@@ -24,7 +24,7 @@ module.exports = {
           return [false, 'subject는 issue 번호를 #[number] 형식으로 끝에 포함해야하며, .(점) 으로 끝나지 말아야 합니다.'];
         
         // 2. FE / BE 로 시작하는가?
-        if (subject && !/^(fe|be) ?- ?/.test(subject.trim()))
+        if (subject && !/^(fe|be|all) ?- ?/.test(subject.trim()))
           return [false, 'subject는 "FE - " 혹은 "BE - "로 시작해야 합니다.'];
 
         // 3. 제목이 한글로 작성되었는가?

@@ -1,0 +1,12 @@
+{
+  "devDependencies": {
+    "@commitlint/cli": "^17.2.0",
+    "@commitlint/config-conventional": "^17.2.0",
+    "@commitlint/types": "^17.0.0",
+    "commitlint-plugin-function-rules": "^1.7.1",
+    "husky": "^8.0.2"
+  },
+  "scripts": {
+    "prepare": "cd.. && husky install util/.husky"
+  }
+}
