@@ -23,11 +23,3 @@ export const SidebarItem = styled.p`
 		margin-top: 30px;
 	}
 `;
-
-export const Logo = styled.div`
-	font-size: 48px;
-	font-weight: 800;
-	line-height: 65px;
-	color: #2071ff;
-	letter-spacing: -4.5px;
-`;
