@@ -3,11 +3,13 @@ import ReactDOM from 'react-dom/client';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
 import { RecoilRoot } from 'recoil';
+import { GlobalStyle } from './global.style';
 
 const root = ReactDOM.createRoot(document.getElementById('root') as HTMLElement);
 root.render(
 	<React.StrictMode>
 		<RecoilRoot>
+			<GlobalStyle />
 			<App />
 		</RecoilRoot>
 	</React.StrictMode>
