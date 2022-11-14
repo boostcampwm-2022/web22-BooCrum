@@ -7,6 +7,6 @@
     "husky": "^8.0.2"
   },
   "scripts": {
-    "prepare": "cd.. && husky install util/.husky"
+    "prepare": "cd .. && husky install util/.husky"
   }
 }
