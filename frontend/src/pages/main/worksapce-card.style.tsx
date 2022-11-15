@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 
 export const CardLayout = styled.div`
+	position: relative;
 	width: 200px;
 	border: none;
 	border-radius: 10px;
