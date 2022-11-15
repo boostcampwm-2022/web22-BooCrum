@@ -15,9 +15,3 @@ interface WorkspaceOrderType {
 	id: number;
 	description: string;
 }
-
-interface TemplateType {
-	id: number;
-	title: string;
-	preview: string;
-}
