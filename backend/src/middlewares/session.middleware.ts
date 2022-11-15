@@ -14,18 +14,16 @@ const sqlStorage = new MySqlStorage({
 
 @Injectable()
 export class SessionMiddleware implements NestMiddleware {
-  use(_request: Request, response: Response, next: NextFunction): void {
-    response.on('finish', () => {
-      session({
-        secret: process.env.SESSION_SECRET,
-        resave: false,
-        saveUninitialized: false,
-        store: sqlStorage,
-        cookie: {
-          maxAge: 6000 * 24 * 365,
-          httpOnly: true,
-        },
-      });
+  use(_request: Request, _response: Response, next: NextFunction): void {
+    session({
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
+      store: sqlStorage,
+      cookie: {
+        maxAge: 6000 * 24 * 365,
+        httpOnly: true,
+      },
     });
 
     next();
