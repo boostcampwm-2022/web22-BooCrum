@@ -1,11 +1,11 @@
 import React from 'react';
-import { Container } from './recent-workspace.style';
+import WorkspaceList from '@components/workspace-list';
 
 function RecentWorkspace() {
 	return (
-		<Container>
-			<p className="title">Recent Workspace</p>
-		</Container>
+		<div>
+			<WorkspaceList title="Recent Workspace" />
+		</div>
 	);
 }
 
