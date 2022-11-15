@@ -4,6 +4,8 @@ import { orderTypes } from '@data/workspace-order';
 import { useRecoilState } from 'recoil';
 import { Dropdown, Description } from './index.style';
 import useDropdown from '@hooks/useDropdown';
+import dropdownActive from '@assets/icon/dropdown-active.svg';
+import dropdownInActive from '@assets/icon/dropdown-inactive.svg';
 
 function OrderDropdown() {
 	const [orderType, setOrderType] = useRecoilState(workspaceOrderState);
@@ -15,11 +17,12 @@ function OrderDropdown() {
 
 	return (
 		<Dropdown ref={dropdownRef}>
-			<div className="button" onClick={toggleActive}>
-				{orderTypes[orderType].description}
+			<div className="dropdown-button" onClick={toggleActive}>
+				<p>{orderTypes[orderType].description}</p>
+				<img className="dropdown-icon" alt="dropdown button" src={isActive ? dropdownActive : dropdownInActive} />
 			</div>
 			{isActive && (
-				<div className="container">
+				<div className="dropdown-container">
 					{orderTypes.map((type) => (
 						<Description key={type.id} isSelected={orderType === type.id} onClick={() => handleOrderType(type.id)}>
 							{type.description}
