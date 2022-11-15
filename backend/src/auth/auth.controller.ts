@@ -10,17 +10,22 @@ import {
 } from '@nestjs/common';
 import { Request } from 'express';
 import { GithubOAuthGuard } from './guard/github.guard';
-import { AuthorizationGuard } from './guard/session.guard';
+import {
+  AuthorizationGuard,
+  UnAuthorizationGuard,
+} from './guard/session.guard';
 
 @Controller('auth')
 export class AuthController {
   constructor() {}
 
   @UseGuards(GithubOAuthGuard)
+  @UseGuards(UnAuthorizationGuard)
   @Get('/oauth/github')
   startGithubOAuthProcess(@Req() req: Request) {}
 
   @UseGuards(GithubOAuthGuard)
+  @UseGuards(UnAuthorizationGuard)
   @Get('/oauth/github_callback')
   @Redirect('/')
   handleGithubData(
