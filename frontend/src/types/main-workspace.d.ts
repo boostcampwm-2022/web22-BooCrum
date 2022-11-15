@@ -3,3 +3,11 @@ interface TemplateType {
 	title: string;
 	preview: string;
 }
+
+interface SidebarItemType {
+	[index: string]: {
+		id: number;
+		title: string;
+		component: React.ReactElement;
+	};
+}

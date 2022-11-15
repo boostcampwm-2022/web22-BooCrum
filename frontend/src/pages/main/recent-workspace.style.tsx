@@ -6,12 +6,6 @@ export const Container = styled.div`
 		font-weight: 700;
 		line-height: 44px;
 
-		margin-bottom: 28px;
-	}
-
-	.template-list {
-		display: flex;
-		flex-wrap: nowrap;
-		overflow-x: auto;
+		margin-bottom: 44px;
 	}
 `;
