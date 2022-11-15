@@ -1,21 +1,27 @@
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function useDropdown() {
 	const [isActive, setIsActive] = useState(false);
+	const dropdownRef = useRef<HTMLDivElement>(null);
 
-	const handleActive = () => {
-		setIsActive(true);
-	};
+	useEffect(() => {
+		document.addEventListener('click', handleOutsideClick);
 
-	const handleInActive = () => {
-		setIsActive(false);
-	};
+		return () => {
+			document.removeEventListener('click', handleOutsideClick);
+		};
+	}, []);
 
 	const toggleActive = () => {
 		setIsActive(!isActive);
 	};
 
-	return { isActive, handleActive, handleInActive, toggleActive };
+	const handleOutsideClick = (e: Event) => {
+		const current = dropdownRef.current;
+		if (isActive && current && !current.contains(e.target as Node)) setIsActive(false);
+	};
+
+	return { isActive, dropdownRef, toggleActive };
 }
 
 export default useDropdown;
