@@ -1,5 +1,13 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Controller, UseGuards, Get, Put, Req, Session } from '@nestjs/common';
+import {
+  Controller,
+  UseGuards,
+  Get,
+  Put,
+  Req,
+  Session,
+  Redirect,
+} from '@nestjs/common';
 import { Request } from 'express';
 import { GithubOAuthGuard } from './guard/github.guard';
 import { AuthorizationGuard } from './guard/session.guard';
@@ -14,6 +22,7 @@ export class AuthController {
 
   @UseGuards(GithubOAuthGuard)
   @Get('/oauth/github_callback')
+  @Redirect('/')
   handleGithubData(
     @Req() req: Request,
     @Session() session: Record<string, any>,
