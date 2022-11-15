@@ -1,5 +1,5 @@
 import { Injectable, NestMiddleware } from '@nestjs/common';
-import { Response, NextFunction } from 'express';
+import { Request, Response, NextFunction } from 'express';
 import * as session from 'express-session';
 import * as MySQLStore from 'express-mysql-session';
 
@@ -14,7 +14,7 @@ const sqlStorage = new MySqlStorage({
 
 @Injectable()
 export class SessionMiddleware implements NestMiddleware {
-  use(response: Response, next: NextFunction): void {
+  use(_request: Request, response: Response, next: NextFunction): void {
     response.on('finish', () => {
       session({
         secret: process.env.SESSION_SECRET,
