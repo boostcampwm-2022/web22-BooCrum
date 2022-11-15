@@ -15,4 +15,5 @@ export const Title = styled.p`
 export const TemplateList = styled.div`
 	display: flex;
 	flex-wrap: nowrap;
+	overflow-x: auto;
 `;

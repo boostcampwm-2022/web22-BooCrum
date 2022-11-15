@@ -1,6 +1,14 @@
 import styled from 'styled-components';
 
 export const Template = styled.div<{ isEmpty: boolean }>`
+	cursor: pointer;
+
+	:hover {
+		.template-card {
+			box-shadow: 3px 3px 10px ${({ theme }) => theme.gray_1};
+		}
+	}
+
 	& + & {
 		margin-left: 24px;
 	}
@@ -9,13 +17,13 @@ export const Template = styled.div<{ isEmpty: boolean }>`
 		width: 150px;
 		height: 100px;
 
-		display: flex;
-		justify-content: center;
-		align-items: center;
-
 		border-radius: 10px;
 
 		background: ${({ theme }) => theme.blue_3};
+
+		display: flex;
+		justify-content: center;
+		align-items: center;
 	}
 
 	.preview {
