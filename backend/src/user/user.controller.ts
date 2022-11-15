@@ -1,13 +1,18 @@
+/* eslint-disable @typescript-eslint/no-empty-function */
 import {
   Controller,
+  Req,
   Body,
   Get,
-  Param,
   Patch,
+  Delete,
+  Param,
   BadRequestException,
+  ForbiddenException,
   UseGuards,
   Session,
 } from '@nestjs/common';
+import { Request } from 'express';
 import { AuthorizationGuard } from 'src/auth/guard/session.guard';
 import { UserDto } from './dto/user.dto';
 import { UserService } from './user.service';
@@ -48,5 +53,20 @@ export class UserController {
       );
     }
     return ret;
+  }
+
+  @Delete()
+  @UseGuards(AuthorizationGuard)
+  async deleteUser(
+    @Req() req: Request,
+    @Session() session: Record<string, any>,
+  ): Promise<void> {
+    const { userId } = session.user;
+    const ret = await this.userService.deleteUserData(userId);
+    if (!ret)
+      throw new ForbiddenException(
+        '잘못되었거나 존재하지 않는 User ID 입니다.',
+      );
+    req.session.destroy(() => {});
   }
 }

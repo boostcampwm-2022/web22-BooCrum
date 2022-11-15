@@ -2,6 +2,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TeamMember } from 'src/team/entity/team-member.entity';
+import { WorkspaceMember } from 'src/workspace/entity/workspace-member.entity';
 import { Repository } from 'typeorm';
 import { UserDto } from './dto/user.dto';
 import { User } from './entity/user.entity';
@@ -13,6 +14,8 @@ export class UserService {
     private userRepository: Repository<User>,
     @InjectRepository(TeamMember)
     private teamMemberRepository: Repository<TeamMember>,
+    @InjectRepository(WorkspaceMember)
+    private workspaceMemberRepository: Repository<WorkspaceMember>,
   ) {}
 
   // 단순히 사용자 정보를 탐색합니다. 없을 경우 null을 반환합니다.
@@ -61,6 +64,18 @@ export class UserService {
         where: { userId },
       });
     return null;
+  }
+
+  // 사용자 정보를 삭제합니다.
+  async deleteUserData(userId: string): Promise<boolean> {
+    const userFind = await this.userRepository.findOne({
+      where: { userId },
+    });
+    if (!userFind) return false;
+    await this.teamMemberRepository.delete({ user: userFind });
+    // TODO: 소유한 워크스페이스 삭제 API 추가 (혹은 구현 안하고 주기적으로 날리는 방법도 있음.) (role 관련해서 시도할 것이 있다고 하여 보류함.)
+    // await this.workspaceMemberRepository.delete({ user: userFind });
+    return true;
   }
 
   // 사용자 정보를 가져옵니다.
