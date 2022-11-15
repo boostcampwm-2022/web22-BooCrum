@@ -1,5 +1,6 @@
 {
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint", "prettier"],
-  "extends": ["plugin:@typescript-eslint/recommended", "plugin:react/recommended", "plugin:prettier/recommended"]
+  "extends": ["plugin:@typescript-eslint/recommended", "plugin:react/recommended", "plugin:prettier/recommended"],
+  "ignorePatterns": ["craco.config.js"]
 }
