@@ -21,6 +21,6 @@ export class TeamMember {
   @JoinColumn({ name: 'team_id' })
   team: Team;
 
-  @Column()
-  role: number;
+  @Column({ type: 'varchar', length: 20 })
+  role: string;
 }
