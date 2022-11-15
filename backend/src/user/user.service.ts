@@ -58,7 +58,7 @@ export class UserService {
     return null;
   }
 
-  async getUserData(userId: string): Promise<any> {
+  async getUserData(userId: string): Promise<User[]> {
     // Join이 Row마다 이루어지는 것이 아니라, 그냥 배열에 Raw Object가 중첩되어 제공된다.
     return await this.userRepository
       .createQueryBuilder('user')
