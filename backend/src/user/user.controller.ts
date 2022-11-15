@@ -2,10 +2,13 @@ import {
   Controller,
   Body,
   Get,
-  Query,
+  Param,
   Patch,
   BadRequestException,
+  UseGuards,
+  Session,
 } from '@nestjs/common';
+import { AuthorizationGuard } from 'src/auth/guard/session.guard';
 import { UserDto } from './dto/user.dto';
 import { UserService } from './user.service';
 
@@ -20,16 +23,24 @@ export class UserController {
   //   return data;
   // }
 
-  @Get('/info')
-  async getUserData(@Query('userId') userId: string): Promise<any> {
+  @Get('/info/:userId')
+  async getUserData(@Param('userId') userId: string): Promise<any> {
     return await this.userService.getUserData(userId);
   }
 
+  @Get('/info')
+  @UseGuards(AuthorizationGuard)
+  async getMyData(@Session() session: Record<string, any>): Promise<any> {
+    return await this.userService.getUserData(session.user.userId);
+  }
+
   @Patch('/info')
+  @UseGuards(AuthorizationGuard)
   async changeUserData(
-    @Query('userId') userId: string,
     @Body() body: UserDto,
+    @Session() session: Record<string, any>,
   ): Promise<UserDto> {
+    const { userId } = session.user;
     const ret: UserDto = await this.userService.changeUserData(userId, body);
     if (!ret) {
       throw new BadRequestException(

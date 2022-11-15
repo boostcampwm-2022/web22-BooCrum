@@ -15,12 +15,16 @@ export class UserService {
     private teamMemberRepository: Repository<TeamMember>,
   ) {}
 
-  async createOrFindUser(newUserDto: UserDto): Promise<User> {
-    const userFind = await this.userRepository.findOne({
-      where: {
-        userId: newUserDto.userId,
-      },
+  // 단순히 사용자 정보를 탐색합니다. 없을 경우 null을 반환합니다.
+  async findUser(userId: string): Promise<User | null> {
+    return await this.userRepository.findOne({
+      where: { userId },
     });
+  }
+
+  // 사용자를 생성하거나 사용자 정보를 탐색합니다.
+  async createOrFindUser(newUserDto: UserDto): Promise<User> {
+    const userFind = await this.findUser(newUserDto.userId);
     // 이미 존재하는 사용자이면 해당 사용자 계정 정보를 전달한다.
     if (userFind) {
       return userFind;
@@ -35,6 +39,7 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
 
+  // 사용자 정보를 변경합니다. 단, UserID와 RegisterDate는 변경할 수 없습니다.
   async changeUserData(
     userId: string,
     newData: UserDto,
@@ -58,7 +63,9 @@ export class UserService {
     return null;
   }
 
-  async getUserData(userId: string): Promise<User[]> {
+  // 사용자 정보를 가져옵니다.
+  // 가져오는 정보는 "사용자 정보 + 소속 팀 및 권한" 입니다.
+  async getUserData(userId: string): Promise<User> {
     // Join이 Row마다 이루어지는 것이 아니라, 그냥 배열에 Raw Object가 중첩되어 제공된다.
     return await this.userRepository
       .createQueryBuilder('user')
@@ -76,6 +83,6 @@ export class UserService {
         'team.isTeam',
         'team.registerDate',
       ])
-      .getMany();
+      .getOne();
   }
 }
