@@ -35,15 +35,27 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
 
-  async changeUserData(userId: string): Promise<User> {
+  async changeUserData(
+    userId: string,
+    newData: UserDto,
+  ): Promise<UserDto | null> {
+    // 지정된 ID의 사용자가 존재하는지 확인한다. 없으면 그대로 return 한다.
     const userFind = await this.userRepository.findOne({
       where: { userId },
     });
     if (!userFind) {
-      return null; //? 여기에서 Http Exception을 발생시킬까?
+      return null;
     }
 
-    await this.userRepository.update({ userId }, {});
+    // 존재하면 Update를 진행한다.
+    delete newData.userId, newData.registerDate;
+    const res = await this.userRepository.update({ userId }, newData);
+
+    if (res.affected !== 0)
+      return this.userRepository.findOne({
+        where: { userId },
+      });
+    return null;
   }
 
   async getUserData(userId: string): Promise<any> {
