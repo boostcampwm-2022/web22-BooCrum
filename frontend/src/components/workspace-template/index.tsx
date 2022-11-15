@@ -4,7 +4,7 @@ import { Template } from './index.style';
 
 function WorkspaceTemplate({ template }: { template: TemplateType }) {
 	return (
-		<Template key={template.id} isEmpty={template.preview === ''}>
+		<Template isEmpty={template.preview === ''}>
 			<div className="template-card">
 				{template.preview ? (
 					<img className="preview" alt={template.title} src={template.preview} />

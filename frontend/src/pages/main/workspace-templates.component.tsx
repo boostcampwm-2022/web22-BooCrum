@@ -1,17 +1,17 @@
 import React from 'react';
-import { Container, TemplateList, Title } from './workspace-templates.style';
+import { Container } from './workspace-templates.style';
 import WorkspaceTemplate from '@components/workspace-template';
 import { templates } from '@data/workspace-templates';
 
 function WorkspaceTemplates() {
 	return (
 		<Container>
-			<Title>Create a workspace</Title>
-			<TemplateList>
+			<p className="title">Create a workspace</p>
+			<div className="template-list">
 				{templates.map((template) => (
 					<WorkspaceTemplate key={template.id} template={template} />
 				))}
-			</TemplateList>
+			</div>
 		</Container>
 	);
 }
