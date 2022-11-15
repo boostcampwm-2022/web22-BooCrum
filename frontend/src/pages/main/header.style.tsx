@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
 	height: 60px;
-	border-bottom: 1px solid #d9d9d9;
+	border-bottom: 1px solid ${({ theme }) => theme.gray_1};
 
 	display: flex;
 	align-items: center;
