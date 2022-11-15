@@ -1,17 +1,17 @@
 import { useEffect, useRef } from 'react';
 import { ContextMeueLayout } from './index.style';
-function ContextMenu({ setOpenMenu }: any) {
+function ContextMenu({ setOpenMenu }: ContextMenuProps) {
 	const menuRef = useRef<HTMLUListElement>(null);
 
 	useEffect(() => {
-		const handler = (e: any) => {
-			if (menuRef.current && !menuRef.current.contains(e.target)) {
-				setOpenMenu(false);
-			}
+		const handler = (e: MouseEvent) => {
+			if (e.target instanceof Element)
+				if (menuRef.current && !menuRef.current.contains(e.target)) {
+					setOpenMenu(false);
+				}
 		};
 
 		document.addEventListener('mousedown', handler);
-
 		return () => {
 			document.removeEventListener('mousedown', handler);
 		};
