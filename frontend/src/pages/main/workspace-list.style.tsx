@@ -6,4 +6,5 @@ export const WorkspaceListContainer = styled.div`
 	flex-basis: 150px;
 	flex-grow: 0;
 	flex-wrap: wrap;
+	z-index: 1;
 `;
