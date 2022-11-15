@@ -2,13 +2,7 @@ import React from 'react';
 import plusWorkspace from '@assets/icon/plus-workspace.svg';
 import { Template } from './index.style';
 
-interface ITemplate {
-	id: number;
-	title: string;
-	preview: string;
-}
-
-function WorkspaceTemplate({ template }: { template: ITemplate }) {
+function WorkspaceTemplate({ template }: { template: TemplateType }) {
 	return (
 		<Template key={template.id} isEmpty={template.preview === ''}>
 			<div className="template-card">
