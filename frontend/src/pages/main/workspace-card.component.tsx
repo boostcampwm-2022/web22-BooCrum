@@ -18,7 +18,7 @@ function WorkspaceCard({ title, timestamp, imgSrc }: { title: string; timestamp:
 					<div className="card-title">{title}</div>
 					<div className="card-timestamp">{timestamp}</div>
 				</div>
-				{isOpenMenu ? <ContextMenu setOpenMenu={setOpenMenu}></ContextMenu> : <></>}
+				{isOpenMenu ? <ContextMenu setOpenMenu={setOpenMenu} workspacename={title}></ContextMenu> : <></>}
 			</CardLayout>
 		</>
 	);

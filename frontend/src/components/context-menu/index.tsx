@@ -1,13 +1,18 @@
 import { useEffect, useRef } from 'react';
 import { useSetRecoilState } from 'recoil';
-import { DeleteModalState } from '../../context/atoms';
+import { DeleteModalState, RenameModalState } from '../../context/atoms';
 import { ContextMeueLayout } from './index.style';
-function ContextMenu({ setOpenMenu }: ContextMenuProps) {
+function ContextMenu({ setOpenMenu, workspacename }: ContextMenuProps) {
 	const menuRef = useRef<HTMLUListElement>(null);
 	const setDeleteOpenModal = useSetRecoilState(DeleteModalState);
+	const setRenameOpenModal = useSetRecoilState(RenameModalState);
 
 	const openDeleteModal = () => {
 		setDeleteOpenModal({ isOpen: true });
+		setOpenMenu(false);
+	};
+	const openRenameModal = () => {
+		setRenameOpenModal({ isOpen: true, workspaceName: workspacename });
 		setOpenMenu(false);
 	};
 
@@ -29,7 +34,7 @@ function ContextMenu({ setOpenMenu }: ContextMenuProps) {
 		<>
 			<ContextMeueLayout ref={menuRef}>
 				<li>Open</li>
-				<li>Rename</li>
+				<li onClick={openRenameModal}>Rename</li>
 				<li onClick={openDeleteModal}>Delete</li>
 			</ContextMeueLayout>
 		</>
