@@ -27,6 +27,7 @@
     "@nestjs/passport": "^9.0.0",
     "@nestjs/platform-express": "^9.0.0",
     "@nestjs/typeorm": "^9.0.1",
+    "connect-typeorm": "^2.0.0",
     "express-mysql-session": "^2.1.8",
     "express-session": "^1.17.3",
     "mysql2": "^2.3.3",
