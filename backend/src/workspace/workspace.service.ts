@@ -251,8 +251,12 @@ export class WorkspaceService {
     if (!workspaceFind)
       throw new BadRequestException('잘못된 워크스페이스 ID입니다.');
     return (
-      (await this.workspaceRepository.update({ workspaceId }, newMetaData))
-        .affected > 0
+      (
+        await this.workspaceRepository.update(
+          { workspaceId },
+          { ...newMetaData, updateDate: () => 'CURRENT_TIMESTAMP' },
+        )
+      ).affected > 0
     );
   }
 
