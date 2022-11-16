@@ -60,22 +60,30 @@ export class WorkspaceController {
   // }
 
   @Get(':workspaceId/info/metadata')
-  async getWorkspaceMetadata(@Param('workspaceId') workspaceId: string) {
+  async getWorkspaceMetadata(
+    @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
+  ) {
     return await this.workspaceService.getWorkspaceMetadata(workspaceId);
   }
 
   @Get(':workspaceId/info/team')
-  async getWorkspaceOwnerTeam(@Param('workspaceId') workspaceId: string) {
+  async getWorkspaceOwnerTeam(
+    @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
+  ) {
     return await this.workspaceService.getWorkspaceOwnerTeam(workspaceId);
   }
 
   @Get(':workspaceId/info/participant')
-  async getWorkspaceParticipantList(@Param('workspaceId') workspaceId: string) {
+  async getWorkspaceParticipantList(
+    @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
+  ) {
     return await this.workspaceService.getWorkspaceParticipantList(workspaceId);
   }
 
   @Get(':workspaceId/info')
-  async getWorkspaceData(@Param('workspaceId') workspaceId: string) {
+  async getWorkspaceData(
+    @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
+  ) {
     return await this.workspaceService.getWorkspaceData(workspaceId);
   }
 
