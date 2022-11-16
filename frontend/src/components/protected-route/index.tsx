@@ -1,16 +1,19 @@
-import { ReactElement } from 'react';
-import { useRecoilValueLoadable } from 'recoil';
-import { authAtom } from '../../context/auth';
+import { ReactElement, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
+import useAuth from '@hooks/useAuth';
 
 function ProtectedRoute({ children }: { children: ReactElement }) {
-	const auth = useRecoilValueLoadable(authAtom);
+	const { isLoading, isAuth, authenticate } = useAuth();
 
-	if (auth.state === 'loading') {
+	useEffect(() => {
+		authenticate();
+	}, []);
+
+	if (isLoading) {
 		return <div>로딩</div>;
 	}
 
-	if (auth.contents === false) {
+	if (isAuth === false) {
 		return <Navigate to="/login" />;
 	}
 

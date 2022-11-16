@@ -1,12 +1,6 @@
 import { atom, RecoilLoadable } from 'recoil';
 
-export const authAtom = atom({
+export const authState = atom({
 	key: 'auth',
-	default: RecoilLoadable.of(
-		new Promise((resolve, reject) => {
-			setInterval(() => {
-				resolve(true);
-			}, 2000);
-		})
-	),
+	default: false,
 });
