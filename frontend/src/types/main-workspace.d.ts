@@ -10,8 +10,3 @@ interface WorkspaceCardType {
 	timestamp: string;
 	imgSrc: string;
 }
-
-interface WorkspaceOrderType {
-	id: number;
-	description: string;
-}
