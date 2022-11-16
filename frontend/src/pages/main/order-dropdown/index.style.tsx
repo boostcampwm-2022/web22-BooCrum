@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
 export const Dropdown = styled.div`
+	position: relative;
+
 	.dropdown-button {
 		width: 148px;
 
@@ -33,6 +35,8 @@ export const Dropdown = styled.div`
 		border-radius: 5px;
 
 		position: absolute;
+
+		top: 40px;
 	}
 `;
 

@@ -10,7 +10,7 @@ function useDropdown() {
 		return () => {
 			document.removeEventListener('click', handleOutsideClick);
 		};
-	}, []);
+	}, [isActive]);
 
 	const toggleActive = () => {
 		setIsActive(!isActive);
