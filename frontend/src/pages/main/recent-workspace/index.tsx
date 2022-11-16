@@ -1,11 +1,7 @@
 import WorkspaceList from '@pages/main/workspace-list';
 
 function RecentWorkspace() {
-	return (
-		<div>
-			<WorkspaceList title="Recent Workspace" />
-		</div>
-	);
+	return <WorkspaceList title="Recent Workspace" />;
 }
 
 export default RecentWorkspace;
