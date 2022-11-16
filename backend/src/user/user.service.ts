@@ -34,7 +34,9 @@ export class UserService {
     }
 
     // 없는 사용자이면 사용자를 생성하여 전달한다.
-    // TODO: 대충 팀 생성하는 부분
+    // TODO: 대충 팀 생성하는 부분. Team으로 대체할 것.
+
+    // TODO END
     const newUser = new User();
     // TODO: 대충 팀 Entity를 넣어줌
     newUser.userId = newUserDto.userId;
@@ -78,6 +80,8 @@ export class UserService {
     return true;
   }
 
+  // 사용자 정보 조회 ============================================================================
+
   // 사용자 정보를 가져옵니다.
   // 가져오는 정보는 "사용자 정보 + 소속 팀 및 권한 + 워크스페이스 및 권한" 입니다.
   async getUserData(userId: string): Promise<User> {
@@ -108,5 +112,52 @@ export class UserService {
         'workspace.updateDate',
       ])
       .getOne();
+  }
+
+  async getUserProfileData(userId: string): Promise<User> {
+    return await this.userRepository.findOne({ where: { userId } });
+  }
+
+  async getUserTeamData(userId: string): Promise<TeamMember[]> {
+    const userData = await this.userRepository
+      .createQueryBuilder('user')
+      .where({ userId: userId })
+      .leftJoinAndSelect('user.teamMember', 'teamMember')
+      .leftJoinAndSelect('teamMember.team', 'team')
+      .select([
+        'user.userId',
+        'user.nickname',
+        'user.registerDate',
+        'teamMember.role',
+        'team.teamId',
+        'team.name',
+        'team.description',
+        'team.isTeam',
+        'team.registerDate',
+      ])
+      .getOne();
+    return userData.teamMember;
+  }
+
+  async getUserWorkspaceData(userId: string): Promise<WorkspaceMember[]> {
+    const userData = await this.userRepository
+      .createQueryBuilder('user')
+      .where({ userId: userId })
+      .leftJoinAndSelect('user.workspaceMember', 'workspaceMember')
+      .leftJoinAndSelect('workspaceMember.workspace', 'workspace')
+      .select([
+        'user.userId',
+        'user.nickname',
+        'user.registerDate',
+        'workspaceMember.role',
+        'workspace.workspaceId',
+        'workspace.team',
+        'workspace.description',
+        'workspace.name',
+        'workspace.registerDate',
+        'workspace.updateDate',
+      ])
+      .getOne();
+    return userData.workspaceMember;
   }
 }
