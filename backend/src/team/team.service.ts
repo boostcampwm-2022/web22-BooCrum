@@ -66,6 +66,15 @@ export class TeamService {
   }
 
   // 팀 멤버 수정 : 권한 수정
+  async updateTeamMember({ team, user, role }: TeamMember): Promise<UpdateResult> {
+    return this.teamMemberRepository
+      .createQueryBuilder()
+      .update('team_member')
+      .where('team_member.team_id = :team', { team })
+      .andWhere('team_member.user_id = :user', { user })
+      .set({ role })
+      .execute();
+  }
 
   // 팀 삭제 : 팀 멤버 전체 삭제 > 팀 삭제
 
