@@ -32,7 +32,6 @@ import { join } from 'path';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(LoggerMiddleware).forRoutes('*');
     consumer.apply(SessionMiddleware).forRoutes('*');
   }
 }
