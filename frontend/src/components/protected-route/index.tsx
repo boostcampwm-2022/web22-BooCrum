@@ -1,6 +1,7 @@
 import { ReactElement, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import useAuth from '@hooks/useAuth';
+import Loading from '@components/loading';
 
 function ProtectedRoute({ children }: { children: ReactElement }) {
 	const { isLoading, isAuth, authenticate } = useAuth();
@@ -10,7 +11,7 @@ function ProtectedRoute({ children }: { children: ReactElement }) {
 	}, []);
 
 	if (isLoading) {
-		return <div>로딩</div>;
+		return <Loading />;
 	}
 
 	if (isAuth === false) {
