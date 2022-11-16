@@ -7,7 +7,7 @@ function Login() {
 	return (
 		<Wrapper>
 			<Header>
-				<div className="logp-container">
+				<div className="logo-container">
 					<Logo />
 				</div>
 			</Header>

@@ -11,7 +11,7 @@ export const Header = styled.div`
 	display: flex;
 	align-items: center;
 
-	.logp-container {
+	.logo-container {
 		padding: 0px 104px;
 	}
 `;
