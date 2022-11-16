@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { InsertResult, Repository } from 'typeorm';
+import { InsertResult, Repository, UpdateResult } from 'typeorm';
 import { Team } from './entity/team.entity';
 import { TeamMember } from './entity/team-member.entity';
 import { IsTeam } from './enum/is-team.enum';
@@ -56,10 +56,18 @@ export class TeamService {
   }
 
   // 팀 수정 : 팀명, 팀 설명 변경
-
-  // 팀 삭제 : 팀 멤버 전체 삭제 > 팀 삭제
+  async updateTeam({ teamId, name, description }: Team): Promise<UpdateResult> {
+    return this.teamRepository
+      .createQueryBuilder()
+      .update('team')
+      .set({ name, description })
+      .where('team.team_id = :teamId', { teamId })
+      .execute();
+  }
 
   // 팀 멤버 수정 : 권한 수정
+
+  // 팀 삭제 : 팀 멤버 전체 삭제 > 팀 삭제
 
   // 팀 멤버 일부 삭제
 
