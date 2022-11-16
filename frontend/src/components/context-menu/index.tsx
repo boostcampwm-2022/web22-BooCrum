@@ -1,34 +1,22 @@
+import useContextMenu from '@hooks/useContextMenu';
 import { useEffect, useRef } from 'react';
 import { useSetRecoilState } from 'recoil';
 import { DeleteModalState, RenameModalState } from '../../context/atoms';
 import { ContextMeueLayout } from './index.style';
-function ContextMenu({ setOpenMenu, workspacename }: ContextMenuProps) {
-	const menuRef = useRef<HTMLUListElement>(null);
+function ContextMenu({ menuRef, toggleOpen, workspacename }: ContextMenuProps) {
+	// const menuRef = useRef<HTMLUListElement>(null);
+
 	const setDeleteOpenModal = useSetRecoilState(DeleteModalState);
 	const setRenameOpenModal = useSetRecoilState(RenameModalState);
 
 	const openDeleteModal = () => {
 		setDeleteOpenModal({ isOpen: true });
-		setOpenMenu(false);
+		toggleOpen();
 	};
 	const openRenameModal = () => {
 		setRenameOpenModal({ isOpen: true, workspaceName: workspacename });
-		setOpenMenu(false);
+		toggleOpen();
 	};
-
-	useEffect(() => {
-		const handler = (e: MouseEvent) => {
-			if (e.target instanceof Element)
-				if (menuRef.current && !menuRef.current.contains(e.target)) {
-					setOpenMenu(false);
-				}
-		};
-
-		document.addEventListener('mousedown', handler);
-		return () => {
-			document.removeEventListener('mousedown', handler);
-		};
-	});
 
 	return (
 		<>

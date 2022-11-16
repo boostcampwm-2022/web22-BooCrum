@@ -1,16 +1,17 @@
+import useContextMenu from '@hooks/useContextMenu';
 import { useState } from 'react';
 import ContextMenu from '../../components/context-menu';
 import { CardLayout } from './worksapce-card.style';
 
 function WorkspaceCard({ title, timestamp, imgSrc }: { title: string; timestamp: string; imgSrc: string }) {
-	const [isOpenMenu, setOpenMenu] = useState(false);
+	const { isOpen, menuRef, toggleOpen } = useContextMenu();
 
 	return (
 		<>
 			<CardLayout
 				onContextMenu={(e) => {
 					e.preventDefault();
-					setOpenMenu(!isOpenMenu);
+					toggleOpen();
 				}}
 			>
 				<img className="card-thumbnail" src={imgSrc}></img>
@@ -18,7 +19,7 @@ function WorkspaceCard({ title, timestamp, imgSrc }: { title: string; timestamp:
 					<div className="card-title">{title}</div>
 					<div className="card-timestamp">{timestamp}</div>
 				</div>
-				{isOpenMenu ? <ContextMenu setOpenMenu={setOpenMenu} workspacename={title}></ContextMenu> : <></>}
+				{isOpen && <ContextMenu menuRef={menuRef} toggleOpen={toggleOpen} workspacename={title}></ContextMenu>}
 			</CardLayout>
 		</>
 	);

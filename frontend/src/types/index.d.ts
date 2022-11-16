@@ -1,5 +1,6 @@
 interface ContextMenuProps {
-	setOpenMenu: React.Dispatch<React.SetStateAction<boolean>>;
+	menuRef: React.RefObject<HTMLUListElement>;
+	toggleOpen: () => void;
 	workspacename: string;
 }
 interface DeleteModalProps {
