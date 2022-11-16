@@ -11,7 +11,7 @@ function AllWorkspace() {
 				<Title>All workspace</Title>
 				<OrderDropdown />
 			</Container>
-			<WorkspaceList />
+			<WorkspaceList hasOrder />
 		</div>
 	);
 }

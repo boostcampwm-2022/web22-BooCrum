@@ -1,4 +1,3 @@
-import React from 'react';
 import { Container } from './index.style';
 import booCrum from '@assets/icon/boo-crum.png';
 

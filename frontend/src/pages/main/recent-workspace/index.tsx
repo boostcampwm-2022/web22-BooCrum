@@ -5,7 +5,7 @@ function RecentWorkspace() {
 	return (
 		<>
 			<Title>Recent Workspace</Title>
-			<WorkspaceList />
+			<WorkspaceList hasOrder={false} />
 		</>
 	);
 }

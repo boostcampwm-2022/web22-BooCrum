@@ -37,6 +37,8 @@ export const Dropdown = styled.div`
 		position: absolute;
 
 		top: 40px;
+
+		background: ${({ theme }) => theme.white};
 	}
 `;
 

@@ -1,4 +1,3 @@
-import React from 'react';
 import { workspaceOrderState } from '@context/main-workspace';
 import { orderItems } from '@data/workspace-order';
 import { useRecoilState } from 'recoil';
