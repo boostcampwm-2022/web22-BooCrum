@@ -24,6 +24,17 @@ import { WorkspaceService } from './workspace.service';
 export class WorkspaceController {
   constructor(private workspaceService: WorkspaceService) {}
 
+  private async hasProperAuthority(
+    workspaceId: string,
+    userId: string,
+    authority: number,
+  ): Promise<boolean> {
+    return (
+      (await this.workspaceService.getAuthorityOfUser(workspaceId, userId)) >=
+      authority
+    );
+  }
+
   @UseGuards(AuthorizationGuard)
   @Post()
   async createWorkspace(
@@ -80,9 +91,7 @@ export class WorkspaceController {
     @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
   ) {
     const userId = session.user.userId;
-    if (
-      (await this.workspaceService.getAuthorityOfUser(workspaceId, userId)) < 2
-    ) {
+    if (!(await this.hasProperAuthority(workspaceId, userId, 2))) {
       throw new ForbiddenException(
         '삭제하려는 워크스페이스에 대한 소유자 권한을 갖고 있지 않습니다.',
       );
@@ -98,9 +107,7 @@ export class WorkspaceController {
     @Body(new ValidationPipe()) newMetadata: WorkspaceMetadataDto,
   ): Promise<void> {
     const userId = session.user.userId;
-    if (
-      (await this.workspaceService.getAuthorityOfUser(workspaceId, userId)) < 2
-    ) {
+    if (!(await this.hasProperAuthority(workspaceId, userId, 2))) {
       throw new ForbiddenException(
         '갱신하려는 워크스페이스에 대한 소유자 권한을 갖고 있지 않습니다.',
       );
@@ -115,6 +122,32 @@ export class WorkspaceController {
         '갱신할 수 있는 워크스페이스가 존재하지 않습니다.',
       );
     }
+    return;
+  }
+
+  @UseGuards(AuthorizationGuard)
+  @Patch(':workspaceId/participant')
+  async updateUserAuthority(
+    @Session() session: Record<string, any>,
+    @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
+    @Body('userId') targetUserId: string,
+    @Body('role') role = 0,
+  ) {
+    const userId = session.user.userId;
+    if (!(await this.hasProperAuthority(workspaceId, userId, 2))) {
+      throw new ForbiddenException(
+        '워크스페이스에 대한 소유자 권한을 갖고 있지 않아 타인의 권한 변경이 불가능합니다.',
+      );
+    }
+    const res = this.workspaceService.updateUesrAuthority(
+      workspaceId,
+      targetUserId,
+      role,
+    );
+    if (!res)
+      throw new BadRequestException(
+        '갱신할 수 있는 사용자가 워크스페이스 참여자 중에 존재하지 않습니다.',
+      );
     return;
   }
 }

@@ -255,4 +255,29 @@ export class WorkspaceService {
         .affected > 0
     );
   }
+
+  /**
+   * 사용자의 워크스페이스에 대한 권한을 조정합니다.
+   *
+   * ※주의※ 권한을 확인하지 않습니다. 사용 전에 권한을 확인해주시기 바랍니다.
+   * @param workspaceId 권한 조정 대상인 워크스페이스 ID입니다.
+   * @param userId 권한 조정 대상인 사용자 ID 입니다.
+   * @param newRole 새로운 Role을 지정합니다.
+   */
+  async updateUesrAuthority(
+    workspaceId: string,
+    userId: string,
+    newRole: number,
+  ): Promise<boolean> {
+    return (
+      (
+        await this.workspaceMemberRepository
+          .createQueryBuilder()
+          .update({ role: newRole })
+          .where('workspace_id = :wid', { wid: workspaceId })
+          .andWhere('user_id = :uid', { uid: userId })
+          .execute()
+      ).affected > 0
+    );
+  }
 }
