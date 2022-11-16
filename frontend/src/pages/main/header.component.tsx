@@ -1,5 +1,5 @@
 import React from 'react';
-import alarm from '../../assets/icon/alarm.svg';
+import alarm from '@assets/icon/alarm.svg';
 import { Container } from './header.style';
 
 function Header() {
