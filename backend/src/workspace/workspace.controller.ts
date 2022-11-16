@@ -59,17 +59,27 @@ export class WorkspaceController {
   //   return await this.workspaceService.getTeamOwnWorkspaceList(teamId);
   // }
 
-  @Get(':workspaceId/participant')
+  @Get(':workspaceId/info/metadata')
+  async getWorkspaceMetadata(@Param('workspaceId') workspaceId: string) {
+    return await this.workspaceService.getWorkspaceMetadata(workspaceId);
+  }
+
+  @Get(':workspaceId/info/team')
+  async getWorkspaceOwnerTeam(@Param('workspaceId') workspaceId: string) {
+    return await this.workspaceService.getWorkspaceOwnerTeam(workspaceId);
+  }
+
+  @Get(':workspaceId/info/participant')
   async getWorkspaceParticipantList(@Param('workspaceId') workspaceId: string) {
     return await this.workspaceService.getWorkspaceParticipantList(workspaceId);
   }
 
-  @Get(':workspaceId')
+  @Get(':workspaceId/info')
   async getWorkspaceData(@Param('workspaceId') workspaceId: string) {
     return await this.workspaceService.getWorkspaceData(workspaceId);
   }
 
-  @Post(':workspaceId/participant')
+  @Post(':workspaceId/info/participant')
   async addWorkspaceParticipant(
     @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
     @Body('userId') userId: string,
@@ -100,7 +110,7 @@ export class WorkspaceController {
   }
 
   @UseGuards(AuthorizationGuard)
-  @Patch(':workspaceId')
+  @Patch(':workspaceId/info/metadata')
   async updateWorkspaceMetadata(
     @Session() session: Record<string, any>,
     @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
@@ -126,7 +136,7 @@ export class WorkspaceController {
   }
 
   @UseGuards(AuthorizationGuard)
-  @Patch(':workspaceId/participant')
+  @Patch(':workspaceId/info/participant')
   async updateUserAuthority(
     @Session() session: Record<string, any>,
     @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,

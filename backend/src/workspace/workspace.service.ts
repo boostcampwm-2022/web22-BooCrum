@@ -117,6 +117,27 @@ export class WorkspaceService {
   }
 
   /**
+   * 특정 워크스페이스의 메타데이터를 불러옵니다.
+   * @param workspaceId 특정 워크스페이스에 대한 ID 값입니다.
+   * @returns 특정 워크스페이스의 메타데이터를 전달합니다.
+   */
+  async getWorkspaceMetadata(workspaceId: string): Promise<Workspace> {
+    return await this.workspaceRepository.findOne({
+      where: { workspaceId },
+    });
+  }
+
+  async getWorkspaceOwnerTeam(workspaceId: string): Promise<Team | null> {
+    return (
+      await this.workspaceRepository
+        .createQueryBuilder('w')
+        .where({ workspaceId })
+        .leftJoinAndSelect('w.team', 'team')
+        .getOne()
+    ).team;
+  }
+
+  /**
    * 특정 유저가 참여한 Workspace 목록을 가져옵니다.
    * @param userId 유저 ID 입니다.
    * @returns Workspace 목록을 가져옵니다.
