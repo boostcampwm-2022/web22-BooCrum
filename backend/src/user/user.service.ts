@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Injectable } from '@nestjs/common';
+import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TeamMember } from 'src/team/entity/team-member.entity';
+import { Team } from 'src/team/entity/team.entity';
 import { WorkspaceMember } from 'src/workspace/entity/workspace-member.entity';
-import { Repository } from 'typeorm';
+import { Repository, DataSource } from 'typeorm';
 import { UserDto } from './dto/user.dto';
 import { User } from './entity/user.entity';
 
@@ -12,10 +13,7 @@ export class UserService {
   constructor(
     @InjectRepository(User)
     private userRepository: Repository<User>,
-    @InjectRepository(TeamMember)
-    private teamMemberRepository: Repository<TeamMember>,
-    @InjectRepository(WorkspaceMember)
-    private workspaceMemberRepository: Repository<WorkspaceMember>,
+    private dataSource: DataSource,
   ) {}
 
   // 단순히 사용자 정보를 탐색합니다. 없을 경우 null을 반환합니다.
@@ -28,20 +26,47 @@ export class UserService {
   // 사용자를 생성하거나 사용자 정보를 탐색합니다.
   async createOrFindUser(newUserDto: UserDto): Promise<User> {
     const userFind = await this.findUser(newUserDto.userId);
+    let ret: User;
     // 이미 존재하는 사용자이면 해당 사용자 계정 정보를 전달한다.
     if (userFind) {
       return userFind;
     }
 
     // 없는 사용자이면 사용자를 생성하여 전달한다.
-    // TODO: 대충 팀 생성하는 부분. Team으로 대체할 것.
-
-    // TODO END
     const newUser = new User();
-    // TODO: 대충 팀 Entity를 넣어줌
+    const userTeam = new Team();
+    const userTeamMember = new TeamMember();
+
+    // TODO: 대충 팀 생성하는 부분. Team으로 대체할 것.
+    userTeam.isTeam = false;
+    userTeam.name = newUserDto.userId;
+
+    userTeamMember.user = newUser;
+    userTeamMember.team = userTeam;
+    userTeamMember.role = 2;
+    // TODO END
     newUser.userId = newUserDto.userId;
     newUser.nickname = newUserDto.nickname;
-    return await this.userRepository.save(newUser);
+
+    // 오류 상황으로 일부만 완료되는 상황이 생길 경우를 고려하여, Transaction으로 처리한다.
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      ret = await queryRunner.manager.save(newUser);
+      await queryRunner.manager.save(userTeam);
+      await queryRunner.manager.save(userTeamMember);
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      console.error(e);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+    return ret;
   }
 
   // 사용자 정보를 변경합니다. 단, UserID와 RegisterDate는 변경할 수 없습니다.
@@ -70,13 +95,36 @@ export class UserService {
 
   // 사용자 정보를 삭제합니다.
   async deleteUserData(userId: string): Promise<boolean> {
-    const userFind = await this.userRepository.findOne({
-      where: { userId },
-    });
-    if (!userFind) return false;
-    await this.teamMemberRepository.delete({ user: userFind });
-    // TODO: 소유한 워크스페이스 삭제 API 추가 (혹은 구현 안하고 주기적으로 날리는 방법도 있음.) (role 관련해서 시도할 것이 있다고 하여 보류함.)
-    // await this.workspaceMemberRepository.delete({ user: userFind });
+    let result = false;
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      const userFind = await queryRunner.manager.findOne(User, {
+        where: { userId },
+      });
+      if (userFind) {
+        await queryRunner.manager.delete(TeamMember, { user: userFind });
+        await queryRunner.manager.delete(WorkspaceMember, { user: userFind });
+        await queryRunner.manager.delete(Team, {
+          name: userFind.userId,
+          isTeam: false,
+        });
+        await queryRunner.manager.delete(User, userFind);
+        // TODO: 소유한 워크스페이스 삭제 API 추가 (혹은 구현 안하고 주기적으로 날리는 방법도 있음.) (role 관련해서 시도할 것이 있다고 하여 보류함.)
+      }
+      result = true;
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      console.error(e);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+
+    if (!result) throw new BadRequestException();
     return true;
   }
 
