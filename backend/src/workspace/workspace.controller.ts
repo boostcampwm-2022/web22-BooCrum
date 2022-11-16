@@ -5,12 +5,15 @@ import {
   Param,
   Get,
   Post,
+  Delete,
   Body,
   UseGuards,
   ValidationPipe,
+  BadRequestException,
 } from '@nestjs/common';
 import { AuthorizationGuard } from 'src/auth/guard/session.guard';
 import { WorkspaceCreateRequestDto } from './dto/workspaceCreateRequest.dto';
+import { WorkspaceIdDto } from './dto/workspaceId.dto';
 import { Workspace } from './entity/workspace.entity';
 import { WorkspaceService } from './workspace.service';
 
@@ -50,5 +53,20 @@ export class WorkspaceController {
   @Get(':workspaceId')
   async getWorkspaceData(@Param('workspaceId') workspaceId: string) {
     return await this.workspaceService.getWorkspaceData(workspaceId);
+  }
+
+  @Post(':workspaceId/participant')
+  async addWorkspaceParticipant(
+    @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
+    @Body('userId') userId: string,
+    @Body('role') role = 0,
+  ) {
+    if (!userId)
+      throw new BadRequestException('사용자를 지정해주시기 바랍니다.');
+    return await this.workspaceService.addUserIntoWorkspace(
+      userId,
+      workspaceId,
+      role,
+    );
   }
 }

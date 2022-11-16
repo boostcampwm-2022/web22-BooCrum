@@ -128,4 +128,48 @@ export class WorkspaceService {
       .where('team.team_id = :id', { id: teamId })
       .getMany();
   }
+
+  async addUserIntoWorkspace(
+    userId: string,
+    workspaceId: string,
+    role = 0,
+  ): Promise<WorkspaceMember> {
+    const userFind = await this.workspaceMemberRepository
+      .createQueryBuilder('wm')
+      .where('wm.user_id = :id', { id: userId })
+      .getOne();
+    if (userFind) throw new BadRequestException('이미 존재하는 사용자입니다.');
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    try {
+      await queryRunner.connect();
+      await queryRunner.startTransaction();
+
+      let newMember = new WorkspaceMember();
+      newMember.role = role;
+      newMember.user = await queryRunner.manager.findOne(User, {
+        where: { userId },
+      });
+      newMember.workspace = await queryRunner.manager.findOne(Workspace, {
+        where: { workspaceId },
+      });
+      if (!newMember.user || !newMember.workspace)
+        throw new BadRequestException(
+          '잘못된 사용자 Id 혹은 워크스페이스 Id입니다.',
+        );
+      newMember = await queryRunner.manager.save(newMember);
+
+      await queryRunner.commitTransaction();
+      await queryRunner.release();
+
+      delete newMember.id;
+      return newMember;
+    } catch (e) {
+      console.log(e);
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+      throw e;
+    } finally {
+    }
+  }
 }
