@@ -1,5 +1,5 @@
 import { Container } from './index.style';
-import WorkspaceTemplate from '@pages/workspace-template';
+import WorkspaceTemplate from '@pages/main/workspace-template';
 import { templates } from '@data/workspace-templates';
 
 function WorkspaceTemplates() {
