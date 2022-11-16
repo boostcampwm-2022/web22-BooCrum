@@ -19,7 +19,6 @@ function useAuth() {
 		try {
 			const result = await fakeAuth();
 			setIsAuth(result);
-			localStorage.setItem('auth', JSON.stringify(result));
 			setIsLoading(false);
 		} catch (error) {
 			console.log(error);
