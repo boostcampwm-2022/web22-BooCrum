@@ -15,4 +15,5 @@ export const theme = {
 	blue_3: '#5794FF',
 	red: '#FF4B4B',
 	black: '#000000',
+	white: '#ffffff',
 };

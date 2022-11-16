@@ -3,10 +3,10 @@ import WorkspaceTemplates from '@pages/main/workspace-template-list';
 
 function AllWorkspace() {
 	return (
-		<div>
+		<>
 			<WorkspaceTemplates />
-			<WorkspaceList title="All workspace" />
-		</div>
+			<WorkspaceList title="All workspace" hasOrder />
+		</>
 	);
 }
 

@@ -1,6 +1,6 @@
 import { CardLayout } from './index.style';
 
-function WorkspaceCard({ title, timestamp, imgSrc }: { title: string; timestamp: string; imgSrc: string }) {
+function WorkspaceCard({ title, timestamp, imgSrc }: Omit<WorkspaceCardType, 'id'>) {
 	return (
 		<CardLayout>
 			<img className="card-thumbnail" src={imgSrc}></img>

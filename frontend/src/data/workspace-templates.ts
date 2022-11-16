@@ -1,4 +1,4 @@
-export const templates = [
+export const templates: TemplateType[] = [
 	{
 		id: 1,
 		title: 'New board',

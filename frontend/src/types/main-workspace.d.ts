@@ -4,10 +4,9 @@ interface TemplateType {
 	preview: string;
 }
 
-interface SidebarItemType {
-	[index: string]: {
-		id: number;
-		title: string;
-		component: React.ReactElement;
-	};
+interface WorkspaceCardType {
+	id: number;
+	title: string;
+	timestamp: string;
+	imgSrc: string;
 }
