@@ -1,8 +1,7 @@
-import React from 'react';
-import Header from './header.component';
+import Contents from './contents';
+import Header from './header';
 import { Wrapper } from './index.style';
-import Sidebar from './sidebar.component';
-import WorkspaceTemplates from './workspace-templates.component';
+import Sidebar from './sidebar';
 
 function Main() {
 	return (
@@ -10,7 +9,7 @@ function Main() {
 			<Sidebar />
 			<div className="workspace-container">
 				<Header />
-				<WorkspaceTemplates />
+				<Contents />
 			</div>
 		</Wrapper>
 	);

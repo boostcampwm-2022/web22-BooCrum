@@ -16,8 +16,10 @@ export const Container = styled.div`
 	}
 `;
 
-export const SidebarItem = styled.p`
+export const SidebarItem = styled.p<{ isSelected: boolean }>`
 	cursor: pointer;
+
+	color: ${({ isSelected, theme }) => (isSelected ? theme.blue_1 : theme.black)};
 
 	& + & {
 		margin-top: 30px;
