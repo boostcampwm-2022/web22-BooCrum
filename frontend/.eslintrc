@@ -2,5 +2,6 @@
   "parser": "@typescript-eslint/parser",
   "plugins": ["@typescript-eslint", "prettier"],
   "extends": ["plugin:@typescript-eslint/recommended", "plugin:react/recommended", "plugin:prettier/recommended"],
-  "ignorePatterns": ["craco.config.js"]
+  "rules": {"prettier/prettier": ["error", { "endOfLine": "auto" }],"react/react-in-jsx-scope": "off"},
+  "ignorePatterns": ["craco.config.js"],
 }
