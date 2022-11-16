@@ -1,4 +1,3 @@
-import React from 'react';
 import plusWorkspace from '@assets/icon/plus-workspace.svg';
 import { Template } from './index.style';
 

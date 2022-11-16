@@ -1,7 +1,6 @@
-import React from 'react';
 import { useRecoilValue } from 'recoil';
 import { workspaceTypeState } from '@context/main-workspace';
-import { Wrapper } from './contents.style';
+import { Wrapper } from './index.style';
 import { sidebarItems } from '@data/workspace-sidebar';
 import Error from '@pages/error';
 

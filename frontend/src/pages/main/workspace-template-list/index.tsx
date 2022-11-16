@@ -1,6 +1,5 @@
-import React from 'react';
-import { Container } from './workspace-templates.style';
-import WorkspaceTemplate from '@components/workspace-template';
+import { Container } from './index.style';
+import WorkspaceTemplate from '@pages/workspace-template';
 import { templates } from '@data/workspace-templates';
 
 function WorkspaceTemplates() {
