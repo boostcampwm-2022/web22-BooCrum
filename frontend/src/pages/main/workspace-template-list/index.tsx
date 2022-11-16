@@ -2,10 +2,10 @@ import { Container } from './index.style';
 import WorkspaceTemplate from '@pages/workspace-template';
 import { templates } from '@data/workspace-templates';
 
-function WorkspaceTemplateList() {
+function WorkspaceTemplates() {
 	return (
 		<Container>
-			<h1 className="title">Create a workspace</h1>
+			<p className="title">Create a workspace</p>
 			<div className="template-list">
 				{templates.map((template) => (
 					<WorkspaceTemplate key={template.id} template={template} />
@@ -15,4 +15,4 @@ function WorkspaceTemplateList() {
 	);
 }
 
-export default WorkspaceTemplateList;
+export default WorkspaceTemplates;
