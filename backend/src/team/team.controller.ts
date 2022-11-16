@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { TeamDTO } from './dto/team.dto';
 import { TeamMember } from './entity/team-member.entity';
 import { Team } from './entity/team.entity';
@@ -13,18 +13,18 @@ export class TeamController {
     return this.teamService.createTeam(teamDTO);
   }
 
-  @Post('/select')
-  async selectTeam(@Body() team: Team): Promise<any> {
-    return await this.teamService.selectTeam(team);
+  @Post('/team-member')
+  async selectTeamMember(@Body() team: Team): Promise<any> {
+    return await this.teamService.selectTeamMember(team);
+  }
+
+  @Get('/team-workspace/:teamId')
+  async selectTeamWorkspace(@Param('teamId') teamId: number) {
+    return await this.teamService.selectTeamWorkspace(teamId);
   }
 
   @Patch('/team-update')
   async updateTeam(@Body() team: Team): Promise<any> {
     return await this.teamService.updateTeam(team);
-  }
-
-  @Patch('/member-update')
-  async updateTeamMember(@Body() TeamMember: TeamMember): Promise<any> {
-    return await this.teamService.updateTeamMember(TeamMember);
   }
 }

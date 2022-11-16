@@ -23,7 +23,7 @@ export class Workspace {
     default: () => 'CURRENT_TIMESTAMP()',
     nullable: false,
   })
-  registeDate: number;
+  registerDate: number;
 
   @Column({
     name: 'update_date',

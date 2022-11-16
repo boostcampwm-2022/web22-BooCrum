@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { InsertResult, Repository, UpdateResult } from 'typeorm';
+import { DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
 import { Team } from './entity/team.entity';
 import { TeamMember } from './entity/team-member.entity';
 import { IsTeam } from './enum/is-team.enum';
@@ -43,15 +43,43 @@ export class TeamService {
       .execute();
   }
 
-  // 팀 + 팀 멤버 조회 (팀ID, 팀명, 팀 설명, 회원ID, 닉네임, 역할)
-  async selectTeam({ teamId }: Team): Promise<Team[] | undefined> {
+  // 팀 & 팀 멤버 조회 (팀ID, 팀명, 팀 설명, 팀 생성일, 회원ID, 닉네임, 역할)
+  async selectTeamMember({ teamId }: Team): Promise<Team[] | undefined> {
     return await this.teamRepository
       .createQueryBuilder('team')
       .where('team.team_id = :teamId', { teamId })
       .andWhere('team.isTeam = :isTeam', { isTeam: 1 })
       .innerJoin('team.teamMember', 'teamMember')
       .innerJoin('teamMember.user', 'user')
-      .select(['team.teamId', 'team.name', 'team.description', 'user.userId', 'user.nickname', 'teamMember.role'])
+      .select([
+        'team.teamId',
+        'team.name',
+        'team.description',
+        'team.registerDate',
+        'user.userId',
+        'user.nickname',
+        'teamMember.role',
+      ])
+      .getMany();
+  }
+
+  // 팀 & 워크스페이스 조회
+  async selectTeamWorkspace(teamId: number): Promise<Team[] | undefined> {
+    return await this.teamRepository
+      .createQueryBuilder('team')
+      .where('team.team_id = :teamId', { teamId })
+      .innerJoin('team.workspace', 'workspace')
+      .select([
+        'team.teamId',
+        'team.name',
+        'team.description',
+        'team.registerDate',
+        'workspace.workspaceId',
+        'workspace.name',
+        'workspace.description',
+        'workspace.registerDate',
+        'workspace.updateDate',
+      ])
       .getMany();
   }
 
@@ -79,6 +107,17 @@ export class TeamService {
   // 팀 삭제 : 팀 멤버 전체 삭제 > 팀 삭제
 
   // 팀 멤버 일부 삭제
+  async deleteTeamMember() {
+    return;
+  }
 
   // 팀 멤버 전체 삭제
+  async deleteEveryTeamMember({ team }: TeamMember): Promise<DeleteResult> {
+    return this.teamMemberRepository
+      .createQueryBuilder()
+      .delete()
+      .from('team_member')
+      .where('team_member.team_id = :team', { team })
+      .execute();
+  }
 }
