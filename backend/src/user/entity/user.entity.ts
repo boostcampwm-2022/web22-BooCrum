@@ -1,5 +1,6 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
 import { TeamMember } from 'src/team/entity/team-member.entity';
+import { WorkspaceMember } from 'src/workspace/entity/workspace-member.entity';
 
 @Entity()
 export class User {
@@ -19,4 +20,7 @@ export class User {
 
   @OneToMany(() => TeamMember, (tm) => tm.user)
   teamMember: TeamMember[];
+
+  @OneToMany(() => WorkspaceMember, (wm) => wm.user)
+  workspaceMember: WorkspaceMember[];
 }
