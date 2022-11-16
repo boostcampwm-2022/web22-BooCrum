@@ -43,8 +43,17 @@ export class TeamService {
       .execute();
   }
 
-  // 팀 + 팀 멤버 조회
-  // async selectTeam()
+  // 팀 + 팀 멤버 조회 (팀ID, 팀명, 팀 설명, 회원ID, 닉네임, 역할)
+  async selectTeam({ teamId }: Team): Promise<Team[] | undefined> {
+    return await this.teamRepository
+      .createQueryBuilder('team')
+      .where('team.team_id = :teamId', { teamId })
+      .andWhere('team.isTeam = :isTeam', { isTeam: 1 })
+      .innerJoin('team.teamMember', 'teamMember')
+      .innerJoin('teamMember.user', 'user')
+      .select(['team.teamId', 'team.name', 'team.description', 'user.userId', 'user.nickname', 'teamMember.role'])
+      .getMany();
+  }
 
   // 팀 수정 : 팀명, 팀 설명 변경
 
