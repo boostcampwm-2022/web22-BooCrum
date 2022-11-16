@@ -12,6 +12,7 @@ function OrderDropdown() {
 
 	const handleOrderType = (id: number) => {
 		setOrderType(id);
+		toggleActive();
 	};
 
 	return (

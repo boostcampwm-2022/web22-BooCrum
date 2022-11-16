@@ -17,6 +17,7 @@ function WorkspaceList({ hasOrder }: { hasOrder: boolean }) {
 			{ id: 5, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
 			{ id: 6, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
 		]);
+		// api 패칭할 때 제대로 정렬
 	}, []);
 
 	return (
