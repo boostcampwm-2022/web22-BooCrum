@@ -1,6 +1,6 @@
-import { atom, RecoilLoadable } from 'recoil';
+import { atom } from 'recoil';
 
 export const authState = atom({
 	key: 'auth',
-	default: false,
+	default: JSON.parse(localStorage.getItem('auth') || 'false'),
 });
