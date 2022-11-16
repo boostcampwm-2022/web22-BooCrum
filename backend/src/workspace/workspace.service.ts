@@ -5,6 +5,7 @@ import { Team } from 'src/team/entity/team.entity';
 import { User } from 'src/user/entity/user.entity';
 import { Repository, DataSource } from 'typeorm';
 import { WorkspaceCreateRequestDto } from './dto/workspaceCreateRequest.dto';
+import { WorkspaceMetadataDto } from './dto/workspaceMetadata.dto';
 import { WorkspaceMember } from './entity/workspace-member.entity';
 import { Workspace } from './entity/workspace.entity';
 
@@ -194,6 +195,7 @@ export class WorkspaceService {
 
   /**
    * 워크스페이스를 삭제합니다.
+   *
    * ※주의※ 권한을 확인하지 않습니다. 삭제 전 권한을 확인해주시기 바랍니다.
    * @param workspaceId 삭제할 워크스페이스의 Id입니다.
    */
@@ -229,5 +231,28 @@ export class WorkspaceService {
       await queryRunner.release();
       throw e;
     }
+  }
+
+  /**
+   * 워크스페이스의 메타데이터를 변경합니다.
+   *
+   * ※주의※ 권한을 확인하지 않습니다. 사용 전에 권한을 확인해주시기 바랍니다.
+   * @param workspaceId 메타데이터를 수정할 워크스페이스의 ID입니다.
+   * @param newMetaData 변경할 메타데이터 객체입니다.
+   * @returns 변경 가능한 것이 존재할 경우 true를 반환합니다.
+   */
+  async updateWorkspaceMetadata(
+    workspaceId: string,
+    newMetaData: WorkspaceMetadataDto,
+  ): Promise<boolean> {
+    const workspaceFind = this.workspaceRepository.findOne({
+      where: { workspaceId },
+    });
+    if (!workspaceFind)
+      throw new BadRequestException('잘못된 워크스페이스 ID입니다.');
+    return (
+      (await this.workspaceRepository.update({ workspaceId }, newMetaData))
+        .affected > 0
+    );
   }
 }

@@ -6,6 +6,7 @@ import {
   Get,
   Post,
   Delete,
+  Patch,
   Body,
   UseGuards,
   ValidationPipe,
@@ -15,6 +16,7 @@ import {
 import { AuthorizationGuard } from 'src/auth/guard/session.guard';
 import { WorkspaceCreateRequestDto } from './dto/workspaceCreateRequest.dto';
 import { WorkspaceIdDto } from './dto/workspaceId.dto';
+import { WorkspaceMetadataDto } from './dto/workspaceMetadata.dto';
 import { Workspace } from './entity/workspace.entity';
 import { WorkspaceService } from './workspace.service';
 
@@ -86,5 +88,33 @@ export class WorkspaceController {
       );
     }
     this.workspaceService.deleteWorkspace(workspaceId);
+  }
+
+  @UseGuards(AuthorizationGuard)
+  @Patch(':workspaceId')
+  async updateWorkspaceMetadata(
+    @Session() session: Record<string, any>,
+    @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
+    @Body(new ValidationPipe()) newMetadata: WorkspaceMetadataDto,
+  ): Promise<void> {
+    const userId = session.user.userId;
+    if (
+      (await this.workspaceService.getAuthorityOfUser(workspaceId, userId)) < 2
+    ) {
+      throw new ForbiddenException(
+        '갱신하려는 워크스페이스에 대한 소유자 권한을 갖고 있지 않습니다.',
+      );
+    }
+
+    const res = this.workspaceService.updateWorkspaceMetadata(
+      workspaceId,
+      newMetadata,
+    );
+    if (!res) {
+      throw new BadRequestException(
+        '갱신할 수 있는 워크스페이스가 존재하지 않습니다.',
+      );
+    }
+    return;
   }
 }
