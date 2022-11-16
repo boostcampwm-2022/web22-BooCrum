@@ -1,7 +1,8 @@
 import Main from './pages/main';
+import Login from '@pages/login';
 
 function App() {
-	return <Main />;
+	return <Login />;
 }
 
 export default App;
