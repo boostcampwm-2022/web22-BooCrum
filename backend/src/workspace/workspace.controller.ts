@@ -10,6 +10,7 @@ import {
   UseGuards,
   ValidationPipe,
   BadRequestException,
+  ForbiddenException,
 } from '@nestjs/common';
 import { AuthorizationGuard } from 'src/auth/guard/session.guard';
 import { WorkspaceCreateRequestDto } from './dto/workspaceCreateRequest.dto';
@@ -68,5 +69,22 @@ export class WorkspaceController {
       workspaceId,
       role,
     );
+  }
+
+  @UseGuards(AuthorizationGuard)
+  @Delete(':workspaceId')
+  async deleteWorkspace(
+    @Session() session: Record<string, any>,
+    @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
+  ) {
+    const userId = session.user.userId;
+    if (
+      (await this.workspaceService.getAuthorityOfUser(workspaceId, userId)) < 2
+    ) {
+      throw new ForbiddenException(
+        '삭제하려는 워크스페이스에 대한 소유자 권한을 갖고 있지 않습니다.',
+      );
+    }
+    this.workspaceService.deleteWorkspace(workspaceId);
   }
 }

@@ -18,6 +18,19 @@ export class WorkspaceService {
     private dataSource: DataSource,
   ) {}
 
+  async getAuthorityOfUser(
+    workspaceId: string,
+    userId: string,
+  ): Promise<number> {
+    return (
+      await this.workspaceMemberRepository
+        .createQueryBuilder()
+        .where('user_id = :uid', { uid: userId })
+        .andWhere('workspace_id = :wid', { wid: workspaceId })
+        .getOne()
+    ).role;
+  }
+
   /**
    * 워크스페이스를 생성합니다.
    * @param param0 워크스페이스를 생성하는데 필요한 정보들입니다. (신규 워크스페이스를 소유할 팀/유저 ID와 워크스페이스 이름, 설명)
@@ -129,6 +142,13 @@ export class WorkspaceService {
       .getMany();
   }
 
+  /**
+   * 사용자를 워크스페이스에 초대합니다.
+   * @param userId 유저 ID 입니다.
+   * @param workspaceId 워크스페이스 ID 입니다.
+   * @param role 유저가 해당 워크스페이스에 갖게될 권한입니다.
+   * @returns 추가 결과를 반환합니다.
+   */
   async addUserIntoWorkspace(
     userId: string,
     workspaceId: string,
@@ -165,11 +185,49 @@ export class WorkspaceService {
       delete newMember.id;
       return newMember;
     } catch (e) {
-      console.log(e);
+      console.error(e);
       await queryRunner.rollbackTransaction();
       await queryRunner.release();
       throw e;
-    } finally {
+    }
+  }
+
+  /**
+   * 워크스페이스를 삭제합니다.
+   * ※주의※ 권한을 확인하지 않습니다. 삭제 전 권한을 확인해주시기 바랍니다.
+   * @param workspaceId 삭제할 워크스페이스의 Id입니다.
+   */
+  async deleteWorkspace(workspaceId: string): Promise<void> {
+    const workspaceFind = await this.workspaceRepository.find({
+      where: { workspaceId },
+    });
+    if (!workspaceFind) {
+      throw new BadRequestException('잘못된 워크스페이스 ID 입니다.');
+    }
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      // Team에서 Workspace 제거 (One To Many의 Many면 그냥 삭제해도 되지 않나? → 패스)
+      // workspaceMember에서 모든 멤버 정보 삭제
+      await this.workspaceMemberRepository
+        .createQueryBuilder('wm', queryRunner)
+        .delete()
+        .where('workspace_id = :id', { id: workspaceId })
+        .execute();
+      // TODO: 워크스페이스 객체 테이블 DROP
+      // 워크스페이스 메타데이터 제거
+      await queryRunner.manager.delete(Workspace, { workspaceId });
+
+      await queryRunner.commitTransaction();
+      await queryRunner.release();
+      return;
+    } catch (e) {
+      console.error(e);
+      await queryRunner.rollbackTransaction();
+      await queryRunner.release();
+      throw e;
     }
   }
 }
