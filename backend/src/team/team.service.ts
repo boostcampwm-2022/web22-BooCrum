@@ -1,6 +1,14 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, DeleteResult, getConnection, InsertResult, Repository, UpdateResult } from 'typeorm';
+import {
+  DataSource,
+  DeleteResult,
+  FindOneOptions,
+  getConnection,
+  InsertResult,
+  Repository,
+  UpdateResult,
+} from 'typeorm';
 import { Team } from './entity/team.entity';
 import { TeamMember } from './entity/team-member.entity';
 import { IsTeam } from './enum/is-team.enum';
@@ -27,21 +35,30 @@ export class TeamService {
 
   // 사용자 생성 팀 생성
   async createTeam(teamDTO: TeamDTO): Promise<any> {
-    // 1. Team 추가
     const team = await this.teamRepository.save(new Team(teamDTO.name, IsTeam.TEAM, teamDTO.description));
-    // 2. TeamMember 추가
     this.insertTeamMember(teamDTO.userId, team.teamId, Role.ADMIN);
     return team;
   }
 
   // 팀 멤버 추가
-  async insertTeamMember(user: string, team: number, role?: Role): Promise<InsertResult> {
+  async insertTeamMember(user: string | User, team: number | Team, role?: Role): Promise<InsertResult> {
+    const teamMember = await this.findTeamMember(team, user);
+    if (teamMember) throw new BadRequestException();
     return this.teamMemberRepository
       .createQueryBuilder()
       .insert()
       .into('team_member')
       .values({ user, team, role })
       .execute();
+  }
+
+  // 팀 멤버 찾기
+  async findTeamMember(team: number | Team, user: string | User): Promise<TeamMember | undefined> {
+    return await this.teamMemberRepository
+      .createQueryBuilder('teamMember')
+      .where('teamMember.team_id = :team', { team })
+      .andWhere('teamMember.user_id = :user', { user })
+      .getOne();
   }
 
   // 팀 & 팀 멤버 조회 (팀ID, 팀명, 팀 설명, 팀 생성일, 회원ID, 닉네임, 역할)
@@ -106,7 +123,7 @@ export class TeamService {
   }
 
   // 팀 삭제 : 팀 멤버 전체 삭제 > 팀 삭제
-  async deleteTeam(teamId: number) {
+  async deleteTeam(teamId: number): Promise<any> {
     const queryRunner = this.dataSource.createQueryRunner();
 
     await queryRunner.connect();
@@ -126,7 +143,7 @@ export class TeamService {
   }
 
   // 팀 멤버 일부 삭제
-  async deleteTeamMember(teamId: number, userId: string) {
+  async deleteTeamMember(teamId: number, userId: string): Promise<DeleteResult> {
     return this.teamMemberRepository
       .createQueryBuilder()
       .delete()

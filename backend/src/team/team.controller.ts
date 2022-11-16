@@ -14,14 +14,21 @@ export class TeamController {
     return this.teamService.createTeam(teamDTO);
   }
 
+  // Team Member 추가
+  @Post('/member')
+  async insertTeamMember(@Body() teamMember: TeamMember): Promise<any> {
+    const { user, team, role } = teamMember;
+    return this.teamService.insertTeamMember(user, team, role);
+  }
+
   // Team Member 조회
-  @Get('/member/:teamId')
+  @Get('/:teamId/member')
   async selectTeamMember(@Param('teamId') teamId: number): Promise<any> {
     return await this.teamService.selectTeamMember(teamId);
   }
 
   // Team Workspace 조회
-  @Get('/team-workspace/:teamId')
+  @Get('/:teamId/workspace')
   async selectTeamWorkspace(@Param('teamId') teamId: number): Promise<any> {
     return await this.teamService.selectTeamWorkspace(teamId);
   }
