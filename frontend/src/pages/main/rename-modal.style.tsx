@@ -15,6 +15,7 @@ export const RenameModalLayout = styled.div`
 	h3 {
 		border-bottom: 1px solid #d8d8d8;
 		padding: 0.5em;
+		margin: 0;
 	}
 	input {
 		margin: 0.5em;
@@ -37,14 +38,4 @@ export const RenameModalLayout = styled.div`
 		padding: 1em;
 		border-radius: 30px;
 	}
-`;
-
-export const RenameModalBackground = styled.div`
-	position: fixed;
-	width: 100%;
-	height: 100%;
-	top: 0;
-	left: 0;
-	background-color: rgba(16, 16, 16, 0.3);
-	z-index: 1;
 `;

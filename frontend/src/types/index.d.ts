@@ -4,11 +4,14 @@ interface ContextMenuProps {
 	children: React.ReactNode;
 }
 interface DeleteModalProps {
-	toggleOpen: () => void;
-	modalRef: React.RefObject<HTMLDivElement>;
+	closeModal: () => void;
 }
 interface RenameModalProps {
-	setOpenModal: SetterOrUpdater<{
-		isOpen: boolean;
-	}>;
+	closeModal: () => void;
+	workspaceName: string;
+}
+interface ModalProps {
+	isOpen: boolean;
+	modalRef: React.RefObject<HTMLDivElement>;
+	children: React.ReactNode;
 }
