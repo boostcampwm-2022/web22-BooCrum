@@ -2,9 +2,10 @@ import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
 import { workspaceOrderState } from '@context/main-workspace';
 import WorkspaceCard from '@pages/main/workspace-card';
-import { WorkspaceListContainer } from './index.style';
+import { Title, TitleContainer, WorkspaceListContainer } from './index.style';
+import OrderDropdown from '../order-dropdown';
 
-function WorkspaceList({ hasOrder }: { hasOrder: boolean }) {
+function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }) {
 	const orderType = useRecoilValue(workspaceOrderState);
 	const [workspaces, setWorkspaces] = useState<WorkspaceCardType[]>([]);
 
@@ -21,16 +22,22 @@ function WorkspaceList({ hasOrder }: { hasOrder: boolean }) {
 	}, []);
 
 	return (
-		<WorkspaceListContainer>
-			{workspaces.map((workspace) => (
-				<WorkspaceCard
-					key={workspace.id}
-					title={workspace.title}
-					timestamp={workspace.timestamp}
-					imgSrc={workspace.imgSrc}
-				/>
-			))}
-		</WorkspaceListContainer>
+		<>
+			<TitleContainer>
+				<Title>{title}</Title>
+				{hasOrder && <OrderDropdown />}
+			</TitleContainer>
+			<WorkspaceListContainer>
+				{workspaces.map((workspace) => (
+					<WorkspaceCard
+						key={workspace.id}
+						title={workspace.title}
+						timestamp={workspace.timestamp}
+						imgSrc={workspace.imgSrc}
+					/>
+				))}
+			</WorkspaceListContainer>
+		</>
 	);
 }
 
