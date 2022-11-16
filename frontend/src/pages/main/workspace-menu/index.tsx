@@ -1,10 +1,11 @@
 import Modal from '@components/modal';
 import useModal from '@hooks/useModal';
 import { useState } from 'react';
-import DeleteModal from './delete-modal.component';
-import RenameModal from './rename-modal.component';
-import { WorkspaceMenuItem, WorkspaceMenuList } from './worksapce-menu.style';
-import { WorkspaceMenuProps } from './worksapce-menu.types';
+
+import { WorkspaceMenuItem, WorkspaceMenuList } from './index.style';
+import { WorkspaceMenuProps } from './index.types';
+import DeleteModal from '../delete-modal';
+import RenameModal from '../rename-modal';
 
 function WorkspaceMenu({ workspaceName }: WorkspaceMenuProps) {
 	const { isOpenModal, modalRef, toggleOpenModal, closeModal } = useModal();
@@ -15,7 +16,6 @@ function WorkspaceMenu({ workspaceName }: WorkspaceMenuProps) {
 	};
 	const openDeleteModal = () => {
 		toggleOpenModal();
-		console.log(isOpenModal);
 		setModalContent(<DeleteModal closeModal={closeModal}></DeleteModal>);
 	};
 	return (

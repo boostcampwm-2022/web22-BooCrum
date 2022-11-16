@@ -1,4 +1,5 @@
-import { DeleteModalLayout } from './delete-modal.style';
+import { DeleteModalLayout } from './index.style';
+import { DeleteModalProps } from './index.types';
 
 function DeleteModal({ closeModal }: DeleteModalProps) {
 	const deleteWorkspace = () => {

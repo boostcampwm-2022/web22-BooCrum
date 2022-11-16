@@ -1,4 +1,5 @@
-import { RenameModalLayout } from './rename-modal.style';
+import { RenameModalLayout } from './index.style';
+import { RenameModalProps } from './index.types';
 
 function RenameModal({ closeModal, workspaceName }: RenameModalProps) {
 	const modifyWorkspaceName = () => {
