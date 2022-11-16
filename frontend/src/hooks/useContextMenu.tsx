@@ -2,13 +2,13 @@ import { useEffect, useRef, useState } from 'react';
 
 function useContextMenu() {
 	const [isOpen, setIsOpen] = useState(false);
-	const menuRef = useRef<HTMLUListElement>(null);
+	const menuRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
-		document.addEventListener('click', handleOutsideClick);
+		document.addEventListener('mousedown', handleOutsideClick);
 
 		return () => {
-			document.removeEventListener('click', handleOutsideClick);
+			document.removeEventListener('mousedown', handleOutsideClick);
 		};
 	}, [isOpen]);
 

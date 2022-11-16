@@ -1,12 +1,11 @@
 interface ContextMenuProps {
-	menuRef: React.RefObject<HTMLUListElement>;
-	toggleOpen: () => void;
-	workspacename: string;
+	isOpen: boolean;
+	menuRef: React.RefObject<HTMLDivElement>;
+	children: React.ReactNode;
 }
 interface DeleteModalProps {
-	setOpenModal: SetterOrUpdater<{
-		isOpen: boolean;
-	}>;
+	toggleOpen: () => void;
+	modalRef: React.RefObject<HTMLDivElement>;
 }
 interface RenameModalProps {
 	setOpenModal: SetterOrUpdater<{
