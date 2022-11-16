@@ -6,7 +6,7 @@ import axios from 'axios';
 function fakeAuth(): Promise<boolean> {
 	return new Promise((resolve, reject) => {
 		setInterval(() => {
-			resolve(false);
+			resolve(true);
 		}, 1000);
 	});
 }
