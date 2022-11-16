@@ -24,6 +24,8 @@ export const Template = styled.div<{ isEmpty: boolean }>`
 		display: flex;
 		justify-content: center;
 		align-items: center;
+
+		transition: all 0.2s;
 	}
 
 	.preview {
