@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
+import { DataSource, DeleteResult, getConnection, InsertResult, Repository, UpdateResult } from 'typeorm';
 import { Team } from './entity/team.entity';
 import { TeamMember } from './entity/team-member.entity';
 import { IsTeam } from './enum/is-team.enum';
@@ -15,6 +15,7 @@ export class TeamService {
     private teamRepository: Repository<Team>,
     @InjectRepository(TeamMember)
     private teamMemberRepository: Repository<TeamMember>,
+    private dataSource: DataSource,
   ) {}
 
   // 회원가입 시 팀 생성
@@ -105,10 +106,34 @@ export class TeamService {
   }
 
   // 팀 삭제 : 팀 멤버 전체 삭제 > 팀 삭제
+  async deleteTeam(teamId: number) {
+    const queryRunner = this.dataSource.createQueryRunner();
+
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.delete(TeamMember, { team: teamId });
+      await queryRunner.manager.delete(Team, { teamId });
+
+      await queryRunner.commitTransaction();
+    } catch (e) {
+      console.error(e);
+      await queryRunner.rollbackTransaction();
+    } finally {
+      await queryRunner.release();
+    }
+  }
 
   // 팀 멤버 일부 삭제
-  async deleteTeamMember() {
-    return;
+  async deleteTeamMember(teamId: number, userId: string) {
+    return this.teamMemberRepository
+      .createQueryBuilder()
+      .delete()
+      .from('team_member')
+      .where('team_member.team_id = :teamId', { teamId })
+      .andWhere('team_member.user_id = :userId', { userId })
+      .execute();
   }
 
   // 팀 멤버 전체 삭제

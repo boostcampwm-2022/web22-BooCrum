@@ -1,6 +1,5 @@
-import { Body, Controller, Get, Param, Patch, Post, Req } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Req } from '@nestjs/common';
 import { TeamDTO } from './dto/team.dto';
-import { TeamMember } from './entity/team-member.entity';
 import { Team } from './entity/team.entity';
 import { TeamService } from './team.service';
 
@@ -26,5 +25,15 @@ export class TeamController {
   @Patch('/team-update')
   async updateTeam(@Body() team: Team): Promise<any> {
     return await this.teamService.updateTeam(team);
+  }
+
+  @Delete('/team-member/:teamId/:userId')
+  async deleteTeamMember(@Param('teamId') teamId: number, @Param('userId') userId: string) {
+    return await this.teamService.deleteTeamMember(teamId, userId);
+  }
+
+  @Delete('/:teamId')
+  async delteTeam(@Param('teamId') teamId: number) {
+    return await this.teamService.deleteTeam(teamId);
   }
 }
