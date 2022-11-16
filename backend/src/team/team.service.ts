@@ -45,7 +45,7 @@ export class TeamService {
   }
 
   // 팀 & 팀 멤버 조회 (팀ID, 팀명, 팀 설명, 팀 생성일, 회원ID, 닉네임, 역할)
-  async selectTeamMember({ teamId }: Team): Promise<Team[] | undefined> {
+  async selectTeamMember(teamId: number): Promise<Team[] | undefined> {
     return await this.teamRepository
       .createQueryBuilder('team')
       .where('team.team_id = :teamId', { teamId })
