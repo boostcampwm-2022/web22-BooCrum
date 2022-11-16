@@ -25,10 +25,10 @@ export class WorkspaceMember {
   role: number;
 
   @Column({
-    name: 'register_date',
+    name: 'update_date',
     type: 'timestamp',
     default: () => 'CURRENT_TIMESTAMP()',
     nullable: false,
   })
-  registerDate: number;
+  updateDate: number;
 }
