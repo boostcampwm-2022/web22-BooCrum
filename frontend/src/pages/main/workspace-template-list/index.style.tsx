@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-	padding: 40px 50px 15px 50px;
+	margin-bottom: 24px;
 
 	.title {
 		font-size: 32px;

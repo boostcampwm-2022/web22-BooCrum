@@ -1,8 +1,7 @@
-import Header from './header.component';
+import Contents from './contents';
+import Header from './header';
 import { Wrapper } from './index.style';
-import Sidebar from './sidebar.component';
-import WorkspaceList from './workspace-list.component';
-import WorkspaceTemplates from './workspace-templates.component';
+import Sidebar from './sidebar';
 
 function Main() {
 	return (
@@ -10,8 +9,7 @@ function Main() {
 			<Sidebar />
 			<div className="workspace-container">
 				<Header />
-				<WorkspaceTemplates />
-				<WorkspaceList title={'Title'}></WorkspaceList>
+				<Contents />
 			</div>
 		</Wrapper>
 	);

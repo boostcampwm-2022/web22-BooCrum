@@ -27,7 +27,8 @@
       "@data/*": ["./data/*"],
       "@hooks/*": ["./hooks/*"],
       "@types/*": ["./types/*"],
-      "@utils/*": ["./utils/*"]
+      "@utils/*": ["./utils/*"],
+      "@pages/*": ["./pages/*"]
     }
   },
   "include": [
