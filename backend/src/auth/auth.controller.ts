@@ -5,10 +5,10 @@ import {
   Get,
   Put,
   Req,
+  Res,
   Session,
-  Redirect,
 } from '@nestjs/common';
-import { Request } from 'express';
+import { Request, Response } from 'express';
 import { GithubOAuthGuard } from './guard/github.guard';
 import {
   AuthorizationGuard,
@@ -22,17 +22,18 @@ export class AuthController {
   @UseGuards(GithubOAuthGuard)
   @UseGuards(UnAuthorizationGuard)
   @Get('/oauth/github')
-  startGithubOAuthProcess(@Req() req: Request) {}
+  startGithubOAuthProcess() {}
 
   @UseGuards(GithubOAuthGuard)
   @UseGuards(UnAuthorizationGuard)
   @Get('/oauth/github_callback')
-  @Redirect('/')
   handleGithubData(
     @Req() req: Request,
     @Session() session: Record<string, any>,
+    @Res() res: Response,
   ): void {
     session.user = req.user;
+    res.redirect(process.env.REDIRECT_AFTER_LOGIN);
   }
 
   @UseGuards(AuthorizationGuard)
