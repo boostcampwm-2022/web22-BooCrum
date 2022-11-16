@@ -1,6 +1,5 @@
-import React from 'react';
-import WorkspaceList from '@components/workspace-list';
-import WorkspaceTemplates from './workspace-templates.component';
+import WorkspaceList from '@pages/main/workspace-list';
+import WorkspaceTemplates from '@pages/main/workspace-template-list';
 
 function AllWorkspace() {
 	return (

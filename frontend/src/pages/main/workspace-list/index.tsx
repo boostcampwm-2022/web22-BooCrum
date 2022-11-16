@@ -1,10 +1,10 @@
-import WorkspaceCard from './workspace-card.component';
-import { WorkspaceListContainer } from './workspace-list.style';
+import WorkspaceCard from '@pages/main/workspace-card';
+import { Title, WorkspaceListContainer } from './index.style';
 
 function WorkspaceList({ title }: { title: string }) {
 	return (
-		<>
-			<h1>{title}</h1>
+		<div>
+			<Title>{title}</Title>
 			<WorkspaceListContainer>
 				<WorkspaceCard title="workspace name" timestamp="timestamp" imgSrc=""></WorkspaceCard>
 				<WorkspaceCard title="workspace name" timestamp="timestamp" imgSrc=""></WorkspaceCard>
@@ -14,7 +14,7 @@ function WorkspaceList({ title }: { title: string }) {
 				<WorkspaceCard title="workspace name" timestamp="timestamp" imgSrc=""></WorkspaceCard>
 				<WorkspaceCard title="workspace name" timestamp="timestamp" imgSrc=""></WorkspaceCard>
 			</WorkspaceListContainer>
-		</>
+		</div>
 	);
 }
 

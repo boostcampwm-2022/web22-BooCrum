@@ -1,6 +1,5 @@
-import React from 'react';
 import Logo from '@components/logo';
-import { Container, SidebarItem } from './sidebar.style';
+import { Container, SidebarItem } from './index.style';
 import { useRecoilState } from 'recoil';
 import { workspaceTypeState } from '@context/main-workspace';
 import { sidebarItems } from '@data/workspace-sidebar';

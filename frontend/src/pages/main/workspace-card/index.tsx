@@ -1,4 +1,4 @@
-import { CardLayout } from './worksapce-card.style';
+import { CardLayout } from './index.style';
 
 function WorkspaceCard({ title, timestamp, imgSrc }: { title: string; timestamp: string; imgSrc: string }) {
 	return (
