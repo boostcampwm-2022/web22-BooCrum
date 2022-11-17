@@ -18,12 +18,17 @@ function useContextMenu() {
 		setMenuPosition({ x: x, y: y });
 	};
 
+	const openContextMenu = () => {
+		console.log('asda');
+		setIsOpen(true);
+	};
+
 	const handleOutsideClick = (e: Event) => {
 		const current = menuRef.current;
 		if (isOpen && current && !current.contains(e.target as Node)) setIsOpen(false);
 	};
 
-	return { isOpen, menuRef, toggleOpen, menuPosition };
+	return { isOpen, menuRef, toggleOpen, menuPosition, openContextMenu };
 }
 
 export default useContextMenu;
