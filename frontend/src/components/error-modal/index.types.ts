@@ -1,7 +1,7 @@
-export interface ModalProps {
+export interface ErrorModalProps {
 	isOpen: boolean;
+	errorMessage: string;
 	modalRef: React.RefObject<HTMLDivElement>;
-	children: React.ReactNode;
 	width?: number;
 	height?: number;
 }

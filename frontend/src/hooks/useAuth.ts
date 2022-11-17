@@ -28,18 +28,20 @@ function useAuth() {
 
 	async function login() {
 		try {
-			const result = await axios.get('/auth/oauth/github', {
+			const result = await axios.get('/api/auth/oauth/github', {
 				withCredentials: true,
 			});
 
 			if (result.status !== 200) {
 				//로그인 실패 모달
-				return alert('로그인 실패');
+				return false;
 			}
 			// github auth 페이지로 리다이렉트
 			window.location.href = result.data.url;
+			return true;
 		} catch (error) {
 			console.log(error);
+			return false;
 		}
 	}
 

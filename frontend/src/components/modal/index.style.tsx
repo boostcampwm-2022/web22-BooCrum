@@ -1,9 +1,9 @@
 import styled from 'styled-components';
 
-export const ModalLayout = styled.div`
+export const ModalLayout = styled.div<{ width: number; height: number }>`
 	position: fixed;
-	width: 400px;
-	height: 200px;
+	width: ${({ width }) => `${width}px`};
+	height: ${({ height }) => `${height}px`};
 	top: 50%;
 	left: 50%;
 	transform: translate(-50%, -50%);
