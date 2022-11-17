@@ -166,6 +166,7 @@ export class WorkspaceService {
     const userFind = await this.workspaceMemberRepository
       .createQueryBuilder('wm')
       .where('wm.user_id = :id', { id: userId })
+      .andWhere('wm.workspace_id = :id', { id: workspaceId })
       .getOne();
     if (userFind) throw new BadRequestException('이미 존재하는 사용자입니다.');
 
