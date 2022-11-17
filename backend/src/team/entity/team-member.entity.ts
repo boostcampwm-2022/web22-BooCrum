@@ -14,11 +14,11 @@ export class TeamMember {
   @PrimaryGeneratedColumn('increment')
   id: number;
 
-  @ManyToOne(() => User, (user) => user.teamMember)
+  @ManyToOne(() => User, (user) => user.teamMember, { nullable: false })
   @JoinColumn({ name: 'user_id' })
   user: User;
 
-  @ManyToOne(() => Team, (team) => team.teamMember)
+  @ManyToOne(() => Team, (team) => team.teamMember, { nullable: false })
   @JoinColumn({ name: 'team_id' })
   team: Team;
 
