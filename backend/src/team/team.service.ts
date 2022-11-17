@@ -22,7 +22,7 @@ export class TeamService {
 
   // 회원가입 시 팀 생성
   async createUser({ userId }: User): Promise<any> {
-    const team = await this.teamRepository.save(new Team(`${userId}_user`, IsTeam.USER));
+    const team = await this.teamRepository.save(new Team(`${userId}`, IsTeam.USER));
     const user = await this.userService.findUser(userId);
     const teamMember = new TeamMember(user, team, Role.ADMIN);
     this.insertTeamMember(team.teamId, teamMember);

@@ -8,7 +8,6 @@ import { UserModule } from 'src/user/user.module';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Team, TeamMember]), UserModule],
-  exports: [TypeOrmModule],
   providers: [TeamService],
   controllers: [TeamController],
 })

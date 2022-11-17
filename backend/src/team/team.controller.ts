@@ -28,7 +28,7 @@ export class TeamController {
   async createTeam(
     @Session() session: Record<string, any>,
     @Body(new ValidationPipe()) teamDTO: TeamDTO,
-  ): Promise<any> {
+  ): Promise<Team> {
     teamDTO.userId = session.user.userId;
     return this.teamService.createTeam(teamDTO);
   }
