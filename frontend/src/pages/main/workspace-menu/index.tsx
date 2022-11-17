@@ -8,15 +8,15 @@ import DeleteModal from '../delete-modal';
 import RenameModal from '../rename-modal';
 
 function WorkspaceMenu({ workspaceName }: WorkspaceMenuProps) {
-	const { isOpenModal, modalRef, toggleOpenModal, closeModal } = useModal();
+	const { isOpenModal, modalRef, toggleOpenModal } = useModal();
 	const [modalContent, setModalContent] = useState(<></>);
 	const openReanmeModal = () => {
 		toggleOpenModal();
-		setModalContent(<RenameModal closeModal={closeModal} workspaceName={workspaceName}></RenameModal>);
+		setModalContent(<RenameModal toggle={toggleOpenModal} workspaceName={workspaceName}></RenameModal>);
 	};
 	const openDeleteModal = () => {
 		toggleOpenModal();
-		setModalContent(<DeleteModal closeModal={closeModal}></DeleteModal>);
+		setModalContent(<DeleteModal toggle={toggleOpenModal}></DeleteModal>);
 	};
 	return (
 		<>

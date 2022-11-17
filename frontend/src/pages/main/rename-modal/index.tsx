@@ -1,9 +1,9 @@
 import { RenameModalLayout } from './index.style';
 import { RenameModalProps } from './index.types';
 
-function RenameModal({ closeModal, workspaceName }: RenameModalProps) {
+function RenameModal({ toggle, workspaceName }: RenameModalProps) {
 	const modifyWorkspaceName = () => {
-		closeModal();
+		toggle();
 	};
 	return (
 		<>

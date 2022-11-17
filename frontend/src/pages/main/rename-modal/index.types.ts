@@ -1,4 +1,4 @@
 export interface RenameModalProps {
-	closeModal: () => void;
+	toggle: () => void;
 	workspaceName: string;
 }
