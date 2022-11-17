@@ -16,6 +16,10 @@ function useModal() {
 		setIsOpenModal(!isOpenModal);
 	};
 
+	const openModal = () => {
+		setIsOpenModal(true);
+	};
+
 	const closeModal = () => {
 		setIsOpenModal(false);
 	};
@@ -25,7 +29,7 @@ function useModal() {
 		if (isOpenModal && current && !current.contains(e.target as Node)) setIsOpenModal(false);
 	};
 
-	return { isOpenModal, modalRef, toggleOpenModal, closeModal };
+	return { isOpenModal, modalRef, toggleOpenModal, closeModal, openModal };
 }
 
 export default useModal;
