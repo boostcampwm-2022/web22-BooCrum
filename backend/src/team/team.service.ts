@@ -64,7 +64,7 @@ export class TeamService {
     return await this.teamRepository
       .createQueryBuilder('team')
       .where('team.team_id = :teamId', { teamId })
-      .andWhere('team.isTeam = :isTeam', { isTeam: 1 })
+      // .andWhere('team.isTeam = :isTeam', { isTeam: 1 })
       .innerJoin('team.teamMember', 'teamMember')
       .innerJoin('teamMember.user', 'user')
       .select([

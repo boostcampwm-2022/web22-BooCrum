@@ -49,7 +49,10 @@ export class TeamController {
   // Team Member 조회
   @Get('/:teamId/member')
   @UseGuards(AuthorizationGuard)
-  async selectTeamMember(@Param('teamId') teamId: number): Promise<any> {
+  async selectTeamMember(@Session() session: Record<string, any>, @Param('teamId') teamId: number): Promise<any> {
+    const user = await this.teamService.findTeamMember(teamId, session.user.userId);
+    if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
+    if (user.role < 1) new BadRequestException(`해당 권한이 없습니다.`);
     return await this.teamService.selectTeamMember(teamId);
   }
 
