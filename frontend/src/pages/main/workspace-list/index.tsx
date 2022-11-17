@@ -1,23 +1,16 @@
 import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
+import axios from 'axios';
 import { workspaceOrderState } from '@context/main-workspace';
 import WorkspaceCard from '@pages/main/workspace-card';
 import { Title, TitleContainer, WorkspaceListContainer } from './index.style';
-import OrderDropdown from '../order-dropdown';
+import OrderDropdown from '@pages/main/order-dropdown';
+import { compareStringByMillisecond, setTimestamp } from 'utils';
+import { WorkspaceCardType } from './index.type';
 
-interface _WorkspaceCardType {
-	role: number;
-	workspace: {
-		workspaceId: string;
-		description: null;
-		name: string;
-		registerDate: string;
-		updateDate: string;
-	};
-}
-
-function compareStringByMillisecond(a: string, b: string) {
-	return new Date(b).getTime() - new Date(a).getTime();
+async function fetchWorkspaceList(): Promise<WorkspaceCardType[]> {
+	const result = await axios.get('https://7f09d24e-a8d4-4e68-a7c5-ec8c6da7ef40.mock.pstmn.io/user/info/workspace');
+	return result.data;
 }
 
 function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }) {
@@ -25,71 +18,21 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 	const [workspaces, setWorkspaces] = useState<WorkspaceCardType[]>([]);
 
 	useEffect(() => {
-		async function getWorkspaceList() {
-			const result = [
-				{
-					role: 2,
-					workspace: {
-						workspaceId: 'be326369-8128-475c-9269-a8b4b3f5fe52',
-						description: null,
-						name: 'workspace1',
-						registerDate: '2022-11-15T16:26:22.000Z',
-						updateDate: '2022-11-15T16:26:20.000Z',
-					},
-				},
-				{
-					role: 0,
-					workspace: {
-						workspaceId: '802d2d0a-52ad-4f70-fb7e-d6a89eaaaf3e',
-						description: null,
-						name: 'workspace2',
-						registerDate: '2022-11-15T18:26:22.000Z',
-						updateDate: '2022-11-15T18:26:20.000Z',
-					},
-				},
-				{
-					role: 1,
-					workspace: {
-						workspaceId: '65e107eb-e881-4e9c-c7f9-ca57b44b2b33',
-						description: null,
-						name: 'workspace3',
-						registerDate: '2022-11-15T20:26:22.000Z',
-						updateDate: '2022-11-15T20:26:20.000Z',
-					},
-				},
-			];
+		async function setWorkspaceList() {
+			const result = await fetchWorkspaceList();
+			const sortedWorkspace = sortWorkspace(result);
 
-			const sortedWorkspace = sortWorkspace(result); // workspaces로 초기화
-			console.log('first render', sortedWorkspace);
-
-			setWorkspaces([
-				{ id: 1, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
-				{ id: 2, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
-				{ id: 3, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
-				{ id: 4, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
-				{ id: 5, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
-				{ id: 6, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
-			]);
+			setWorkspaces(sortedWorkspace);
 		}
-		getWorkspaceList();
+		setWorkspaceList();
 	}, []);
 	useEffect(() => {
-		if (workspaces.length !== 0) {
-			const sortedWorkspace = sortWorkspace([]); // workspaces로 비교
-			console.log('order change: ', sortedWorkspace);
+		const sortedWorkspace = sortWorkspace(workspaces);
 
-			setWorkspaces([
-				{ id: 1, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
-				{ id: 2, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
-				{ id: 3, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
-				{ id: 4, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
-				{ id: 5, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
-				{ id: 6, title: 'workspace name', timestamp: 'timestamp', imgSrc: '' },
-			]);
-		}
+		setWorkspaces(sortedWorkspace);
 	}, [orderType]);
 
-	function sortWorkspace(workspaceList: _WorkspaceCardType[]) {
+	function sortWorkspace(workspaceList: WorkspaceCardType[]): WorkspaceCardType[] {
 		if (!hasOrder) {
 			return workspaceList.sort((a, b) => {
 				return compareStringByMillisecond(a.workspace.registerDate, b.workspace.registerDate);
@@ -109,12 +52,12 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 				{hasOrder && <OrderDropdown />}
 			</TitleContainer>
 			<WorkspaceListContainer>
-				{workspaces.map((workspace) => (
+				{workspaces.map((item) => (
 					<WorkspaceCard
-						key={workspace.id}
-						title={workspace.title}
-						timestamp={workspace.timestamp}
-						imgSrc={workspace.imgSrc}
+						key={item.workspace.workspaceId}
+						title={item.workspace.name}
+						timestamp={setTimestamp(item.workspace.updateDate)}
+						imgSrc={''}
 					/>
 				))}
 			</WorkspaceListContainer>
