@@ -10,13 +10,12 @@ import {
   Req,
   Session,
   UseGuards,
+  ValidationPipe,
 } from '@nestjs/common';
-import { Request } from 'express';
 import { AuthorizationGuard } from 'src/auth/guard/session.guard';
 import { TeamDTO } from './dto/team.dto';
 import { TeamMember } from './entity/team-member.entity';
 import { Team } from './entity/team.entity';
-import { Role } from './enum/role.enum';
 import { TeamService } from './team.service';
 
 @Controller('team')
@@ -26,7 +25,10 @@ export class TeamController {
   // Team 생성
   @Post('/')
   @UseGuards(AuthorizationGuard)
-  async createTeam(@Session() session: Record<string, any>, @Body() teamDTO: TeamDTO): Promise<any> {
+  async createTeam(
+    @Session() session: Record<string, any>,
+    @Body(new ValidationPipe()) teamDTO: TeamDTO,
+  ): Promise<any> {
     teamDTO.userId = session.user.userId;
     return this.teamService.createTeam(teamDTO);
   }
