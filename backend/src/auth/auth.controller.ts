@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Controller, UseGuards, Get, Put, Req, Res, Session, UnauthorizedException } from '@nestjs/common';
+import { Controller, UseGuards, UseFilters, Get, Put, Req, Res, Session, UnauthorizedException } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { UnAuthRedirectionFilter } from './filter/unauth-redirect.filter';
 import { GithubOAuthGuard } from './guard/github.guard';
 import { AuthorizationGuard, UnAuthorizationGuard } from './guard/session.guard';
 
@@ -10,11 +11,13 @@ export class AuthController {
 
   @UseGuards(GithubOAuthGuard)
   @UseGuards(UnAuthorizationGuard)
+  @UseFilters(UnAuthRedirectionFilter)
   @Get('/oauth/github')
   startGithubOAuthProcess() {}
 
   @UseGuards(GithubOAuthGuard)
   @UseGuards(UnAuthorizationGuard)
+  @UseFilters(UnAuthRedirectionFilter)
   @Get('/oauth/github_callback')
   handleGithubData(@Req() req: Request, @Session() session: Record<string, any>, @Res() res: Response): void {
     session.user = req.user;
