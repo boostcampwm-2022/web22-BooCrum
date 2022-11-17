@@ -1,6 +1,6 @@
 import { ButtonContainer } from './index.style';
 import githubIcon from '@assets/icon/github-login.svg';
-import useAuth from '../../hooks/useAuth';
+import useAuth from '@hooks/useAuth';
 
 function GithubLoginButton() {
 	const { login } = useAuth();
