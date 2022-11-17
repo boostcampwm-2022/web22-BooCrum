@@ -3,6 +3,8 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TeamMember } from 'src/team/entity/team-member.entity';
 import { Team } from 'src/team/entity/team.entity';
+import { IsTeam } from 'src/team/enum/is-team.enum';
+import { Role } from 'src/team/enum/role.enum';
 import { WorkspaceMember } from 'src/workspace/entity/workspace-member.entity';
 import { Repository, DataSource } from 'typeorm';
 import { UserDto } from './dto/user.dto';
@@ -34,19 +36,11 @@ export class UserService {
 
     // 없는 사용자이면 사용자를 생성하여 전달한다.
     const newUser = new User();
-    const userTeam = new Team();
-    const userTeamMember = new TeamMember();
-
-    // TODO: 대충 팀 생성하는 부분. Team으로 대체할 것.
-    userTeam.isTeam = false;
-    userTeam.name = newUserDto.userId;
-
-    userTeamMember.user = newUser;
-    userTeamMember.team = userTeam;
-    userTeamMember.role = 2;
-    // TODO END
     newUser.userId = newUserDto.userId;
     newUser.nickname = newUserDto.nickname;
+
+    const userTeam = new Team(newUserDto.userId, IsTeam.USER);
+    const userTeamMember = new TeamMember(newUser, userTeam, Role.ADMIN);
 
     // 오류 상황으로 일부만 완료되는 상황이 생길 경우를 고려하여, Transaction으로 처리한다.
     const queryRunner = this.dataSource.createQueryRunner();
@@ -70,10 +64,7 @@ export class UserService {
   }
 
   // 사용자 정보를 변경합니다. 단, UserID와 RegisterDate는 변경할 수 없습니다.
-  async changeUserData(
-    userId: string,
-    newData: UserDto,
-  ): Promise<UserDto | null> {
+  async changeUserData(userId: string, newData: UserDto): Promise<UserDto | null> {
     // 지정된 ID의 사용자가 존재하는지 확인한다. 없으면 그대로 return 한다.
     const userFind = await this.userRepository.findOne({
       where: { userId },

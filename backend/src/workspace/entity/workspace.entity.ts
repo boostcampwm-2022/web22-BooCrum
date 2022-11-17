@@ -1,11 +1,4 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  ManyToOne,
-  JoinColumn,
-  OneToMany,
-} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Team } from '../../team/entity/team.entity';
 import { WorkspaceMember } from './workspace-member.entity';
 
@@ -40,9 +33,6 @@ export class Workspace {
   })
   updateDate: number;
 
-  @OneToMany(
-    () => WorkspaceMember,
-    (workspaceMember) => workspaceMember.workspace,
-  )
+  @OneToMany(() => WorkspaceMember, (workspaceMember) => workspaceMember.workspace)
   workspaceMember: WorkspaceMember[];
 }
