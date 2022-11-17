@@ -1,7 +1,16 @@
-import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Main from '@pages/main';
+import Error from '@pages/error';
+import Workspace from '@pages/workspace';
 
 function App() {
-	return <div className="App">app입니다</div>;
+	return (
+		<Routes>
+			<Route path="/" element={<Main />} />
+			<Route path="/workspace" element={<Workspace />} />
+			<Route path="/*" element={<Error />} />
+		</Routes>
+	);
 }
 
 export default App;

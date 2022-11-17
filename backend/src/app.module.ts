@@ -2,7 +2,6 @@ import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
-import { SessionMiddleware } from './middlewares/session.middleware';
 import { UserModule } from './user/user.module';
 import { TeamModule } from './team/team.module';
 import { WorkspaceModule } from './workspace/workspace.module';
