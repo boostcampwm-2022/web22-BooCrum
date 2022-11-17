@@ -15,6 +15,7 @@ import { IsTeam } from './enum/is-team.enum';
 import { Role } from './enum/role.enum';
 import { TeamDTO } from './dto/team.dto';
 import { User } from 'src/user/entity/user.entity';
+import { UserService } from 'src/user/user.service';
 
 @Injectable()
 export class TeamService {
@@ -24,36 +25,41 @@ export class TeamService {
     @InjectRepository(TeamMember)
     private teamMemberRepository: Repository<TeamMember>,
     private dataSource: DataSource,
+    private userService: UserService,
   ) {}
 
   // 회원가입 시 팀 생성
   async createUser({ userId }: User): Promise<any> {
     const team = await this.teamRepository.save(new Team(`${userId}_user`, IsTeam.USER));
-    this.insertTeamMember(userId, team.teamId, Role.ADMIN);
+    const user = await this.userService.findUser(userId);
+    const teamMember = new TeamMember(user, team, Role.ADMIN);
+    this.insertTeamMember(team.teamId, teamMember);
     return team;
   }
 
   // 사용자 생성 팀 생성
   async createTeam(teamDTO: TeamDTO): Promise<any> {
     const team = await this.teamRepository.save(new Team(teamDTO.name, IsTeam.TEAM, teamDTO.description));
-    this.insertTeamMember(teamDTO.userId, team.teamId, Role.ADMIN);
+    const user = await this.userService.findUser(teamDTO.userId);
+    const teamMember = new TeamMember(user, team, Role.ADMIN);
+    this.insertTeamMember(team.teamId, teamMember);
     return team;
   }
 
   // 팀 멤버 추가
-  async insertTeamMember(user: string | User, team: number | Team, role?: Role): Promise<InsertResult> {
-    const teamMember = await this.findTeamMember(team, user);
-    if (teamMember) throw new BadRequestException();
+  async insertTeamMember(team: number, teamMember: TeamMember): Promise<InsertResult> {
+    if (await this.findTeamMember(team, teamMember.user.userId))
+      throw new BadRequestException('이미 존재하는 회원입니다.');
     return this.teamMemberRepository
       .createQueryBuilder()
       .insert()
       .into('team_member')
-      .values({ user, team, role })
+      .values({ user: teamMember.user.userId, team, role: teamMember.role })
       .execute();
   }
 
   // 팀 멤버 찾기
-  async findTeamMember(team: number | Team, user: string | User): Promise<TeamMember | undefined> {
+  async findTeamMember(team: number, user: string): Promise<TeamMember | undefined> {
     return await this.teamMemberRepository
       .createQueryBuilder('teamMember')
       .where('teamMember.team_id = :team', { team })
