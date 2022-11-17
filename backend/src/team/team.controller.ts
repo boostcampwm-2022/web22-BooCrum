@@ -40,7 +40,7 @@ export class TeamController {
     @Session() session: Record<string, any>,
     @Param('teamId') teamId: number,
     @Body() teamMember: TeamMember,
-  ): Promise<any> {
+  ): Promise<boolean> {
     const user = await this.teamService.findTeamMember(teamId, session.user.userId);
     if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
     if (user.role < 1) new BadRequestException(`해당 권한이 없습니다.`);
@@ -73,7 +73,7 @@ export class TeamController {
     @Session() session: Record<string, any>,
     @Param('teamId') teamId: number,
     @Body() team: Team,
-  ): Promise<any> {
+  ): Promise<boolean> {
     const user = await this.teamService.findTeamMember(teamId, session.user.userId);
     if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
     if (user.role < 1) new BadRequestException(`해당 권한이 없습니다.`);
@@ -88,7 +88,7 @@ export class TeamController {
     @Session() session: Record<string, any>,
     @Param('teamId') teamId: number,
     @Body() teamMember: TeamMember,
-  ): Promise<any> {
+  ): Promise<boolean> {
     const user = await this.teamService.findTeamMember(teamId, session.user.userId);
     if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
     if (user.role < 2) new BadRequestException(`해당 권한이 없습니다.`);
@@ -103,7 +103,7 @@ export class TeamController {
     @Session() session: Record<string, any>,
     @Param('teamId') teamId: number,
     @Param('userId') userId: string,
-  ) {
+  ): Promise<boolean> {
     const user = await this.teamService.findTeamMember(teamId, session.user.userId);
     if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
     if (user.role < 2) new BadRequestException(`해당 권한이 없습니다.`);
@@ -113,7 +113,7 @@ export class TeamController {
   // Team 삭제
   @Delete('/:teamId')
   @UseGuards(AuthorizationGuard)
-  async delteTeam(@Session() session: Record<string, any>, @Param('teamId') teamId: number) {
+  async delteTeam(@Session() session: Record<string, any>, @Param('teamId') teamId: number): Promise<boolean> {
     const user = await this.teamService.findTeamMember(teamId, session.user.userId);
     if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
     if (user.role < 2) new BadRequestException(`해당 권한이 없습니다.`);

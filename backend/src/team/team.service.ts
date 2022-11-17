@@ -39,15 +39,17 @@ export class TeamService {
   }
 
   // 팀 멤버 추가
-  async insertTeamMember(team: number, teamMember: TeamMember): Promise<InsertResult> {
+  async insertTeamMember(team: number, teamMember: TeamMember): Promise<boolean> {
     if (await this.findTeamMember(team, teamMember.user)) throw new BadRequestException('이미 존재하는 회원입니다.');
 
-    return this.teamMemberRepository
+    const result: InsertResult = await this.teamMemberRepository
       .createQueryBuilder()
       .insert()
       .into('team_member')
       .values({ user: teamMember.user, team, role: teamMember.role })
       .execute();
+
+    return Boolean(result.raw.affectedRows);
   }
 
   // 팀 멤버 찾기
@@ -100,26 +102,29 @@ export class TeamService {
   }
 
   // 팀 수정 : 팀명, 팀 설명 변경
-  async updateTeam({ teamId, name, description }: Team): Promise<UpdateResult> {
-    return this.teamRepository
+  async updateTeam({ teamId, name, description }: Team): Promise<boolean> {
+    const result: UpdateResult = await this.teamRepository
       .createQueryBuilder()
       .update('team')
       .set({ name, description })
       .where('team.team_id = :teamId', { teamId })
       .execute();
+    return Boolean(result.raw.affectedRows);
   }
 
   // 팀 멤버 수정 : 권한 수정
-  async updateTeamMember(teamId: number, teamMember: TeamMember): Promise<UpdateResult> {
+  async updateTeamMember(teamId: number, teamMember: TeamMember): Promise<boolean> {
     console.log(teamId);
     console.log(teamMember.user, teamMember.role);
-    return this.teamMemberRepository
+    const result = await this.teamMemberRepository
       .createQueryBuilder()
       .update('team_member')
       .where('team_member.team_id = :teamId', { teamId })
       .andWhere('team_member.user_id = :user', { user: teamMember.user })
       .set({ role: teamMember.role })
       .execute();
+
+    return Boolean(result.raw.affectedRows);
   }
 
   // 팀 삭제 : 팀 멤버 전체 삭제 > 팀 삭제
@@ -143,24 +148,27 @@ export class TeamService {
   }
 
   // 팀 멤버 일부 삭제
-  async deleteTeamMember(teamId: number, userId: string): Promise<DeleteResult> {
-    return this.teamMemberRepository
+  async deleteTeamMember(teamId: number, userId: string): Promise<boolean> {
+    const result: DeleteResult = await this.teamMemberRepository
       .createQueryBuilder()
       .delete()
       .from('team_member')
       .where('team_member.team_id = :teamId', { teamId })
       .andWhere('team_member.user_id = :userId', { userId })
       .execute();
+
+    return Boolean(result.raw.affectedRows);
   }
 
   // 팀 멤버 전체 삭제
-  async deleteEveryTeamMember({ team }: TeamMember): Promise<DeleteResult> {
-    return this.teamMemberRepository
+  async deleteEveryTeamMember({ team }: TeamMember): Promise<boolean> {
+    const result: DeleteResult = await this.teamMemberRepository
       .createQueryBuilder()
       .delete()
       .from('team_member')
       .where('team_member.team_id = :team', { team })
       .execute();
+    return Boolean(result.raw.affectedRows);
   }
 
   // 팀 ID를 통한 팀 찾기
