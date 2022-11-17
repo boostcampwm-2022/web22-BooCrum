@@ -65,17 +65,33 @@ export class TeamController {
   }
 
   // Team 정보 수정
-  @Patch('/')
+  @Patch('/:teamId')
   @UseGuards(AuthorizationGuard)
-  async updateTeam(@Body() team: Team): Promise<any> {
+  async updateTeam(
+    @Session() session: Record<string, any>,
+    @Param('teamId') teamId: number,
+    @Body() team: Team,
+  ): Promise<any> {
+    const user = await this.teamService.findTeamMember(teamId, session.user.userId);
+    if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
+    if (user.role < 1) new BadRequestException(`해당 권한이 없습니다.`);
+    team.teamId = teamId;
     return await this.teamService.updateTeam(team);
   }
 
   // Team Member 정보 수정
-  @Patch('/member')
+  @Patch('/:teamId/member')
   @UseGuards(AuthorizationGuard)
-  async updateTeamMember(@Body() teamMember: TeamMember): Promise<any> {
-    return await this.teamService.updateTeamMember(teamMember);
+  async updateTeamMember(
+    @Session() session: Record<string, any>,
+    @Param('teamId') teamId: number,
+    @Body() teamMember: TeamMember,
+  ): Promise<any> {
+    const user = await this.teamService.findTeamMember(teamId, session.user.userId);
+    if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
+    if (user.role < 2) new BadRequestException(`해당 권한이 없습니다.`);
+    teamMember.team = await this.teamService.findTeam(teamId);
+    return await this.teamService.updateTeamMember(teamId, teamMember);
   }
 
   // Team Member 삭제

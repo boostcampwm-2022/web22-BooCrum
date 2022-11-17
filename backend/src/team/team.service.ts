@@ -110,13 +110,15 @@ export class TeamService {
   }
 
   // 팀 멤버 수정 : 권한 수정
-  async updateTeamMember({ team, user, role }: TeamMember): Promise<UpdateResult> {
+  async updateTeamMember(teamId: number, teamMember: TeamMember): Promise<UpdateResult> {
+    console.log(teamId);
+    console.log(teamMember.user, teamMember.role);
     return this.teamMemberRepository
       .createQueryBuilder()
       .update('team_member')
-      .where('team_member.team_id = :team', { team })
-      .andWhere('team_member.user_id = :user', { user })
-      .set({ role })
+      .where('team_member.team_id = :teamId', { teamId })
+      .andWhere('team_member.user_id = :user', { user: teamMember.user })
+      .set({ role: teamMember.role })
       .execute();
   }
 
