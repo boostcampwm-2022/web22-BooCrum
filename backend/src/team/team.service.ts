@@ -1,14 +1,6 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import {
-  DataSource,
-  DeleteResult,
-  FindOneOptions,
-  getConnection,
-  InsertResult,
-  Repository,
-  UpdateResult,
-} from 'typeorm';
+import { DataSource, DeleteResult, InsertResult, Repository, UpdateResult } from 'typeorm';
 import { Team } from './entity/team.entity';
 import { TeamMember } from './entity/team-member.entity';
 import { IsTeam } from './enum/is-team.enum';
@@ -48,18 +40,18 @@ export class TeamService {
 
   // 팀 멤버 추가
   async insertTeamMember(team: number, teamMember: TeamMember): Promise<InsertResult> {
-    if (await this.findTeamMember(team, teamMember.user.userId))
-      throw new BadRequestException('이미 존재하는 회원입니다.');
+    if (await this.findTeamMember(team, teamMember.user)) throw new BadRequestException('이미 존재하는 회원입니다.');
+
     return this.teamMemberRepository
       .createQueryBuilder()
       .insert()
       .into('team_member')
-      .values({ user: teamMember.user.userId, team, role: teamMember.role })
+      .values({ user: teamMember.user, team, role: teamMember.role })
       .execute();
   }
 
   // 팀 멤버 찾기
-  async findTeamMember(team: number, user: string): Promise<TeamMember | undefined> {
+  async findTeamMember(team: number, user: string | User): Promise<TeamMember | undefined> {
     return await this.teamMemberRepository
       .createQueryBuilder('teamMember')
       .where('teamMember.team_id = :team', { team })
@@ -167,5 +159,10 @@ export class TeamService {
       .from('team_member')
       .where('team_member.team_id = :team', { team })
       .execute();
+  }
+
+  // 팀 ID를 통한 팀 찾기
+  async findTeam(teamId: number): Promise<Team> {
+    return await this.teamRepository.createQueryBuilder('team').where('team.team_id = :teamId', { teamId }).getOne();
   }
 }
