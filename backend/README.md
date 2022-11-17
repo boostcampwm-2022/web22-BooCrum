@@ -14,6 +14,7 @@ GITHUB_CLIENT_SECRET=
 NODE_ENV=develop|production
 
 REDIRECT_AFTER_LOGIN=
+REDIRECT_FAIL_LOGIN=
 ```
 
 ## Description
