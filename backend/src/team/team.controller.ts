@@ -111,7 +111,10 @@ export class TeamController {
   // Team 삭제
   @Delete('/:teamId')
   @UseGuards(AuthorizationGuard)
-  async delteTeam(@Param('teamId') teamId: number) {
+  async delteTeam(@Session() session: Record<string, any>, @Param('teamId') teamId: number) {
+    const user = await this.teamService.findTeamMember(teamId, session.user.userId);
+    if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
+    if (user.role < 2) new BadRequestException(`해당 권한이 없습니다.`);
     return await this.teamService.deleteTeam(teamId);
   }
 }
