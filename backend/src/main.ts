@@ -5,6 +5,7 @@ import * as MySQLStore from 'express-mysql-session';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
+  app.setGlobalPrefix('api');
 
   // 세션 초기화
   const MySqlStorage = MySQLStore(session);

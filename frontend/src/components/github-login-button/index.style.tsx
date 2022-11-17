@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const ButtonContainer = styled.a`
+export const ButtonContainer = styled.button`
 	width: 312px;
 	background-color: #333;
 	border-radius: 20px;

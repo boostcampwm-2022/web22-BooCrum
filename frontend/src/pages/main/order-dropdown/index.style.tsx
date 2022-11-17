@@ -2,6 +2,7 @@ import styled from 'styled-components';
 
 export const Dropdown = styled.div`
 	position: relative;
+	z-index: 5;
 
 	.dropdown-button {
 		width: 148px;
