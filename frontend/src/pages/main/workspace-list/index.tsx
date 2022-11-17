@@ -27,7 +27,7 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 		setWorkspaceList();
 	}, []);
 	useEffect(() => {
-		const sortedWorkspace = sortWorkspace(workspaces);
+		const sortedWorkspace = sortWorkspace(workspaces.slice(0));
 
 		setWorkspaces(sortedWorkspace);
 	}, [orderType]);
@@ -44,6 +44,8 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 			else return a.workspace.name < b.workspace.name ? -1 : 1;
 		});
 	}
+
+	console.log(workspaces);
 
 	return (
 		<>
