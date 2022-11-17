@@ -2,8 +2,9 @@ import ContextMenu from '@components/context-menu';
 import useContextMenu from '@hooks/useContextMenu';
 import WorkspaceMenu from '../workspace-menu';
 import { CardLayout } from './index.style';
+import { WorkspaceCardProps } from './index.type';
 
-function WorkspaceCard({ title, timestamp, imgSrc }: Omit<WorkspaceCardType, 'id'>) {
+function WorkspaceCard({ title, timestamp, imgSrc }: WorkspaceCardProps) {
 	const { isOpen, menuRef, toggleOpen, menuPosition } = useContextMenu();
 	const openContextMenu: React.MouseEventHandler<HTMLDivElement> = (e) => {
 		e.preventDefault();
