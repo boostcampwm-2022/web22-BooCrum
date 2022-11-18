@@ -45,8 +45,6 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 		});
 	}
 
-	console.log(workspaces);
-
 	return (
 		<>
 			<TitleContainer>
