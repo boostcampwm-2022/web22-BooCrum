@@ -1,16 +1,21 @@
+import { useState } from 'react';
 import { RenameModalLayout } from './index.style';
 import { RenameModalProps } from './index.types';
 
-function RenameModal({ toggle, workspaceName }: RenameModalProps) {
-	const modifyWorkspaceName = () => {
-		toggle();
+function RenameModal({ action, workspaceName }: RenameModalProps) {
+	const [newWorkspaceName, setNewWorkspaceName] = useState(workspaceName);
+	const handleClickBtn = () => {
+		action(newWorkspaceName);
+	};
+	const onChange: React.ChangeEventHandler<HTMLInputElement> = (e) => {
+		setNewWorkspaceName(e.target.value);
 	};
 	return (
 		<>
 			<RenameModalLayout>
 				<h3>Rename</h3>
-				<input type="text" placeholder="File Name..." defaultValue={workspaceName}></input>
-				<button onClick={modifyWorkspaceName}>RENAME</button>
+				<input onChange={onChange} type="text" placeholder="File Name..." value={newWorkspaceName}></input>
+				<button onClick={handleClickBtn}>RENAME</button>
 			</RenameModalLayout>
 		</>
 	);

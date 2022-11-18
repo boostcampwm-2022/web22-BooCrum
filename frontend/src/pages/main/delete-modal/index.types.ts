@@ -1,3 +1,3 @@
 export interface DeleteModalProps {
-	toggle: () => void;
+	action: () => void;
 }

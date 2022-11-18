@@ -55,6 +55,7 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 				{workspaces.map((item) => (
 					<WorkspaceCard
 						key={item.workspace.workspaceId}
+						workspaceId={item.workspace.workspaceId}
 						role={item.role}
 						title={item.workspace.name}
 						timestamp={setTimestamp(item.workspace.updateDate)}

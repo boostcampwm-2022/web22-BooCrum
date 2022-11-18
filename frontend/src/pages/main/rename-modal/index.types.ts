@@ -1,4 +1,4 @@
 export interface RenameModalProps {
-	toggle: () => void;
+	action: (workspaceName: string) => void;
 	workspaceName: string;
 }

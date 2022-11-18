@@ -1,17 +1,16 @@
 import { DeleteModalLayout } from './index.style';
 import { DeleteModalProps } from './index.types';
 
-function DeleteModal({ toggle }: DeleteModalProps) {
-	const deleteWorkspace = () => {
-		toggle();
+function DeleteModal({ action }: DeleteModalProps) {
+	const handleClickBtn = () => {
+		action();
 	};
-
 	return (
 		<>
 			<DeleteModalLayout>
 				<h3>Delete</h3>
 				<div>정말 삭제하시겠습니까?</div>
-				<button onClick={deleteWorkspace}>DELETE</button>
+				<button onClick={handleClickBtn}>DELETE</button>
 			</DeleteModalLayout>
 		</>
 	);
