@@ -1,28 +1,34 @@
-import { useState, useEffect } from 'react';
-import { authState } from '../context/auth';
+import { useState } from 'react';
+import { authState } from '@context/auth';
 import { useRecoilState } from 'recoil';
 import axios from 'axios';
-
-function fakeAuth(): Promise<boolean> {
-	return new Promise((resolve, reject) => {
-		setInterval(() => {
-			resolve(true);
-		}, 1000);
-	});
-}
 
 function useAuth() {
 	const [isLoading, setIsLoading] = useState(true);
 	const [isAuth, setIsAuth] = useRecoilState(authState);
 
+	const authorizate = () => {
+		setIsAuth(true);
+		localStorage.setItem('auth', JSON.stringify(true));
+	};
+
+	const deprivate = () => {
+		setIsAuth(false);
+		localStorage.setItem('auth', JSON.stringify(false));
+	};
+
 	async function authenticate() {
 		try {
-			const result = await fakeAuth();
-			setIsAuth(result);
-			localStorage.setItem('auth', JSON.stringify(result));
+			await axios.get('/api/auth/status');
+			authorizate();
 			setIsLoading(false);
 		} catch (error) {
-			console.log(error);
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					deprivate();
+				}
+			}
+			setIsLoading(false);
 		}
 	}
 
@@ -31,17 +37,30 @@ function useAuth() {
 			const result = await axios.get('/api/auth/oauth/github', {
 				withCredentials: true,
 			});
-
-			if (result.status !== 200) {
-				//로그인 실패 모달
-				return false;
-			}
 			// github auth 페이지로 리다이렉트
 			window.location.href = result.data.url;
 			return true;
 		} catch (error) {
-			console.log(error);
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 400) {
+					authorizate();
+					return true;
+				}
+			}
 			return false;
+		}
+	}
+
+	async function logout() {
+		try {
+			await axios.put('/api/auth/logout');
+			deprivate();
+		} catch (error) {
+			if (axios.isAxiosError(error)) {
+				if (error.response?.status === 401) {
+					deprivate();
+				}
+			}
 		}
 	}
 
@@ -50,6 +69,7 @@ function useAuth() {
 		isAuth,
 		authenticate,
 		login,
+		logout,
 	};
 }
 
