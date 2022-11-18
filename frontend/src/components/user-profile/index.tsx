@@ -4,7 +4,7 @@ import userProfileIcon from '@assets/icon/user-profile.svg';
 import logoutIcon from '@assets/icon/logout.svg';
 import useContextMenu from '@hooks/useContextMenu';
 import useAuth from '@hooks/useAuth';
-import { fetchMockUser } from '@api/user';
+import { User } from '@api/user';
 
 function UserProfile() {
 	const [nickName, setNickName] = useState<string>('');
@@ -14,7 +14,7 @@ function UserProfile() {
 
 	useEffect(() => {
 		async function setUserData() {
-			const { nickname } = await fetchMockUser();
+			const { nickname } = await User.getProfile();
 			setNickName(nickname);
 		}
 		setUserData();
