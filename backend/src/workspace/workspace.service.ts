@@ -19,17 +19,16 @@ export class WorkspaceService {
     private dataSource: DataSource,
   ) {}
 
-  async getAuthorityOfUser(
-    workspaceId: string,
-    userId: string,
-  ): Promise<number> {
+  async getAuthorityOfUser(workspaceId: string, userId: string): Promise<number> {
     return (
-      await this.workspaceMemberRepository
-        .createQueryBuilder()
-        .where('user_id = :uid', { uid: userId })
-        .andWhere('workspace_id = :wid', { wid: workspaceId })
-        .getOne()
-    ).role;
+      (
+        await this.workspaceMemberRepository
+          .createQueryBuilder()
+          .where('user_id = :uid', { uid: userId })
+          .andWhere('workspace_id = :wid', { wid: workspaceId })
+          .getOne()
+      )?.role ?? 0
+    );
   }
 
   /**
@@ -37,12 +36,7 @@ export class WorkspaceService {
    * @param param0 워크스페이스를 생성하는데 필요한 정보들입니다. (신규 워크스페이스를 소유할 팀/유저 ID와 워크스페이스 이름, 설명)
    * @returns 생성한 워크스페이스의 정보를 반환합니다.
    */
-  async createWorkspace({
-    teamId,
-    ownerId: userId,
-    name,
-    description,
-  }: WorkspaceCreateRequestDto): Promise<Workspace> {
+  async createWorkspace({ teamId, ownerId: userId, name, description }: WorkspaceCreateRequestDto): Promise<Workspace> {
     const newWorkspace = new Workspace();
     const workspaceMember = new WorkspaceMember();
 
@@ -57,8 +51,6 @@ export class WorkspaceService {
         where: { userId },
       });
       if (!teamFind || !userFind) {
-        await queryRunner.rollbackTransaction();
-        await queryRunner.release();
         throw new BadRequestException('잘못된 사용자 ID 혹은 팀 ID 입니다.');
       }
 
@@ -96,6 +88,7 @@ export class WorkspaceService {
       .createQueryBuilder('ws')
       .where('ws.workspace_id = :id', { id: workspaceId })
       .leftJoinAndSelect('ws.workspaceMember', 'wm')
+      .leftJoinAndSelect('ws.team', 'team')
       .leftJoinAndSelect('wm.user', 'user')
       .select()
       .getOne();
@@ -106,9 +99,7 @@ export class WorkspaceService {
    * @param workspaceId 특정 워크스페이스에 대한 ID 값입니다.
    * @returns 특정 워크스페이스에 참여한 유저들의 명단입니다.
    */
-  async getWorkspaceParticipantList(
-    workspaceId: string,
-  ): Promise<WorkspaceMember[]> {
+  async getWorkspaceParticipantList(workspaceId: string): Promise<WorkspaceMember[]> {
     return await this.workspaceMemberRepository
       .createQueryBuilder('wm')
       .where('wm.workspace_id = :id', { id: workspaceId })
@@ -171,14 +162,11 @@ export class WorkspaceService {
    * @param role 유저가 해당 워크스페이스에 갖게될 권한입니다.
    * @returns 추가 결과를 반환합니다.
    */
-  async addUserIntoWorkspace(
-    userId: string,
-    workspaceId: string,
-    role = 0,
-  ): Promise<WorkspaceMember> {
+  async addUserIntoWorkspace(userId: string, workspaceId: string, role = 0): Promise<WorkspaceMember> {
     const userFind = await this.workspaceMemberRepository
       .createQueryBuilder('wm')
       .where('wm.user_id = :id', { id: userId })
+      .andWhere('wm.workspace_id = :id', { id: workspaceId })
       .getOne();
     if (userFind) throw new BadRequestException('이미 존재하는 사용자입니다.');
 
@@ -196,9 +184,7 @@ export class WorkspaceService {
         where: { workspaceId },
       });
       if (!newMember.user || !newMember.workspace)
-        throw new BadRequestException(
-          '잘못된 사용자 Id 혹은 워크스페이스 Id입니다.',
-        );
+        throw new BadRequestException('잘못된 사용자 Id 혹은 워크스페이스 Id입니다.');
       newMember = await queryRunner.manager.save(newMember);
 
       await queryRunner.commitTransaction();
@@ -262,15 +248,11 @@ export class WorkspaceService {
    * @param newMetaData 변경할 메타데이터 객체입니다.
    * @returns 변경 가능한 것이 존재할 경우 true를 반환합니다.
    */
-  async updateWorkspaceMetadata(
-    workspaceId: string,
-    newMetaData: WorkspaceMetadataDto,
-  ): Promise<boolean> {
+  async updateWorkspaceMetadata(workspaceId: string, newMetaData: WorkspaceMetadataDto): Promise<boolean> {
     const workspaceFind = this.workspaceRepository.findOne({
       where: { workspaceId },
     });
-    if (!workspaceFind)
-      throw new BadRequestException('잘못된 워크스페이스 ID입니다.');
+    if (!workspaceFind) throw new BadRequestException('잘못된 워크스페이스 ID입니다.');
     return (
       (
         await this.workspaceRepository.update(
@@ -289,11 +271,7 @@ export class WorkspaceService {
    * @param userId 권한 조정 대상인 사용자 ID 입니다.
    * @param newRole 새로운 Role을 지정합니다.
    */
-  async updateUesrAuthority(
-    workspaceId: string,
-    userId: string,
-    newRole: number,
-  ): Promise<boolean> {
+  async updateUesrAuthority(workspaceId: string, userId: string, newRole: number): Promise<boolean> {
     return (
       (
         await this.workspaceMemberRepository

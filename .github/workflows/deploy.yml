@@ -1,0 +1,25 @@
+name: Try Deploy
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+
+jobs:
+  try-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: deploy
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            export GIT_PROJECT_PATH=https://github.com/boostcampwm-2022/web22-BooCrum.git
+            export PROJECT_DIR_NAME=BooCrum
+            export BRANCH_NAME=dev
+            export FRONTEND_WORKING_DIR=frontend
+            export BACKEND_WORKING_DIR=backend
+            sh ~/scripts/deploy.sh

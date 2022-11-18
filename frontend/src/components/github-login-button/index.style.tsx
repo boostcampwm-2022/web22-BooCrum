@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const ButtonContainer = styled.button`
+export const ButtonContainer = styled.a`
 	width: 312px;
 	background-color: #333;
 	border-radius: 20px;
@@ -12,6 +12,7 @@ export const ButtonContainer = styled.button`
 	color: white;
 	height: 72px;
 	text-align: left;
+	text-decoration: none;
 
 	&:hover {
 		text-decoration: none;

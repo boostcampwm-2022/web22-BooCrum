@@ -28,7 +28,8 @@
       "@hooks/*": ["./hooks/*"],
       "@types/*": ["./types/*"],
       "@utils/*": ["./utils/*"],
-      "@pages/*": ["./pages/*"]
+      "@pages/*": ["./pages/*"],
+      "@api/*": ["./api/*"]
     }
   },
   "include": [

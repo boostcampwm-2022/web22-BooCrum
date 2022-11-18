@@ -1,17 +1,12 @@
 import { useEffect, useState } from 'react';
 import { useRecoilValue } from 'recoil';
-import axios from 'axios';
 import { workspaceOrderState } from '@context/main-workspace';
 import WorkspaceCard from '@pages/main/workspace-card';
-import { Title, TitleContainer, WorkspaceListContainer } from './index.style';
 import OrderDropdown from '@pages/main/order-dropdown';
+import { Title, TitleContainer, WorkspaceListContainer } from './index.style';
 import { compareStringByMillisecond, setTimestamp } from 'utils';
 import { WorkspaceCardType } from './index.type';
-
-async function fetchWorkspaceList(): Promise<WorkspaceCardType[]> {
-	const result = await axios.get('https://7f09d24e-a8d4-4e68-a7c5-ec8c6da7ef40.mock.pstmn.io/user/info/workspace');
-	return result.data;
-}
+import { fetchWorkspaceList } from '@api/user';
 
 function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }) {
 	const orderType = useRecoilValue(workspaceOrderState);
@@ -27,7 +22,7 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 		setWorkspaceList();
 	}, []);
 	useEffect(() => {
-		const sortedWorkspace = sortWorkspace(workspaces);
+		const sortedWorkspace = sortWorkspace(workspaces.slice(0));
 
 		setWorkspaces(sortedWorkspace);
 	}, [orderType]);

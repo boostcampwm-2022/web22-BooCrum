@@ -13,7 +13,7 @@ function useModal() {
 	}, [isOpenModal]);
 
 	const toggleOpenModal = () => {
-		setIsOpenModal((isOpen) => !isOpen);
+		setIsOpenModal((prevIsOpenModal) => !prevIsOpenModal);
 	};
 
 	const openModal = () => {

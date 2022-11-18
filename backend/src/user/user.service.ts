@@ -125,7 +125,7 @@ export class UserService {
   // 가져오는 정보는 "사용자 정보 + 소속 팀 및 권한 + 워크스페이스 및 권한" 입니다.
   async getUserData(userId: string): Promise<User> {
     // Join이 Row마다 이루어지는 것이 아니라, 그냥 배열에 Raw Object가 중첩되어 제공된다.
-    return await this.userRepository
+    const userData = await this.userRepository
       .createQueryBuilder('user')
       .where({ userId: userId })
       .leftJoinAndSelect('user.teamMember', 'teamMember')
@@ -151,10 +151,14 @@ export class UserService {
         'workspace.updateDate',
       ])
       .getOne();
+    if (!userData) throw new BadRequestException('유효하지 않은 사용자 ID입니다.');
+    return userData;
   }
 
   async getUserProfileData(userId: string): Promise<User> {
-    return await this.userRepository.findOne({ where: { userId } });
+    const userData = await this.userRepository.findOne({ where: { userId } });
+    if (!userData) throw new BadRequestException('유효하지 않은 사용자 ID입니다.');
+    return userData;
   }
 
   async getUserTeamData(userId: string): Promise<TeamMember[]> {
@@ -175,6 +179,7 @@ export class UserService {
         'team.registerDate',
       ])
       .getOne();
+    if (!userData) throw new BadRequestException('유효하지 않은 사용자 ID입니다.');
     return userData.teamMember;
   }
 
@@ -197,6 +202,7 @@ export class UserService {
         'workspace.updateDate',
       ])
       .getOne();
+    if (!userData) throw new BadRequestException('유효하지 않은 사용자 ID입니다.');
     return userData.workspaceMember;
   }
 }

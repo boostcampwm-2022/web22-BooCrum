@@ -1,10 +1,4 @@
-import {
-  CanActivate,
-  ExecutionContext,
-  Injectable,
-  UnauthorizedException,
-  BadRequestException,
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { Observable } from 'rxjs';
 
 /**
@@ -13,9 +7,7 @@ import { Observable } from 'rxjs';
  */
 @Injectable()
 export class AuthorizationGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest();
     return this.validateRequest(req);
   }
@@ -34,16 +26,17 @@ export class AuthorizationGuard implements CanActivate {
  */
 @Injectable()
 export class UnAuthorizationGuard implements CanActivate {
-  canActivate(
-    context: ExecutionContext,
-  ): boolean | Promise<boolean> | Observable<boolean> {
+  canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
     const req = context.switchToHttp().getRequest();
-    return this.validateRequest(req);
+    const res = context.switchToHttp().getResponse();
+    return this.validateRequest(req, res);
   }
 
-  private validateRequest(req: any) {
+  private validateRequest(req: any, res: any) {
     const session: Record<string, any> = req.session;
-    if (session.user) throw new BadRequestException('이미 로그인 중입니다.');
+    if (session.user) {
+      return res.redirect('/');
+    }
     return true;
   }
 }
