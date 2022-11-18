@@ -1,19 +1,9 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import {
-  Controller,
-  UseGuards,
-  Get,
-  Put,
-  Req,
-  Res,
-  Session,
-} from '@nestjs/common';
+import { Controller, UseGuards, UseFilters, Get, Put, Req, Res, Session, UnauthorizedException } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { UnAuthRedirectionFilter } from './filter/unauth-redirect.filter';
 import { GithubOAuthGuard } from './guard/github.guard';
-import {
-  AuthorizationGuard,
-  UnAuthorizationGuard,
-} from './guard/session.guard';
+import { AuthorizationGuard, UnAuthorizationGuard } from './guard/session.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -21,17 +11,15 @@ export class AuthController {
 
   @UseGuards(GithubOAuthGuard)
   @UseGuards(UnAuthorizationGuard)
+  @UseFilters(UnAuthRedirectionFilter)
   @Get('/oauth/github')
   startGithubOAuthProcess() {}
 
   @UseGuards(GithubOAuthGuard)
   @UseGuards(UnAuthorizationGuard)
+  @UseFilters(UnAuthRedirectionFilter)
   @Get('/oauth/github_callback')
-  handleGithubData(
-    @Req() req: Request,
-    @Session() session: Record<string, any>,
-    @Res() res: Response,
-  ): void {
+  handleGithubData(@Req() req: Request, @Session() session: Record<string, any>, @Res() res: Response): void {
     session.user = req.user;
     res.redirect(process.env.REDIRECT_AFTER_LOGIN);
   }
@@ -40,5 +28,11 @@ export class AuthController {
   @Put('/logout')
   destroySession(@Req() req: Request): void {
     req.session.destroy(() => {});
+  }
+
+  @Get('/status')
+  checkLoginStatus(@Session() session: Record<string, any>, @Res() res: Response): void {
+    if (!session.user) throw new UnauthorizedException();
+    res.sendStatus(200);
   }
 }
