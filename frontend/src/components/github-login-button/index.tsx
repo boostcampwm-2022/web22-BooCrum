@@ -5,19 +5,11 @@ import useModal from '@hooks/useModal';
 import ErrorModal from '@components/error-modal';
 
 function GithubLoginButton() {
-	const { login } = useAuth();
-	const { isOpenModal, modalRef, openModal } = useModal();
-
-	async function handleOnClick() {
-		const result = await login();
-		if (result === false) {
-			openModal();
-		}
-	}
+	const { isOpenModal, modalRef } = useModal();
 
 	return (
 		<>
-			<ButtonContainer onClick={handleOnClick}>
+			<ButtonContainer href="/api/auth/oauth/github">
 				<img className="icon" src={githubIcon} />
 				<div className="text">Github로 로그인하기</div>
 			</ButtonContainer>
