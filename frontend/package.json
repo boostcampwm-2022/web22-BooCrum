@@ -58,5 +58,6 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.31.10",
     "prettier": "^2.7.1"
-  }
+  },
+  "proxy": "http://bc7m-j045.xyz"
 }
