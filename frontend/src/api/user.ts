@@ -30,9 +30,9 @@ export const User = {
 	patchProfile: (body: PatchProfileBody): Promise<ProfileData> =>
 		userRequests.patch<ProfileData, PatchProfileBody>('/info', body),
 	deleteUser: (): Promise<number> => userRequests.delete(''),
-	getAllById: (userId: string): Promise<UserData> => userRequests.get<UserData>(`${userId}/info`),
-	getProfileById: (userId: string): Promise<ProfileData> => userRequests.get<ProfileData>(`${userId}/info/profile`),
-	getTeamById: (userId: string): Promise<TeamData[]> => userRequests.get<TeamData[]>(`${userId}/info/team`),
+	getAllById: (userId: string): Promise<UserData> => userRequests.get<UserData>(`/${userId}/info`),
+	getProfileById: (userId: string): Promise<ProfileData> => userRequests.get<ProfileData>(`/${userId}/info/profile`),
+	getTeamById: (userId: string): Promise<TeamData[]> => userRequests.get<TeamData[]>(`/${userId}/info/team`),
 	getWorkspaceById: (userId: string): Promise<WorkspaceData[]> =>
-		userRequests.get<WorkspaceData[]>(`${userId}/info/workspace`),
+		userRequests.get<WorkspaceData[]>(`/${userId}/info/workspace`),
 };
