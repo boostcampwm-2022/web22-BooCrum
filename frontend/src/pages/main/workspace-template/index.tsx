@@ -1,12 +1,14 @@
 import { useNavigate } from 'react-router-dom';
 import plusWorkspace from '@assets/icon/plus-workspace.svg';
 import { Template } from './index.style';
+import { Workspace } from '@api/workspace';
 
 function WorkspaceTemplate({ template }: { template: TemplateType }) {
 	const navigate = useNavigate();
 
-	const handleWorkspaceRouting = () => {
-		navigate('/workspace', { state: { id: template.id, user: 1 } });
+	const handleWorkspaceRouting = async () => {
+		const workspace = await Workspace.postWorkspace({ teamId: 0, name: '', description: '' });
+		navigate('/workspace', { state: workspace });
 	};
 
 	return (
