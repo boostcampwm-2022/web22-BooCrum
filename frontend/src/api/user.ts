@@ -1,11 +1,5 @@
-import { WorkspaceCardType } from '@pages/main/workspace-list/index.type';
 import axios, { AxiosResponse } from 'axios';
 import { TeamData, ProfileData, WorkspaceData, UserData, PatchProfileBody } from './user.types';
-
-export async function fetchWorkspaceList(): Promise<WorkspaceCardType[]> {
-	const result = await axios.get('https://7f09d24e-a8d4-4e68-a7c5-ec8c6da7ef40.mock.pstmn.io/user/info/workspace');
-	return result.data;
-}
 
 const instance = axios.create({
 	baseURL: '/api/user',
