@@ -30,4 +30,23 @@ export class ObjectDatabaseService {
       await queryRunner.release();
     }
   }
+
+  async deleteObjectTable(workspaceId: string) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    try {
+      await queryRunner.connect();
+      await queryRunner.dropTable(
+        new Table({
+          database: OBJECT_DATABASE_NAME,
+          name: workspaceId,
+        }),
+        true,
+      );
+    } catch (error) {
+      console.log(error);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
 }
