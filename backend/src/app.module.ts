@@ -7,6 +7,7 @@ import { TeamModule } from './team/team.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { AuthModule } from './auth/auth.module';
 import { join } from 'path';
+import { ObjectDatabaseModule } from './object-database/object-database.module';
 
 @Module({
   imports: [
@@ -27,6 +28,7 @@ import { join } from 'path';
     TeamModule,
     WorkspaceModule,
     AuthModule,
+    ObjectDatabaseModule,
   ],
   controllers: [],
   providers: [],
