@@ -137,18 +137,9 @@ export class UserService {
         'user.nickname',
         'user.registerDate',
         'teamMember.role',
-        'team.teamId',
-        'team.name',
-        'team.description',
-        'team.isTeam',
-        'team.registerDate',
+        'team',
         'workspaceMember.role',
-        'workspace.workspaceId',
-        'workspace.team',
-        'workspace.description',
-        'workspace.name',
-        'workspace.registerDate',
-        'workspace.updateDate',
+        'workspace',
       ])
       .getOne();
     if (!userData) throw new BadRequestException('유효하지 않은 사용자 ID입니다.');
@@ -167,17 +158,7 @@ export class UserService {
       .where({ userId: userId })
       .leftJoinAndSelect('user.teamMember', 'teamMember')
       .leftJoinAndSelect('teamMember.team', 'team')
-      .select([
-        'user.userId',
-        'user.nickname',
-        'user.registerDate',
-        'teamMember.role',
-        'team.teamId',
-        'team.name',
-        'team.description',
-        'team.isTeam',
-        'team.registerDate',
-      ])
+      .select(['user.userId', 'user.nickname', 'user.registerDate', 'teamMember.role', 'team'])
       .getOne();
     if (!userData) throw new BadRequestException('유효하지 않은 사용자 ID입니다.');
     return userData.teamMember;
@@ -189,18 +170,7 @@ export class UserService {
       .where({ userId: userId })
       .leftJoinAndSelect('user.workspaceMember', 'workspaceMember')
       .leftJoinAndSelect('workspaceMember.workspace', 'workspace')
-      .select([
-        'user.userId',
-        'user.nickname',
-        'user.registerDate',
-        'workspaceMember.role',
-        'workspace.workspaceId',
-        'workspace.team',
-        'workspace.description',
-        'workspace.name',
-        'workspace.registerDate',
-        'workspace.updateDate',
-      ])
+      .select(['user', 'workspaceMember.role', 'workspace'])
       .getOne();
     if (!userData) throw new BadRequestException('유효하지 않은 사용자 ID입니다.');
     return userData.workspaceMember;

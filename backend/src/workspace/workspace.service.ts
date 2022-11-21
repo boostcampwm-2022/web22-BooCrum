@@ -59,7 +59,7 @@ export class WorkspaceService {
       workspaceMember.workspace = newWorkspace;
 
       newWorkspace.team = teamFind;
-      newWorkspace.name = name;
+      newWorkspace.name = name ?? 'untitled';
       newWorkspace.description = description ?? null;
       newWorkspace.team = teamFind;
 
