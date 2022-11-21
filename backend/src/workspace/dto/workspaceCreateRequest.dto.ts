@@ -8,6 +8,7 @@ export class WorkspaceCreateRequestDto {
   ownerId: string;
 
   @IsString()
+  @IsOptional()
   name: string;
 
   @IsString()
