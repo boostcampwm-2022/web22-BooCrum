@@ -19,6 +19,8 @@ import { join } from 'path';
       password: process.env.MYSQL_PASSWORD,
       database: process.env.MYSQL_DATABASE,
       entities: [join(__dirname, '/**/*.entity{.ts,.js}')],
+      migrations: ['migrations/**/*.ts'],
+      migrationsTableName: 'migrations',
       synchronize: process.env.NODE_ENV === 'develop',
     }),
     UserModule,
