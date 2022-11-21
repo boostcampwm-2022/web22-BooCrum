@@ -6,7 +6,7 @@ import OrderDropdown from '@pages/main/order-dropdown';
 import { Title, TitleContainer, WorkspaceListContainer } from './index.style';
 import { compareStringByMillisecond, setTimestamp } from 'utils';
 import { WorkspaceCardType } from './index.type';
-import { fetchWorkspaceList } from '@api/user';
+import { User } from '@api/user';
 
 function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }) {
 	const orderType = useRecoilValue(workspaceOrderState);
@@ -14,7 +14,7 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 
 	useEffect(() => {
 		async function setWorkspaceList() {
-			const result = await fetchWorkspaceList();
+			const result = await User.getWorkspace();
 			const sortedWorkspace = sortWorkspace(result);
 
 			setWorkspaces(sortedWorkspace);
