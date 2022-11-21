@@ -283,4 +283,22 @@ export class WorkspaceService {
       ).affected > 0
     );
   }
+
+  /**
+   * 워크스페이스에 대한 사용자의 권한을 반환합니다.
+   *
+   * 0: Viewer, 1: Editor, 2: Admin
+   * @param workspaceId   권한을 조회할 워크스페이스 ID입니다.
+   * @param userId        권한을 조회할 사용자 ID 입니다.
+   */
+  async getWorkspaceAuthority(workspaceId: string, userId: string) {
+    const member = await this.workspaceMemberRepository
+      .createQueryBuilder()
+      .select()
+      .where('workspace_id = :workspaceId', { workspaceId })
+      .andWhere('user_id = :userId', { userId })
+      .getOne();
+
+    return !member ? -1 : member.role;
+  }
 }
