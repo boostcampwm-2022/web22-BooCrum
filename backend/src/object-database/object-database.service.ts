@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { WorkspaceService } from 'src/workspace/workspace.service';
-import { DataSource, Table, QueryRunner } from 'typeorm';
+import { DataSource, Table } from 'typeorm';
 import { OBJECT_DATABASE_NAME, OBJECT_TABLE_COLUMN_LIST } from './constant/object-database.constant';
 
 @Injectable()
@@ -73,11 +73,13 @@ export class ObjectDatabaseService {
   async isObjectTableExist(workspaceId: string): Promise<boolean> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
-    return await queryRunner.hasTable(
+    const ret = await queryRunner.hasTable(
       new Table({
         database: OBJECT_DATABASE_NAME,
         name: workspaceId,
       }),
     );
+    await queryRunner.release();
+    return ret;
   }
 }
