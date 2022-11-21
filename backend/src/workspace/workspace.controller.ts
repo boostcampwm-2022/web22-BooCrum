@@ -35,6 +35,7 @@ export class WorkspaceController {
     @Session() session: Record<string, any>,
   ): Promise<Workspace> {
     body.ownerId = session.user.userId;
+    if (!body.teamId) body.teamId = session.user.userTeamId;
     return this.workspaceService.createWorkspace(body);
   }
 
@@ -92,7 +93,7 @@ export class WorkspaceController {
     if (!(await this.hasProperAuthority(workspaceId, userId, 2))) {
       throw new ForbiddenException('삭제하려는 워크스페이스에 대한 소유자 권한을 갖고 있지 않습니다.');
     }
-    this.workspaceService.deleteWorkspace(workspaceId);
+    await this.workspaceService.deleteWorkspace(workspaceId);
   }
 
   @UseGuards(AuthorizationGuard)
