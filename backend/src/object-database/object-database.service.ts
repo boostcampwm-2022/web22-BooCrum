@@ -1,12 +1,12 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
-import { WorkspaceService } from 'src/workspace/workspace.service';
-import { DataSource, Table } from 'typeorm';
+import { DataSource, Table, QueryRunner } from 'typeorm';
 import { OBJECT_DATABASE_NAME, OBJECT_TABLE_COLUMN_LIST } from './constant/object-database.constant';
 import { RowDataPacket } from 'mysql2';
+import { Workspace } from 'src/workspace/entity/workspace.entity';
 
 @Injectable()
 export class ObjectDatabaseService {
-  constructor(private dataSource: DataSource, private workspaceService: WorkspaceService) {}
+  constructor(private dataSource: DataSource) {}
 
   /**
    * Object Table을 생성합니다.
@@ -14,13 +14,14 @@ export class ObjectDatabaseService {
    * 이미 Object Table을 갖고 있을 경우 무시됩니다.
    * @param workspaceId 생성할 Object Table와 연결될 Workspace ID
    */
-  async createObjectTable(workspaceId: string): Promise<void> {
-    const workspace = this.workspaceService.getWorkspaceMetadata(workspaceId);
-    if (!workspace) throw new BadRequestException('잘못된 워크스페이스 ID 입니다.');
+  async createObjectTable(workspaceId: string, usedQueryRunner?: QueryRunner): Promise<void> {
+    const queryRunner = usedQueryRunner ? usedQueryRunner : this.dataSource.createQueryRunner();
+    if (!usedQueryRunner) await queryRunner.connect();
 
-    const queryRunner = this.dataSource.createQueryRunner();
+    const isWorkspaceExist = await queryRunner.manager.findOne(Workspace, { where: { workspaceId } });
+    if (!isWorkspaceExist) throw new BadRequestException('잘못된 워크스페이스 ID 입니다.');
+
     try {
-      await queryRunner.connect();
       await queryRunner.createDatabase(OBJECT_DATABASE_NAME, true);
       await queryRunner.createTable(
         new Table({
@@ -34,7 +35,7 @@ export class ObjectDatabaseService {
       console.log(error);
       throw error;
     } finally {
-      await queryRunner.release();
+      if (!usedQueryRunner) await queryRunner.release();
     }
   }
 

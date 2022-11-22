@@ -8,6 +8,7 @@ import { WorkspaceCreateRequestDto } from './dto/workspaceCreateRequest.dto';
 import { WorkspaceMetadataDto } from './dto/workspaceMetadata.dto';
 import { WorkspaceMember } from './entity/workspace-member.entity';
 import { Workspace } from './entity/workspace.entity';
+import { ObjectDatabaseService } from 'src/object-database/object-database.service';
 
 @Injectable()
 export class WorkspaceService {
@@ -17,6 +18,7 @@ export class WorkspaceService {
     @InjectRepository(WorkspaceMember)
     private workspaceMemberRepository: Repository<WorkspaceMember>,
     private dataSource: DataSource,
+    private objectDatabaseService: ObjectDatabaseService,
   ) {}
 
   async getAuthorityOfUser(workspaceId: string, userId: string): Promise<number> {
@@ -65,6 +67,8 @@ export class WorkspaceService {
 
       const ret = await queryRunner.manager.save(newWorkspace);
       await queryRunner.manager.save(workspaceMember);
+
+      await this.objectDatabaseService.createObjectTable(ret.workspaceId, queryRunner);
 
       await queryRunner.commitTransaction();
       await queryRunner.release();
