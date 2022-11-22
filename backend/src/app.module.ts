@@ -7,6 +7,8 @@ import { TeamModule } from './team/team.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { AuthModule } from './auth/auth.module';
 import { join } from 'path';
+import { AppGateway } from './app.gateway';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -28,9 +30,10 @@ import { join } from 'path';
     TeamModule,
     WorkspaceModule,
     AuthModule,
+    HttpModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [AppGateway],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

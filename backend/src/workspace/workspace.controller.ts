@@ -131,4 +131,9 @@ export class WorkspaceController {
     if (!res) throw new BadRequestException('갱신할 수 있는 사용자가 워크스페이스 참여자 중에 존재하지 않습니다.');
     return;
   }
+
+  @Get('/:workspaceId/role/:userId')
+  async getWorkspaceAuthority(@Param('workspaceId') workspaceId: string, @Param('userId') userId: string) {
+    return await this.workspaceService.getWorkspaceAuthority(workspaceId, userId);
+  }
 }
