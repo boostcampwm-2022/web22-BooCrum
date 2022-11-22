@@ -175,4 +175,15 @@ export class TeamService {
   async findTeam(teamId: number): Promise<Team> {
     return await this.teamRepository.createQueryBuilder('team').where('team.team_id = :teamId', { teamId }).getOne();
   }
+
+  // user 개인 팀을 userId로 찾기
+  async findUserTeam(userId: string): Promise<Team> {
+    const ret = await this.teamMemberRepository
+      .createQueryBuilder('team_member')
+      .innerJoinAndSelect('team_member.team', 'team')
+      .where('team_member.user_id = :userId', { userId })
+      .andWhere('team.is_team = :isTeam', { isTeam: 0 })
+      .getOne();
+    return ret.team;
+  }
 }
