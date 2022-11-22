@@ -8,13 +8,15 @@ import DeleteModal from '../delete-modal';
 import RenameModal from '../rename-modal';
 import axios from 'axios';
 
-function WorkspaceMenu({ workspaceId, role, workspaceName }: WorkspaceMenuProps) {
+function WorkspaceMenu({ workspaceId, role, workspaceName, setWorkspaceList }: WorkspaceMenuProps) {
 	const { isOpenModal, modalRef, toggleOpenModal } = useModal();
 	const [modalContent, setModalContent] = useState(<></>);
+
 	const openReanmeModal = () => {
 		const renameWorkspace = async (workspaceName: string) => {
 			toggleOpenModal();
 			await axios.patch(`/api/workspace/${workspaceId}/info/metadata`, { name: workspaceName });
+			setWorkspaceList();
 		};
 		toggleOpenModal();
 		setModalContent(<RenameModal action={renameWorkspace} workspaceName={workspaceName}></RenameModal>);
@@ -23,6 +25,7 @@ function WorkspaceMenu({ workspaceId, role, workspaceName }: WorkspaceMenuProps)
 		const deleteWorkspace = async () => {
 			toggleOpenModal();
 			await axios.delete(`/api/workspace/${workspaceId}`);
+			setWorkspaceList();
 		};
 		toggleOpenModal();
 		setModalContent(<DeleteModal action={deleteWorkspace}></DeleteModal>);
