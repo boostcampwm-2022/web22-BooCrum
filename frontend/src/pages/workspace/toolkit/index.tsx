@@ -1,3 +1,4 @@
+import { useRecoilState } from 'recoil';
 import { Container, CursorBackground, Tool } from './index.style';
 import { ReactComponent as SelectCursor } from '@assets/icon/toolkit-select-cursor.svg';
 import { ReactComponent as MoveCursor } from '@assets/icon/toolkit-move-cursor.svg';
@@ -5,7 +6,6 @@ import penTool from '@assets/image/pen.png';
 import postIt from '@assets/image/post-it.svg';
 import section from '@assets/image/section.svg';
 import { toolItems } from '@data/workspace-tool';
-import { useRecoilState } from 'recoil';
 import { cursorState } from '@context/workspace';
 
 function Toolkit() {
@@ -15,10 +15,10 @@ function Toolkit() {
 		<Container>
 			<div className="cursor">
 				<CursorBackground selected={cursor === toolItems.SELECT} onClick={() => setCursor(toolItems.SELECT)}>
-					<SelectCursor fill={cursor === toolItems.SELECT ? '#ffffff' : '#000000'} />
+					<SelectCursor fill={cursor === toolItems.SELECT ? 'white' : 'black'} />
 				</CursorBackground>
 				<CursorBackground selected={cursor === toolItems.MOVE} onClick={() => setCursor(toolItems.MOVE)}>
-					<MoveCursor fill={cursor === toolItems.MOVE ? '#ffffff' : '#000000'} />
+					<MoveCursor fill={cursor === toolItems.MOVE ? 'white' : 'black'} />
 				</CursorBackground>
 			</div>
 			<div className="draw-tools">
