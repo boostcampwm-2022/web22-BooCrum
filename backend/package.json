@@ -19,7 +19,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "test:e2e": "jest --config ./test/jest-e2e.json",
-    "typeorm": "typeorm-ts-node-commonjs --require ts-node/register"
+    "typeorm": "typeorm-ts-node-commonjs"
   },
   "dependencies": {
     "@nestjs/axios": "^1.0.0",
@@ -36,6 +36,7 @@
     "class-validator": "^0.13.2",
     "connect-typeorm": "^2.0.0",
     "cookie-parser": "^1.4.6",
+    "dotenv": "^16.0.3",
     "express-mysql-session": "^2.1.8",
     "express-session": "^1.17.3",
     "mysql2": "^2.3.3",

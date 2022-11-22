@@ -1,5 +1,5 @@
 import { Entity, Column, PrimaryGeneratedColumn, OneToMany } from 'typeorm';
-import { Workspace } from 'src/workspace/entity/workspace.entity';
+import { Workspace } from '../../workspace/entity/workspace.entity';
 import { TeamMember } from './team-member.entity';
 import { IsTeam } from '../enum/is-team.enum';
 

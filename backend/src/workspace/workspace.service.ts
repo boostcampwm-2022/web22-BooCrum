@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Team } from 'src/team/entity/team.entity';
-import { User } from 'src/user/entity/user.entity';
+import { Team } from '../team/entity/team.entity';
+import { User } from '../user/entity/user.entity';
 import { Repository, DataSource } from 'typeorm';
 import { WorkspaceCreateRequestDto } from './dto/workspaceCreateRequest.dto';
 import { WorkspaceMetadataDto } from './dto/workspaceMetadata.dto';
