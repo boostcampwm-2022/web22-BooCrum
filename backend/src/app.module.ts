@@ -1,12 +1,12 @@
+import { join } from 'path';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { TeamModule } from './team/team.module';
 import { WorkspaceModule } from './workspace/workspace.module';
-import { AuthModule } from './auth/auth.module';
-import { join } from 'path';
 import { ObjectDatabaseModule } from './object-database/object-database.module';
 
 @Module({
@@ -21,7 +21,7 @@ import { ObjectDatabaseModule } from './object-database/object-database.module';
       database: process.env.MYSQL_DATABASE,
       entities: [join(__dirname, '/**/*.entity{.ts,.js}')],
       migrationsRun: true,
-      migrations: [process.env.NODE_ENV === 'develop' ? 'migrations/**/*.ts' : 'dist/migrations/**/*.ts'],
+      migrations: [process.env.NODE_ENV === 'develop' ? 'src/migrations/**/*.ts' : 'dist/migrations/**/*.js'],
       migrationsTableName: 'migrations',
       synchronize: process.env.NODE_ENV === 'develop',
     }),
