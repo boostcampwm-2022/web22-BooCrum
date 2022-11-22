@@ -1,4 +1,4 @@
-import { Team } from 'src/team/entity/team.entity';
+import { Team } from '../../team/entity/team.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../user/entity/user.entity';
 import { Role } from '../enum/role.enum';

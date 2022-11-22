@@ -1,6 +1,6 @@
 import { Entity, PrimaryColumn, Column, OneToMany } from 'typeorm';
-import { TeamMember } from 'src/team/entity/team-member.entity';
-import { WorkspaceMember } from 'src/workspace/entity/workspace-member.entity';
+import { TeamMember } from '../../team/entity/team-member.entity';
+import { WorkspaceMember } from '../../workspace/entity/workspace-member.entity';
 
 @Entity()
 export class User {
