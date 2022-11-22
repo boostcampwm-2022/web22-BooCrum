@@ -35,11 +35,10 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   constructor(private readonly httpService: HttpService) {}
 
   async handleConnection(client: Socket, ...args: any[]) {
-    // this.server.of()
     this.logger.log(`Client connected: ${client.id}`);
-    const workspaceId = client.nsp.name.match(/workspace\/(.+)/)[1];
 
     // 1. Workspace 존재 여부 체크
+    const workspaceId = client.nsp.name.match(/workspace\/(.+)/)[1];
     const isValidWorkspace = await this.isExistWorkspace(workspaceId);
     if (!isValidWorkspace) {
       this.logger.log(`존재하지 않는 Workspace 접근`);
@@ -53,14 +52,18 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // 3. WorkspaceMember 존재 여부 조회
     const role = await this.getUserRole(workspaceId, userId);
 
-    // 4. User List 추가
+    // 4. room 추가
     client.join(workspaceId);
     this.userList.push(new UserData(client.id, userId, role));
   }
 
   handleDisconnect(client: Socket) {
+    // TODO: userList에서 제거
     client.disconnect();
   }
+
+  @SubscribeMessage('mouse-move')
+  moveMouse(@MessageBody() body: string, @ConnectedSocket() socket: Socket) {}
 
   async isExistWorkspace(workspaceId: string) {
     try {
