@@ -1,4 +1,5 @@
 import { useLocation } from 'react-router-dom';
+import Header from './header';
 import Toolkit from './toolkit';
 
 function Workspace() {
@@ -8,6 +9,7 @@ function Workspace() {
 
 	return (
 		<>
+			<Header name={name} />
 			<Toolkit />
 		</>
 	);
