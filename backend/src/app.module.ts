@@ -7,6 +7,7 @@ import { TeamModule } from './team/team.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { AuthModule } from './auth/auth.module';
 import { join } from 'path';
+import { ObjectDatabaseModule } from './object-database/object-database.module';
 import { AppGateway } from './app.gateway';
 import { HttpModule } from '@nestjs/axios';
 
@@ -30,6 +31,7 @@ import { HttpModule } from '@nestjs/axios';
     TeamModule,
     WorkspaceModule,
     AuthModule,
+    ObjectDatabaseModule,
     HttpModule,
   ],
   controllers: [],
