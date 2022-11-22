@@ -11,13 +11,11 @@ function RenameModal({ action, workspaceName }: RenameModalProps) {
 		setNewWorkspaceName(e.target.value);
 	};
 	return (
-		<>
-			<RenameModalLayout>
-				<h3>Rename</h3>
-				<input onChange={onChange} type="text" placeholder="File Name..." value={newWorkspaceName}></input>
-				<button onClick={handleClickBtn}>RENAME</button>
-			</RenameModalLayout>
-		</>
+		<RenameModalLayout>
+			<h3>Rename</h3>
+			<input onChange={onChange} type="text" placeholder="File Name..." value={newWorkspaceName}></input>
+			<button onClick={handleClickBtn}>RENAME</button>
+		</RenameModalLayout>
 	);
 }
 

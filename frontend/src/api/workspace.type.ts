@@ -20,3 +20,7 @@ export interface PostWorkspaceBody {
 	name?: string;
 	description?: string;
 }
+
+export interface PatchWorkspaceBody {
+	name?: string;
+}
