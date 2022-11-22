@@ -24,4 +24,24 @@ export class ObjectHandlerService {
       await queryRunner.release();
     }
   }
+
+  async selectObjectById(workspaceId: string, objectId: number): Promise<RowDataPacket[] | undefined> {
+    const objectTable = this.objectDatabaseService.isObjectTableExist(workspaceId);
+    if (!objectTable) throw new BadRequestException('잘못된 워크스페이스 ID 입니다.');
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    try {
+      await queryRunner.connect();
+      return (
+        await queryRunner.query(
+          `SELECT * FROM \`${OBJECT_DATABASE_NAME}\`.\`${workspaceId}\` WHERE object_id = ${objectId}`,
+        )
+      )[0];
+    } catch (error) {
+      console.log(error);
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
 }

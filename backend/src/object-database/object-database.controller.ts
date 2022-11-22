@@ -3,6 +3,7 @@ import { CreateTableRequestDto } from './dto/create-table-request.dto';
 import { ObjectDatabaseService } from './object-database.service';
 import { Response } from 'express';
 import { ObjectHandlerService } from './object-handler.service';
+import { SelectObjectDTO } from './dto/select-object.dto';
 
 @Controller('object-database')
 export class ObjectDatabaseController {
@@ -26,8 +27,13 @@ export class ObjectDatabaseController {
     return res.sendStatus((await this.objectDatabaseService.isObjectTableExist(workspaceId)) ? 200 : 404);
   }
 
-  @Get('/:workspaceId/objects')
+  @Get('/:workspaceId/object')
   async selectAllObjects(@Param(new ValidationPipe()) { workspaceId }: CreateTableRequestDto) {
     return this.objectHandlerService.selectAllObjects(workspaceId);
+  }
+
+  @Get('/:workspaceId/object/:objectId')
+  async selectOneObjects(@Param(new ValidationPipe()) { workspaceId, objectId }: SelectObjectDTO) {
+    return this.objectHandlerService.selectObjectById(workspaceId, objectId);
   }
 }
