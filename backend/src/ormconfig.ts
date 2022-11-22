@@ -11,10 +11,12 @@ export const config: DataSourceOptions = {
   password: process.env.MYSQL_PASSWORD,
   database: process.env.MYSQL_DATABASE,
   entities: [join(__dirname, '/**/*.entity{.ts,.js}')],
-  migrationsRun: true,
-  migrations: [process.env.NODE_ENV === 'develop' ? 'src/migrations/**/*.ts' : 'dist/src/migrations/**/*.js'],
+  migrations: [
+    process.env.NODE_ENV !== 'develop' && process.env.NODE_ENV !== 'production'
+      ? 'migrations/**/*.ts'
+      : 'dist/migrations/**/*.js',
+  ],
   migrationsTableName: 'migrations',
   synchronize: process.env.NODE_ENV === 'develop',
 };
-console.log(config);
 export default new DataSource(config);
