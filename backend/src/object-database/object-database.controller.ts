@@ -1,9 +1,10 @@
-import { Controller, Res, Get, Post, Delete, Param, ValidationPipe } from '@nestjs/common';
+import { Controller, Res, Get, Post, Delete, Param, ValidationPipe, Body } from '@nestjs/common';
 import { CreateTableRequestDto } from './dto/create-table-request.dto';
 import { ObjectDatabaseService } from './object-database.service';
 import { Response } from 'express';
 import { ObjectHandlerService } from './object-handler.service';
 import { SelectObjectDTO } from './dto/select-object.dto';
+import { CreateObjectDTO } from './dto/create-object.dto';
 
 @Controller('object-database')
 export class ObjectDatabaseController {
@@ -35,5 +36,13 @@ export class ObjectDatabaseController {
   @Get('/:workspaceId/object/:objectId')
   async selectOneObjects(@Param(new ValidationPipe()) { workspaceId, objectId }: SelectObjectDTO) {
     return this.objectHandlerService.selectObjectById(workspaceId, objectId);
+  }
+
+  @Post('/:workspaceId/object')
+  async createObject(
+    @Param(new ValidationPipe()) { workspaceId }: CreateTableRequestDto,
+    @Body() createObjectDTO: CreateObjectDTO,
+  ) {
+    return this.objectHandlerService.createObject(workspaceId, createObjectDTO);
   }
 }
