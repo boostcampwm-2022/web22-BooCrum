@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import { Container, CursorBackground, Tool } from './index.style';
 import { ReactComponent as SelectCursor } from '@assets/icon/toolkit-select-cursor.svg';
 import { ReactComponent as MoveCursor } from '@assets/icon/toolkit-move-cursor.svg';
@@ -6,9 +5,11 @@ import penTool from '@assets/image/pen.png';
 import postIt from '@assets/image/post-it.svg';
 import section from '@assets/image/section.svg';
 import { toolItems } from '@data/workspace-tool';
+import { useRecoilState } from 'recoil';
+import { cursorState } from '@context/workspace';
 
 function Toolkit() {
-	const [cursor, setCursor] = useState(toolItems.SELECT);
+	const [cursor, setCursor] = useRecoilState(cursorState);
 
 	return (
 		<Container>
