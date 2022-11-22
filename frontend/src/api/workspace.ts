@@ -1,5 +1,5 @@
 import axios, { AxiosResponse } from 'axios';
-import { PostWorkspaceBody, WorkspaceData } from './workspace.type';
+import { PatchWorkspaceBody, PostWorkspaceBody, WorkspaceData } from './workspace.type';
 
 const instance = axios.create({
 	baseURL: '/api/workspace',
@@ -20,4 +20,7 @@ const workspaceRequests = {
 export const Workspace = {
 	postWorkspace: (body: PostWorkspaceBody): Promise<WorkspaceData> =>
 		workspaceRequests.post<WorkspaceData, PostWorkspaceBody>('', body),
+	patchWorkspace: (workspaceId: string, body: PatchWorkspaceBody): Promise<WorkspaceData> =>
+		workspaceRequests.patch<WorkspaceData, PatchWorkspaceBody>(`${workspaceId}/info/metadata`, body),
+	deleteWorkspace: (workspaceId: string): Promise<number> => workspaceRequests.delete(`${workspaceId}`),
 };
