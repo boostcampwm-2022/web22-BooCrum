@@ -44,11 +44,12 @@ export class ObjectDatabaseService {
    *
    * Object Table이 존재하지 않을 경우 무시됩니다.
    * @param workspaceId Object Table과 연결된 워크스페이스의 ID
+   * @param usedQueryRunner 해당 함수를 QueryRunner의 Transaction 도중에 사용하는 경우에 대응함.
    */
-  async deleteObjectTable(workspaceId: string): Promise<void> {
-    const queryRunner = this.dataSource.createQueryRunner();
+  async deleteObjectTable(workspaceId: string, usedQueryRunner?: QueryRunner): Promise<void> {
+    const queryRunner = usedQueryRunner ? usedQueryRunner : this.dataSource.createQueryRunner();
+    if (!usedQueryRunner) await queryRunner.connect();
     try {
-      await queryRunner.connect();
       await queryRunner.dropTable(
         new Table({
           database: OBJECT_DATABASE_NAME,
@@ -60,7 +61,7 @@ export class ObjectDatabaseService {
       console.log(error);
       throw error;
     } finally {
-      await queryRunner.release();
+      if (!usedQueryRunner) await queryRunner.release();
     }
   }
 

@@ -229,7 +229,7 @@ export class WorkspaceService {
         .delete()
         .where('workspace_id = :id', { id: workspaceId })
         .execute();
-      // TODO: 워크스페이스 객체 테이블 DROP
+      await this.objectDatabaseService.deleteObjectTable(workspaceId, queryRunner);
       // 워크스페이스 메타데이터 제거
       await queryRunner.manager.delete(Workspace, { workspaceId });
 
