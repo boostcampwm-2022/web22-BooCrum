@@ -23,10 +23,27 @@ export const Container = styled.div`
 		display: flex;
 		justify-content: space-around;
 	}
+`;
+
+export const Tool = styled.div<{ selected: boolean }>`
+	width: 90px;
+	height: 100%;
+
+	cursor: pointer;
+
+	background: ${({ selected }) => selected && '#F3F3F3'};
+	border-radius: 8px 8px 0 0;
 
 	.tool {
 		width: 90px;
-		height: 70px;
+		position: absolute;
+		top: 10px;
+		clip: rect(0px, 120px, 70px, 0px);
+
+		:hover {
+			top: -20px;
+			clip: rect(0px, 120px, 100px, 0px);
+		}
 	}
 `;
 
