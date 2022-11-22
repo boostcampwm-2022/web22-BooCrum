@@ -2,6 +2,7 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { WorkspaceService } from 'src/workspace/workspace.service';
 import { DataSource, Table } from 'typeorm';
 import { OBJECT_DATABASE_NAME, OBJECT_TABLE_COLUMN_LIST } from './constant/object-database.constant';
+import { RowDataPacket } from 'mysql2';
 
 @Injectable()
 export class ObjectDatabaseService {
@@ -19,7 +20,6 @@ export class ObjectDatabaseService {
 
     const queryRunner = this.dataSource.createQueryRunner();
     try {
-      await queryRunner.connect();
       await queryRunner.connect();
       await queryRunner.createDatabase(OBJECT_DATABASE_NAME, true);
       await queryRunner.createTable(
@@ -81,5 +81,94 @@ export class ObjectDatabaseService {
     );
     await queryRunner.release();
     return ret;
+  }
+
+  /**
+   * Object Table을 복사합니다.
+   *
+   * 원하는 Object 테이블을 복사하여, 동일한 값을 갖는 새로운 테이블을 생성합니다.
+   * @param workspaceId 복사한 Object Table과 연결할 워크스페이스의 ID
+   * @param targetObjectTableName 원본 Object Table의 이름
+   */
+  async copyObjectTable(workspaceId: string, targetObjectTableName: string): Promise<boolean> {
+    if (!workspaceId || !targetObjectTableName) return false;
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+
+    // 복사 대상 테이블이 존재하는지 확인하고, 없으면 실패를 반환한다.
+    const isTableExist = await queryRunner.hasTable(
+      new Table({
+        database: OBJECT_DATABASE_NAME,
+        name: targetObjectTableName,
+      }),
+    );
+    console.log(isTableExist);
+    if (!isTableExist) {
+      await queryRunner.release();
+      return false;
+    }
+
+    // 복사 결과 테이블 객체를 생성한다.
+    const newTable = new Table({
+      database: OBJECT_DATABASE_NAME,
+      name: workspaceId,
+      columns: OBJECT_TABLE_COLUMN_LIST,
+    });
+
+    try {
+      await queryRunner.startTransaction();
+
+      const rows: RowDataPacket[] = await queryRunner.query(
+        `SELECT * FROM \`${OBJECT_DATABASE_NAME}\`.\`${targetObjectTableName}\``,
+      );
+
+      // 테이블 생성
+      await queryRunner.createTable(newTable);
+      // 쿼리 스트링 생성
+      const queryTexts: string[] = this.buildInsertQueryStringArrayFromRowDataPacket(rows, workspaceId);
+      // 쿼리 처리
+      for (const queryText of queryTexts) {
+        await queryRunner.query(queryText);
+      }
+      // 완료 시 commit 수행
+      await queryRunner.commitTransaction();
+      return true;
+    } catch (error) {
+      if (error.sqlState !== '42S01') await queryRunner.dropTable(newTable); // queryRunner가 담당하던 DataSource 외부의 것은 Transaction이 반영이 안되는 듯?
+      await queryRunner.rollbackTransaction();
+      console.error(error);
+      return false;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
+  private buildInsertQueryStringArrayFromRowDataPacket(
+    rowDataPacketArray: RowDataPacket[],
+    targetTable: string,
+  ): string[] {
+    // RowDataPacket을 column 이름과 value로 분할
+    const queryTexts: string[] = rowDataPacketArray.map((row) => {
+      const parsedRow = Object.entries(row).reduce(
+        (pre, val) => {
+          if (val[1] === null) return pre;
+
+          pre.columns.push(`${val[0]}`);
+          pre.value.push(`'${val[1]}'`);
+          return pre;
+        },
+        { columns: [], value: [] },
+      );
+
+      // 분할한 값을 바탕으로 Insert 쿼리문 작성.
+      const queryText = `
+        INSERT INTO \`${OBJECT_DATABASE_NAME}\`.\`${targetTable}\`
+        (${parsedRow.columns.join(', ')})
+        VALUES (${parsedRow.value.join(', ')});
+      `;
+      return queryText;
+    });
+    return queryTexts;
   }
 }
