@@ -100,4 +100,29 @@ export class ObjectHandlerService {
       return ret;
     }
   }
+
+  async deleteObject(workspaceId: string, objectId: number) {
+    const objectTable = this.objectDatabaseService.isObjectTableExist(workspaceId);
+    if (!objectTable) throw new BadRequestException('잘못된 워크스페이스 ID 입니다.');
+
+    const object = await this.selectObjectById(workspaceId, objectId);
+    if (!object) throw new BadRequestException('존재하지 않는 객체입니다.');
+
+    const queryRunner = this.dataSource.createQueryRunner();
+    let ret;
+
+    try {
+      await queryRunner.connect();
+      await queryRunner.query(
+        `DELETE FROM \`${OBJECT_DATABASE_NAME}\`.\`${workspaceId}\` 
+         WHERE object_id = '${objectId}'`,
+      );
+      ret = true;
+    } catch (error) {
+      ret = false;
+    } finally {
+      await queryRunner.release();
+      return ret;
+    }
+  }
 }

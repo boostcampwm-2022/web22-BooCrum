@@ -30,12 +30,12 @@ export class ObjectDatabaseController {
 
   @Get('/:workspaceId/object')
   async selectAllObjects(@Param(new ValidationPipe()) { workspaceId }: CreateTableRequestDto) {
-    return this.objectHandlerService.selectAllObjects(workspaceId);
+    return await this.objectHandlerService.selectAllObjects(workspaceId);
   }
 
   @Get('/:workspaceId/object/:objectId')
   async selectOneObjects(@Param(new ValidationPipe()) { workspaceId, objectId }: SelectObjectDTO) {
-    return this.objectHandlerService.selectObjectById(workspaceId, objectId);
+    return await this.objectHandlerService.selectObjectById(workspaceId, objectId);
   }
 
   @Post('/:workspaceId/object')
@@ -43,7 +43,7 @@ export class ObjectDatabaseController {
     @Param(new ValidationPipe()) { workspaceId }: CreateTableRequestDto,
     @Body(new ValidationPipe()) createObjectDTO: CreateObjectDTO,
   ) {
-    return this.objectHandlerService.createObject(workspaceId, createObjectDTO);
+    return await this.objectHandlerService.createObject(workspaceId, createObjectDTO);
   }
 
   @Patch('/:workspaceId/object/:objectId')
@@ -51,6 +51,11 @@ export class ObjectDatabaseController {
     @Param(new ValidationPipe()) { workspaceId, objectId }: SelectObjectDTO,
     @Body() createObjectDTO: CreateObjectDTO,
   ) {
-    return this.objectHandlerService.updateObject(workspaceId, objectId, createObjectDTO);
+    return await this.objectHandlerService.updateObject(workspaceId, objectId, createObjectDTO);
+  }
+
+  @Delete('/:workspaceId/object/:objectId')
+  async deleteObject(@Param(new ValidationPipe()) { workspaceId, objectId }: SelectObjectDTO) {
+    return await this.objectHandlerService.deleteObject(workspaceId, objectId);
   }
 }
