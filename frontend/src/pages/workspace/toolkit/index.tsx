@@ -1,32 +1,33 @@
+import { useState } from 'react';
 import { Container, CursorBackground, Tool } from './index.style';
 import { ReactComponent as SelectCursor } from '@assets/icon/toolkit-select-cursor.svg';
 import { ReactComponent as MoveCursor } from '@assets/icon/toolkit-move-cursor.svg';
 import penTool from '@assets/image/pen.png';
 import postIt from '@assets/image/post-it.svg';
 import section from '@assets/image/section.svg';
-import { useState } from 'react';
+import { toolItems } from '@data/workspace-tool';
 
 function Toolkit() {
-	const [cursor, setCursor] = useState(0);
+	const [cursor, setCursor] = useState(toolItems.SELECT);
 
 	return (
 		<Container>
 			<div className="cursor">
-				<CursorBackground selected={cursor === 0} onClick={() => setCursor(0)}>
-					<SelectCursor fill={cursor === 0 ? '#ffffff' : '#000000'} />
+				<CursorBackground selected={cursor === toolItems.SELECT} onClick={() => setCursor(toolItems.SELECT)}>
+					<SelectCursor fill={cursor === toolItems.SELECT ? '#ffffff' : '#000000'} />
 				</CursorBackground>
-				<CursorBackground selected={cursor === 1} onClick={() => setCursor(1)}>
-					<MoveCursor fill={cursor === 1 ? '#ffffff' : '#000000'} />
+				<CursorBackground selected={cursor === toolItems.MOVE} onClick={() => setCursor(toolItems.MOVE)}>
+					<MoveCursor fill={cursor === toolItems.MOVE ? '#ffffff' : '#000000'} />
 				</CursorBackground>
 			</div>
 			<div className="draw-tools">
-				<Tool selected={cursor === 2} onClick={() => setCursor(2)}>
+				<Tool selected={cursor === toolItems.PEN} onClick={() => setCursor(toolItems.PEN)}>
 					<img alt="pen" className="tool" src={penTool} />
 				</Tool>
-				<Tool selected={cursor === 4} onClick={() => setCursor(4)}>
+				<Tool selected={cursor === toolItems.SECTION} onClick={() => setCursor(toolItems.SECTION)}>
 					<img alt="section" className="tool" src={section} />
 				</Tool>
-				<Tool selected={cursor === 5} onClick={() => setCursor(5)}>
+				<Tool selected={cursor === toolItems.POST_IT} onClick={() => setCursor(toolItems.POST_IT)}>
 					<img alt="post it" className="tool" src={postIt} />
 				</Tool>
 			</div>
