@@ -1,4 +1,4 @@
 export interface RenameModalProps {
-	closeModal: () => void;
+	action: (workspaceName: string) => void;
 	workspaceName: string;
 }

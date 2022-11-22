@@ -8,6 +8,8 @@ import { UserModule } from './user/user.module';
 import { TeamModule } from './team/team.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { ObjectDatabaseModule } from './object-database/object-database.module';
+import { AppGateway } from './app.gateway';
+import { HttpModule } from '@nestjs/axios';
 
 @Module({
   imports: [
@@ -30,9 +32,10 @@ import { ObjectDatabaseModule } from './object-database/object-database.module';
     WorkspaceModule,
     AuthModule,
     ObjectDatabaseModule,
+    HttpModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [AppGateway],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

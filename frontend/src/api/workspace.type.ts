@@ -16,7 +16,11 @@ export interface WorkspaceData {
 }
 
 export interface PostWorkspaceBody {
-	teamId: number;
-	name: string;
-	description: string;
+	teamId?: number;
+	name?: string;
+	description?: string;
+}
+
+export interface PatchWorkspaceBody {
+	name?: string;
 }

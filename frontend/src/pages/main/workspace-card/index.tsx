@@ -4,7 +4,7 @@ import WorkspaceMenu from '../workspace-menu';
 import { CardLayout } from './index.style';
 import { WorkspaceCardProps } from './index.type';
 
-function WorkspaceCard({ title, timestamp, imgSrc }: WorkspaceCardProps) {
+function WorkspaceCard({ workspaceId, role, title, timestamp, imgSrc, setWorkspaceList }: WorkspaceCardProps) {
 	const { isOpen, menuRef, toggleOpen, menuPosition } = useContextMenu();
 	const openContextMenu: React.MouseEventHandler<HTMLDivElement> = (e) => {
 		e.preventDefault();
@@ -21,7 +21,12 @@ function WorkspaceCard({ title, timestamp, imgSrc }: WorkspaceCardProps) {
 				</div>
 			</CardLayout>
 			<ContextMenu isOpen={isOpen} menuRef={menuRef} posX={menuPosition.x} posY={menuPosition.y}>
-				<WorkspaceMenu workspaceName={title}></WorkspaceMenu>
+				<WorkspaceMenu
+					workspaceId={workspaceId}
+					role={role}
+					workspaceName={title}
+					setWorkspaceList={setWorkspaceList}
+				></WorkspaceMenu>
 			</ContextMenu>
 		</>
 	);
