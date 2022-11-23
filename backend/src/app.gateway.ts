@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { BadRequestException, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -10,27 +10,17 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
+import { AxiosResponse } from 'axios';
 import * as cookieParser from 'cookie-parser';
 import { Server, Socket } from 'socket.io';
-import { Workspace } from './workspace/entity/workspace.entity';
-
-class UserData {
-  constructor(socketId: string, userId: string, role: number) {
-    this.socketId = socketId;
-    this.userId = userId;
-    this.role = role;
-  }
-
-  socketId: string;
-  userId: string;
-  role: number;
-}
+import { CreateObjectDTO } from './object-database/dto/create-object.dto';
+import { UserMapVO } from './user-map.vo';
 
 @WebSocketGateway(8080, { cors: '*', namespace: /workspace\/.+/ })
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('AppGateway');
-  private userList = [];
+  private userMap = new Map();
 
   constructor(private readonly httpService: HttpService) {}
 
@@ -52,18 +42,43 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     // 3. WorkspaceMember 존재 여부 조회
     const role = await this.getUserRole(workspaceId, userId);
 
-    // 4. room 추가
+    // 4. Random 색상 지정
+    const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
+
+    // 5. room 추가
     client.join(workspaceId);
-    this.userList.push(new UserData(client.id, userId, role));
+    client.join(userId);
+
+    // 6. userMap 추가 (현재: key = client.id, 변경 시 : `${userId}_${workspaceId}`)
+    this.userMap.set(client.id, new UserMapVO(client.id, userId, workspaceId, role, color));
+
+    // 7. Socket.io - Client 이벤트 호출
+    const members = Array.from(this.userMap.values()).map((value: UserMapVO) => value.userId);
+    const objects = await this.getAllObjects(workspaceId);
+    this.server.to(workspaceId).emit('init', { members, objects });
   }
 
   handleDisconnect(client: Socket) {
-    // TODO: userList에서 제거
-    client.disconnect();
+    this.logger.log(`Client disconnected: ${client.id}`);
+    this.userMap.delete(client.id);
   }
 
-  @SubscribeMessage('mouse-move')
-  moveMouse(@MessageBody() body: string, @ConnectedSocket() socket: Socket) {}
+  @SubscribeMessage('create')
+  async createObject(@MessageBody() body: CreateObjectDTO, @ConnectedSocket() socket: Socket) {
+    // 1. Client 소켓 연결 http://localhost:8080/workspace/694cc960-0aed-4292-8eac-4a7f447f42ae
+    // 2. event 요청 : http://localhost:8080/workspace/694cc960-0aed-4292-8eac-4a7f447f42ae
+    socket.to('uuid').emit('event 명');
+    const result = await this.requestAPI(
+      `http://localhost:3000/api/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object`,
+      'POST',
+      body,
+    );
+  }
+
+  async getAllObjects(workspaceId: string) {
+    // TODO: Workspace에 해당하는 객체 API 호출 -> 객체 리스트 반환
+    return [];
+  }
 
   async isExistWorkspace(workspaceId: string) {
     try {
@@ -106,5 +121,24 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       },
     );
     return response.data;
+  }
+
+  async requestAPI(address: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE', body: object | null) {
+    const headers = {
+      accept: 'application/json',
+    };
+
+    let response: AxiosResponse;
+
+    switch (method) {
+      case 'GET':
+        response = await this.httpService.axiosRef.get(address, { headers });
+        return response.data;
+      case 'POST':
+        response = await this.httpService.axiosRef.post(address, body, { headers });
+        return response.data;
+      default:
+        console.log('default');
+    }
   }
 }
