@@ -13,34 +13,49 @@ import PenTypeBox from '../penTypeBox';
 function Toolkit() {
 	const [cursor, setCursor] = useRecoilState(cursorState);
 
+	const handleCursor = (type: number) => {
+		setCursor({ ...cursor, type });
+	};
+
 	return (
 		<Container>
 			<div className="cursor">
 				<CursorBackground
-					selected={isSelectedCursor(cursor, toolItems.SELECT)}
-					onClick={() => setCursor(toolItems.SELECT)}
+					selected={isSelectedCursor(cursor.type, toolItems.SELECT)}
+					onClick={() => handleCursor(toolItems.SELECT)}
 				>
-					<SelectCursor fill={isSelectedCursor(cursor, toolItems.SELECT) ? 'white' : 'black'} />
+					<SelectCursor fill={isSelectedCursor(cursor.type, toolItems.SELECT) ? 'white' : 'black'} />
 				</CursorBackground>
-				<CursorBackground selected={isSelectedCursor(cursor, toolItems.MOVE)} onClick={() => setCursor(toolItems.MOVE)}>
-					<MoveCursor fill={isSelectedCursor(cursor, toolItems.MOVE) ? 'white' : 'black'} />
+				<CursorBackground
+					selected={isSelectedCursor(cursor.type, toolItems.MOVE)}
+					onClick={() => handleCursor(toolItems.MOVE)}
+				>
+					<MoveCursor fill={isSelectedCursor(cursor.type, toolItems.MOVE) ? 'white' : 'black'} />
 				</CursorBackground>
 			</div>
 			<div className="draw-tools">
 				<Tool
-					selected={isSelectedCursor(cursor, toolItems.PEN) || isSelectedCursor(cursor, toolItems.ERASER)}
-					onClick={() => setCursor(toolItems.PEN)}
+					selected={isSelectedCursor(cursor.type, toolItems.PEN) || isSelectedCursor(cursor.type, toolItems.ERASER)}
+					onClick={() => handleCursor(toolItems.PEN)}
 				>
 					<img alt="pen" className="tool" src={penTool} />
 				</Tool>
-				<Tool selected={isSelectedCursor(cursor, toolItems.SECTION)} onClick={() => setCursor(toolItems.SECTION)}>
+				<Tool
+					selected={isSelectedCursor(cursor.type, toolItems.SECTION)}
+					onClick={() => handleCursor(toolItems.SECTION)}
+				>
 					<img alt="section" className="tool" src={section} />
 				</Tool>
-				<Tool selected={isSelectedCursor(cursor, toolItems.POST_IT)} onClick={() => setCursor(toolItems.POST_IT)}>
+				<Tool
+					selected={isSelectedCursor(cursor.type, toolItems.POST_IT)}
+					onClick={() => handleCursor(toolItems.POST_IT)}
+				>
 					<img alt="post it" className="tool" src={postIt} />
 				</Tool>
 			</div>
-			{(isSelectedCursor(cursor, toolItems.PEN) || isSelectedCursor(cursor, toolItems.ERASER)) && <PenTypeBox />}
+			{(isSelectedCursor(cursor.type, toolItems.PEN) || isSelectedCursor(cursor.type, toolItems.ERASER)) && (
+				<PenTypeBox />
+			)}
 		</Container>
 	);
 }

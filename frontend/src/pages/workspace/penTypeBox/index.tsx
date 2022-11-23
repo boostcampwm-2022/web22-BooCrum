@@ -10,16 +10,32 @@ import { colorChips } from '@data/workspace-object-color';
 function PenTypeBox() {
 	const [cursor, setCursor] = useRecoilState(cursorState);
 
+	const handleCursorType = (type: number) => {
+		setCursor({ ...cursor, type });
+	};
+
+	const handleCursorColor = (color: string) => {
+		setCursor({ ...cursor, color });
+	};
+
 	return (
 		<Container>
-			<Tool selected={isSelectedCursor(cursor, toolItems.PEN)} onClick={() => setCursor(toolItems.PEN)}>
+			<Tool
+				name="type"
+				selected={isSelectedCursor(cursor.type, toolItems.PEN)}
+				onClick={() => handleCursorType(toolItems.PEN)}
+			>
 				<img alt="pen" className="tool" src={penTool} />
 			</Tool>
-			<Tool selected={isSelectedCursor(cursor, toolItems.ERASER)} onClick={() => setCursor(toolItems.ERASER)}>
+			<Tool
+				name="type"
+				selected={isSelectedCursor(cursor.type, toolItems.ERASER)}
+				onClick={() => handleCursorType(toolItems.ERASER)}
+			>
 				<img alt="section" className="tool" src={eraserTool} />
 			</Tool>
 			{colorChips.map((color) => (
-				<ColorChip key={color} color={color}></ColorChip>
+				<ColorChip key={color} name="color" color={color} onClick={() => handleCursorColor(color)}></ColorChip>
 			))}
 		</Container>
 	);

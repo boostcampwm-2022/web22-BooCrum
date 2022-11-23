@@ -15,7 +15,7 @@ export const Container = styled.div`
 	align-items: center;
 `;
 
-export const Tool = styled.div<{ selected: boolean }>`
+export const Tool = styled.div<{ name: string; selected: boolean }>`
 	width: 60px;
 	height: 100%;
 
@@ -47,12 +47,14 @@ export const Tool = styled.div<{ selected: boolean }>`
 	}
 `;
 
-export const ColorChip = styled.div<{ color: string }>`
+export const ColorChip = styled.div<{ name: string; color: string }>`
 	background: ${({ color }) => color};
 	border-radius: 30px;
 
 	width: 24px;
 	height: 24px;
+
+	cursor: pointer;
 
 	& + & {
 		margin-left: 4px;
