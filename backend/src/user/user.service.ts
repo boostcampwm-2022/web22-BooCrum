@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { TeamMember } from 'src/team/entity/team-member.entity';
-import { Team } from 'src/team/entity/team.entity';
+import { TeamMember } from '../team/entity/team-member.entity';
+import { Team } from '../team/entity/team.entity';
 import { IsTeam } from 'src/team/enum/is-team.enum';
 import { Role } from 'src/team/enum/role.enum';
-import { WorkspaceMember } from 'src/workspace/entity/workspace-member.entity';
+import { WorkspaceMember } from '../workspace/entity/workspace-member.entity';
 import { Repository, DataSource } from 'typeorm';
 import { UserDto } from './dto/user.dto';
 import { User } from './entity/user.entity';

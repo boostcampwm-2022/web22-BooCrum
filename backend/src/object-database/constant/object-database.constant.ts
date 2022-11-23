@@ -46,4 +46,10 @@ export const OBJECT_TABLE_COLUMN_LIST: TableColumnOptions[] = [
     type: 'TEXT',
     isNullable: true,
   },
+  {
+    name: 'creator',
+    type: 'varchar',
+    length: '50',
+    isNullable: false,
+  },
 ];

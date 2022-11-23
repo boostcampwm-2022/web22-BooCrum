@@ -17,6 +17,17 @@ REDIRECT_AFTER_LOGIN=
 REDIRECT_FAIL_LOGIN=
 ```
 
+## migration 실행 시
+
+```
+// 마이그레이션 반영 목록 확인
+npm run typeorm -- migration:show -d src/ormconfig.ts
+// 마이그레이션 전체 적용
+npm run typeorm -- migration:run -d src/ormconfig.ts
+// 가장 최근에 적용된 마이그레이션 1개 파일 되돌리기
+npm run typeorm -- migration:revert -d src/ormconfig.ts
+```
+
 ## Description
 
 [Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
