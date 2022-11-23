@@ -1,7 +1,7 @@
 import { Container } from './index.style';
 import shareIcon from '@assets/icon/share.svg';
-import ZoomController from '../zoomController';
-import UserList from '../userList';
+import ZoomController from '../zoom-controller';
+import UserList from '../user-list';
 
 function RightSide() {
 	return (

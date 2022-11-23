@@ -1,5 +1,5 @@
-import LeftSide from '../leftSide';
-import RightSide from '../rightSide';
+import LeftSide from '../left-side';
+import RightSide from '../right-side';
 import { Container } from './index.style';
 
 function Header({ name }: { name: string }) {
