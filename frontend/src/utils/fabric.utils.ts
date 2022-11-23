@@ -1,4 +1,5 @@
 import { fabric } from 'fabric';
+import { CanvasObject } from '@pages/workspace/whiteboard-canvas/index.types';
 
 export const drawingGird = (canvas: fabric.Canvas, width: number, height: number, gridSize: number) => {
 	for (let i = 0; i < width / gridSize; i++) {
@@ -16,4 +17,12 @@ export const drawingGird = (canvas: fabric.Canvas, width: number, height: number
 		canvas.sendToBack(lineX);
 		canvas.sendToBack(lineY);
 	}
+};
+
+export const createObjectFromServer = (canvas: fabric.Canvas, newObject: CanvasObject) => {
+	const rect = new fabric.Rect({
+		...newObject,
+	});
+
+	canvas.add(rect);
 };
