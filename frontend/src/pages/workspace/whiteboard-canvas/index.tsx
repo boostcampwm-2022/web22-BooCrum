@@ -1,9 +1,18 @@
 import { useEffect, useRef } from 'react';
 import { fabric } from 'fabric';
-import { drawingGird } from '@utils/fabric.utils';
+import { initGrid, initZoom, setZoomValue } from '@utils/fabric.utils';
+import { WhiteboardCanvasLayout } from './index.style';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { zoomState } from '@context/workspace';
 
 function WhiteboardCanvas() {
 	const canvas = useRef<fabric.Canvas | null>(null);
+	const [zoom, setZoom] = useRecoilState(zoomState);
+
+	useEffect(() => {
+		if (canvas.current) canvas.current.zoomToPoint({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, zoom / 100);
+	}, [zoom]);
+
 	useEffect(() => {
 		canvas.current = initCanvas();
 		return () => {
@@ -16,8 +25,8 @@ function WhiteboardCanvas() {
 
 	const initCanvas = () => {
 		const grid = 50;
-		const canvasWidth = 2000;
-		const canvasHeight = 900;
+		const canvasWidth = window.innerWidth;
+		const canvasHeight = window.innerHeight;
 
 		const fabricCanvas = new fabric.Canvas('canvas', {
 			height: canvasHeight,
@@ -25,13 +34,8 @@ function WhiteboardCanvas() {
 			backgroundColor: '#f1f1f1',
 		});
 
-		drawingGird(fabricCanvas, canvasWidth, canvasHeight, grid);
-
-		// 이벤트 추가 예시
-		fabricCanvas.on('object:added', (e) => {
-			console.log(e);
-		});
-
+		initGrid(fabricCanvas, canvasWidth, canvasHeight, grid);
+		initZoom(fabricCanvas, setZoom);
 		return fabricCanvas;
 	};
 
@@ -57,9 +61,9 @@ function WhiteboardCanvas() {
 	};
 	return (
 		<>
-			<button onClick={addObj}>add</button>
-			<button onClick={clearObjects}>CLEAR</button>
-			<canvas id="canvas"></canvas>
+			<WhiteboardCanvasLayout>
+				<canvas id="canvas"></canvas>
+			</WhiteboardCanvasLayout>
 		</>
 	);
 }

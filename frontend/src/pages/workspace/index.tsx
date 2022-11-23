@@ -10,7 +10,6 @@ function Workspace() {
 	return (
 		<>
 			<Layout name={name} />
-			<h1>Workspace</h1>
 			<WhiteboardCanvas></WhiteboardCanvas>
 		</>
 	);

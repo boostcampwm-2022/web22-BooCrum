@@ -1,6 +1,8 @@
 import styled from 'styled-components';
 
-export const WhiteboardCanvasLayout = styled.canvas`
-	width: 1000px;
-	height: 1000px;
+export const WhiteboardCanvasLayout = styled.div`
+	position: fixed;
+	left: 0;
+	top: 0;
+	z-index: 0;
 `;

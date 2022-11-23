@@ -3,16 +3,15 @@ import zoomOut from '@assets/icon/zoom-out.svg';
 import zoomIn from '@assets/icon/zoom-in.svg';
 import { useRecoilState } from 'recoil';
 import { zoomState } from '@context/workspace';
-
 function ZoomController() {
 	const [zoom, setZoom] = useRecoilState(zoomState);
 
 	const handleZoomOut = () => {
-		setZoom((prevZoom) => (prevZoom - 10 > 0 ? prevZoom - 10 : prevZoom));
+		setZoom((prevZoom) => (prevZoom - 10 > 40 ? prevZoom - 10 : prevZoom));
 	};
 
 	const handleZoomIn = () => {
-		setZoom((prevZoom) => (prevZoom + 10 <= 100 ? prevZoom + 10 : prevZoom));
+		setZoom((prevZoom) => (prevZoom + 10 <= 200 ? prevZoom + 10 : prevZoom));
 	};
 
 	return (
