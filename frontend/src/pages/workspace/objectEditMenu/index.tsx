@@ -1,16 +1,16 @@
 import { colorChips } from '@data/workspace-object-color';
 import { useState } from 'react';
-import { ColorChip, ColorSelect, Container, Rename } from './index.style';
+import { ColorChip, ColorSelect, Container, Rename, FontSize } from './index.style';
 import dropdownColor from '@assets/icon/dropdown-color.svg';
 import { ReactComponent as RenameSection } from '@assets/icon/rename-section.svg';
 
 const selectedType: { [index: string]: number } = {
 	NONE: 0,
 	COLOR: 1,
-	RENAME: 2,
+	TYPE: 2,
 };
 
-function ObjectEditMenu() {
+function ObjectEditMenu({ selectedObject }: { selectedObject: string }) {
 	const [color, setColor] = useState(colorChips[0]); // 나중에 밖으로 빼기
 	const [selected, setSelected] = useState(selectedType.NONE);
 
@@ -29,9 +29,13 @@ function ObjectEditMenu() {
 				<div className="selected-color" />
 				<img alt="set color" className="dropdown-color" src={dropdownColor} />
 			</ColorSelect>
-			<Rename selected={selected === selectedType.RENAME} onClick={() => setSelected(selectedType.RENAME)}>
-				<RenameSection stroke={selected === selectedType.RENAME ? 'white' : '#777777'} />
-			</Rename>
+			{selectedObject === 'section' ? (
+				<Rename selected={selected === selectedType.TYPE} onClick={() => setSelected(selectedType.TYPE)}>
+					<RenameSection stroke={selected === selectedType.TYPE ? 'white' : '#777777'} />
+				</Rename>
+			) : (
+				<FontSize selected={selected === selectedType.TYPE} onClick={() => setSelected(selectedType.TYPE)}></FontSize>
+			)}
 			{selected === selectedType.COLOR && (
 				<ColorChip>
 					{colorChips.map((color) => (

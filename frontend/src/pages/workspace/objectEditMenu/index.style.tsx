@@ -46,6 +46,19 @@ export const Rename = styled.div<{ selected: boolean }>`
 	cursor: pointer;
 `;
 
+export const FontSize = styled.input<{ selected: boolean }>`
+	background: ${({ theme }) => theme.gray_4};
+	width: 100%;
+
+	margin-left: 6px;
+
+	font-size: 12px;
+	color: ${({ theme }) => theme.white};
+
+	outline: none;
+	border: none;
+`;
+
 export const ColorChip = styled.div`
 	padding: 8px 16px;
 	border-radius: 10px;
