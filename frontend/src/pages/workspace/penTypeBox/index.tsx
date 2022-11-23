@@ -20,23 +20,19 @@ function PenTypeBox() {
 
 	return (
 		<Container>
-			<Tool
-				name="type"
-				selected={isSelectedCursor(cursor.type, toolItems.PEN)}
-				onClick={() => handleCursorType(toolItems.PEN)}
-			>
+			<Tool selected={isSelectedCursor(cursor.type, toolItems.PEN)} onClick={() => handleCursorType(toolItems.PEN)}>
 				<img alt="pen" className="tool" src={penTool} />
 			</Tool>
 			<Tool
-				name="type"
 				selected={isSelectedCursor(cursor.type, toolItems.ERASER)}
 				onClick={() => handleCursorType(toolItems.ERASER)}
 			>
 				<img alt="section" className="tool" src={eraserTool} />
 			</Tool>
-			{colorChips.map((color) => (
-				<ColorChip key={color} name="color" color={color} onClick={() => handleCursorColor(color)}></ColorChip>
-			))}
+			{isSelectedCursor(cursor.type, toolItems.PEN) &&
+				colorChips.map((color) => (
+					<ColorChip key={color} color={color} onClick={() => handleCursorColor(color)}></ColorChip>
+				))}
 		</Container>
 	);
 }
