@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { fabric } from 'fabric';
 import { drawingGird } from '@utils/fabric.utils';
+import { v4 } from 'uuid';
 
 function WhiteboardCanvas() {
 	const canvas = useRef<fabric.Canvas | null>(null);
@@ -39,6 +40,7 @@ function WhiteboardCanvas() {
 	const addObj = () => {
 		if (!canvas.current) return;
 		const rect = new fabric.Rect({
+			objectId: v4(),
 			height: 280,
 			width: 200,
 			top: 100,
