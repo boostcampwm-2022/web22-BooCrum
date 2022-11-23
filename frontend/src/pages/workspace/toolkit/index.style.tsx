@@ -13,6 +13,8 @@ export const Container = styled.div`
 
 	display: flex;
 
+	background: ${({ theme }) => theme.white};
+
 	.cursor {
 		border-right: 1px solid ${({ theme }) => theme.gray_1};
 		width: 44px;
@@ -33,6 +35,8 @@ export const Tool = styled.div<{ selected: boolean }>`
 
 	background: ${({ selected }) => selected && '#F3F3F3'};
 	border-radius: 8px 8px 0 0;
+
+	z-index: 10;
 
 	.tool {
 		width: 90px;

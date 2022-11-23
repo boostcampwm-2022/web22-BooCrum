@@ -8,6 +8,7 @@ import section from '@assets/image/section.svg';
 import { toolItems } from '@data/workspace-tool';
 import { cursorState } from '@context/workspace';
 import { isSelectedCursor } from '@utils/isSelectedCursor';
+import PenTypeBox from '../penTypeBox';
 
 function Toolkit() {
 	const [cursor, setCursor] = useRecoilState(cursorState);
@@ -26,7 +27,10 @@ function Toolkit() {
 				</CursorBackground>
 			</div>
 			<div className="draw-tools">
-				<Tool selected={isSelectedCursor(cursor, toolItems.PEN)} onClick={() => setCursor(toolItems.PEN)}>
+				<Tool
+					selected={isSelectedCursor(cursor, toolItems.PEN) || isSelectedCursor(cursor, toolItems.ERASER)}
+					onClick={() => setCursor(toolItems.PEN)}
+				>
 					<img alt="pen" className="tool" src={penTool} />
 				</Tool>
 				<Tool selected={isSelectedCursor(cursor, toolItems.SECTION)} onClick={() => setCursor(toolItems.SECTION)}>
@@ -36,6 +40,7 @@ function Toolkit() {
 					<img alt="post it" className="tool" src={postIt} />
 				</Tool>
 			</div>
+			{(isSelectedCursor(cursor, toolItems.PEN) || isSelectedCursor(cursor, toolItems.ERASER)) && <PenTypeBox />}
 		</Container>
 	);
 }
