@@ -29,3 +29,9 @@ export const createObjectFromServer = (canvas: fabric.Canvas, newObject: CanvasO
 
 	canvas.add(rect);
 };
+
+export const deleteObjectFromServer = (canvas: fabric.Canvas, objectId: string) => {
+	canvas.forEachObject((object) => {
+		if (object.objectId === objectId) canvas.remove(object);
+	});
+};
