@@ -2,7 +2,6 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
 	height: calc(100vh - 32px);
-	border-right: 1px solid ${({ theme }) => theme.gray_1};
 
 	padding: 32px 62px 0 57px;
 

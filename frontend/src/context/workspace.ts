@@ -11,8 +11,3 @@ export const zoomState = atom({
 	key: 'zoom',
 	default: { percent: 100, event: '' },
 });
-
-export const zoomState = atom({
-	key: 'zoom',
-	default: 100,
-});
