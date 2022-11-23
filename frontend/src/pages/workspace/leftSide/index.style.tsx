@@ -1,6 +1,7 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
+	flex: 1;
 	display: flex;
 
 	margin-left: 22px;
@@ -17,7 +18,7 @@ export const Container = styled.div`
 	.export {
 		width: 24px;
 		height: 28px;
-		margin-left: 20px;
+		margin: 3px 0 0 20px;
 
 		cursor: pointer;
 	}
