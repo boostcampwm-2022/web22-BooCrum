@@ -1,11 +1,16 @@
 import { useLocation } from 'react-router-dom';
+import Toolkit from './toolkit';
 
 function Workspace() {
 	const {
-		state: { id, user },
+		state: { name, workspaceId },
 	} = useLocation();
 
-	return <div>workspace</div>;
+	return (
+		<>
+			<Toolkit />
+		</>
+	);
 }
 
 export default Workspace;
