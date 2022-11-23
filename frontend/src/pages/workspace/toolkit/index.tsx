@@ -7,6 +7,7 @@ import postIt from '@assets/image/post-it.svg';
 import section from '@assets/image/section.svg';
 import { toolItems } from '@data/workspace-tool';
 import { cursorState } from '@context/workspace';
+import { isSelectedCursor } from '@utils/isSelectedCursor';
 
 function Toolkit() {
 	const [cursor, setCursor] = useRecoilState(cursorState);
@@ -14,21 +15,24 @@ function Toolkit() {
 	return (
 		<Container>
 			<div className="cursor">
-				<CursorBackground selected={cursor === toolItems.SELECT} onClick={() => setCursor(toolItems.SELECT)}>
-					<SelectCursor fill={cursor === toolItems.SELECT ? 'white' : 'black'} />
+				<CursorBackground
+					selected={isSelectedCursor(cursor, toolItems.SELECT)}
+					onClick={() => setCursor(toolItems.SELECT)}
+				>
+					<SelectCursor fill={isSelectedCursor(cursor, toolItems.SELECT) ? 'white' : 'black'} />
 				</CursorBackground>
-				<CursorBackground selected={cursor === toolItems.MOVE} onClick={() => setCursor(toolItems.MOVE)}>
-					<MoveCursor fill={cursor === toolItems.MOVE ? 'white' : 'black'} />
+				<CursorBackground selected={isSelectedCursor(cursor, toolItems.MOVE)} onClick={() => setCursor(toolItems.MOVE)}>
+					<MoveCursor fill={isSelectedCursor(cursor, toolItems.MOVE) ? 'white' : 'black'} />
 				</CursorBackground>
 			</div>
 			<div className="draw-tools">
-				<Tool selected={cursor === toolItems.PEN} onClick={() => setCursor(toolItems.PEN)}>
+				<Tool selected={isSelectedCursor(cursor, toolItems.PEN)} onClick={() => setCursor(toolItems.PEN)}>
 					<img alt="pen" className="tool" src={penTool} />
 				</Tool>
-				<Tool selected={cursor === toolItems.SECTION} onClick={() => setCursor(toolItems.SECTION)}>
+				<Tool selected={isSelectedCursor(cursor, toolItems.SECTION)} onClick={() => setCursor(toolItems.SECTION)}>
 					<img alt="section" className="tool" src={section} />
 				</Tool>
-				<Tool selected={cursor === toolItems.POST_IT} onClick={() => setCursor(toolItems.POST_IT)}>
+				<Tool selected={isSelectedCursor(cursor, toolItems.POST_IT)} onClick={() => setCursor(toolItems.POST_IT)}>
 					<img alt="post it" className="tool" src={postIt} />
 				</Tool>
 			</div>
