@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react';
 import { fabric } from 'fabric';
-import { initGrid, initZoom, setZoomValue } from '@utils/fabric.utils';
+import { initGrid, initZoom } from '@utils/fabric.utils';
 import { WhiteboardCanvasLayout } from './index.style';
-import { useRecoilState, useRecoilValue } from 'recoil';
+import { useRecoilState } from 'recoil';
 import { zoomState } from '@context/workspace';
 
 function WhiteboardCanvas() {
@@ -10,7 +10,8 @@ function WhiteboardCanvas() {
 	const [zoom, setZoom] = useRecoilState(zoomState);
 
 	useEffect(() => {
-		if (canvas.current) canvas.current.zoomToPoint({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, zoom / 100);
+		if (canvas.current && zoom.event === 'control')
+			canvas.current.zoomToPoint({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, zoom.zoom / 100);
 	}, [zoom]);
 
 	useEffect(() => {
@@ -39,26 +40,6 @@ function WhiteboardCanvas() {
 		return fabricCanvas;
 	};
 
-	// Object 추가 예시
-	const addObj = () => {
-		if (!canvas.current) return;
-		const rect = new fabric.Rect({
-			height: 280,
-			width: 200,
-			top: 100,
-			left: 100,
-			fill: 'yellow',
-		});
-		canvas.current.add(rect);
-	};
-	// Object 삭제 예시
-	const clearObjects = () => {
-		if (!canvas.current) return;
-		canvas.current.forEachObject((obj) => {
-			// 그리드 제외 하고 삭제
-			if (!(obj instanceof fabric.Line)) canvas.current?.remove(obj);
-		});
-	};
 	return (
 		<>
 			<WhiteboardCanvasLayout>

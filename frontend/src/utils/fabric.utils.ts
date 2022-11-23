@@ -22,19 +22,22 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 	}
 };
 
-export const initZoom = (canvas: fabric.Canvas, setZoom: SetterOrUpdater<number>) => {
+export const initZoom = (
+	canvas: fabric.Canvas,
+	setZoom: SetterOrUpdater<{
+		zoom: number;
+		event: string;
+	}>
+) => {
 	canvas.on('mouse:wheel', function (opt) {
 		const delta = opt.e.deltaY;
 		let zoom = canvas.getZoom();
 		zoom += -delta / 1000;
 		if (zoom > 2) zoom = 2;
 		if (zoom < 0.5) zoom = 0.5;
-		setZoom(Math.round(zoom * 100));
+		setZoom({ zoom: Math.round(zoom * 100), event: 'wheel' });
+		canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
 		opt.e.preventDefault();
 		opt.e.stopPropagation();
 	});
-};
-
-export const setZoomValue = (canvas: fabric.Canvas, zoom: number) => {
-	canvas.setZoom(zoom / 100);
 };
