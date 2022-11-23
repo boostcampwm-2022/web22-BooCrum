@@ -33,13 +33,14 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     if (!isValidWorkspace) {
       this.logger.log(`존재하지 않는 Workspace 접근`);
       client.disconnect();
+      return;
     }
 
     // 2. 쿠키 존재 여부 조회 => 비회원 or 회원
     const cookie = client.handshake.headers.cookie;
-    const userId = await this.getUserId(cookie);
+    const userId = await this.getUserId(cookie, client.id);
 
-    // 3. WorkspaceMember 존재 여부 조회
+    // 3. WorkspaceMember 존재 여부 조회 후 role 부여
     const role = await this.getUserRole(workspaceId, userId);
 
     // 4. Random 색상 지정
@@ -50,11 +51,14 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(userId);
 
     // 6. userMap 추가 (현재: key = client.id, 변경 시 : `${userId}_${workspaceId}`)
-    this.userMap.set(client.id, new UserMapVO(client.id, userId, workspaceId, role, color));
+    this.userMap.set(`${userId}_${workspaceId}`, new UserMapVO(client.id, userId, workspaceId, role, color));
 
     // 7. Socket.io - Client 이벤트 호출
-    const members = Array.from(this.userMap.values()).map((value: UserMapVO) => value.userId);
+    const members = Array.from(this.userMap.keys())
+      .filter((key: string) => key.split('_')[1] === workspaceId)
+      .map((key: string) => key.split('_')[0]);
     const objects = await this.getAllObjects(workspaceId);
+
     this.server.to(workspaceId).emit('init', { members, objects });
   }
 
@@ -65,9 +69,6 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   @SubscribeMessage('create')
   async createObject(@MessageBody() body: CreateObjectDTO, @ConnectedSocket() socket: Socket) {
-    // 1. Client 소켓 연결 http://localhost:8080/workspace/694cc960-0aed-4292-8eac-4a7f447f42ae
-    // 2. event 요청 : http://localhost:8080/workspace/694cc960-0aed-4292-8eac-4a7f447f42ae
-    socket.to('uuid').emit('event 명');
     const result = await this.requestAPI(
       `http://localhost:3000/api/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object`,
       'POST',
@@ -96,9 +97,9 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     }
   }
 
-  async getUserId(cookie: string) {
+  async getUserId(cookie: string, clientId: string) {
     if (!cookie) {
-      return 'undefined';
+      return clientId;
     } else {
       const sessionId = cookieParser.signedCookie(decodeURIComponent(cookie.split('=')[1]), process.env.SESSION_SECRET);
 
