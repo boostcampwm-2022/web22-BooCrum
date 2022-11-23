@@ -4,8 +4,7 @@ export function compareStringByMillisecond(a: string, b: string) {
 
 export function setTimestamp(time: string): string {
 	const updateDate = new Date(time).getTime();
-	const timezoneOffset = new Date().getTimezoneOffset() * 60000;
-	const currentDate = new Date(Date.now() - timezoneOffset).getTime();
+	const currentDate = new Date().getTime();
 
 	const minuteDiff = Math.floor(Math.abs((currentDate - updateDate) / (1000 * 60)));
 
