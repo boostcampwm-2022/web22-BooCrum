@@ -1,6 +1,5 @@
 import { BadRequestException, Injectable } from '@nestjs/common';
 import { RowDataPacket } from 'mysql2';
-import { WorkspaceService } from 'src/workspace/workspace.service';
 import { DataSource } from 'typeorm';
 import { OBJECT_DATABASE_NAME, OBJECT_TABLE_COLUMN_LIST } from './constant/object-database.constant';
 import { CreateObjectDTO } from './dto/create-object.dto';
