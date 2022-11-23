@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { ColorChip, ColorSelect, Container, Rename, FontSize } from './index.style';
 import dropdownColor from '@assets/icon/dropdown-color.svg';
 import { ReactComponent as RenameSection } from '@assets/icon/rename-section.svg';
+import { ObjectEditMenuProps } from './index.type';
 
 const selectedType: { [index: string]: number } = {
 	NONE: 0,
@@ -10,12 +11,11 @@ const selectedType: { [index: string]: number } = {
 	TYPE: 2,
 };
 
-function ObjectEditMenu({ selectedObject }: { selectedObject: string }) {
-	const [color, setColor] = useState(colorChips[0]); // 나중에 밖으로 빼기
+function ObjectEditMenu({ selectedObject, color, setObjectColor }: ObjectEditMenuProps) {
 	const [selected, setSelected] = useState(selectedType.NONE);
 
 	const handleColor = (color: string) => {
-		setColor(color);
+		setObjectColor(color);
 		setSelected(selectedType.NONE);
 	};
 
