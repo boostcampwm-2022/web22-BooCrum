@@ -3,7 +3,6 @@ import { fabric } from 'fabric';
 import { drawingGird } from '@utils/fabric.utils';
 
 function WhiteboardCanvas() {
-	const canvasRef = useRef(null);
 	const canvas = useRef<fabric.Canvas | null>(null);
 	useEffect(() => {
 		canvas.current = initCanvas();
@@ -20,7 +19,7 @@ function WhiteboardCanvas() {
 		const canvasWidth = 2000;
 		const canvasHeight = 900;
 
-		const fabricCanvas = new fabric.Canvas(canvasRef.current, {
+		const fabricCanvas = new fabric.Canvas('canvas', {
 			height: canvasHeight,
 			width: canvasWidth,
 			backgroundColor: '#f1f1f1',
@@ -60,7 +59,7 @@ function WhiteboardCanvas() {
 		<>
 			<button onClick={addObj}>add</button>
 			<button onClick={clearObjects}>CLEAR</button>
-			<canvas ref={canvasRef}></canvas>
+			<canvas id="canvas"></canvas>
 		</>
 	);
 }
