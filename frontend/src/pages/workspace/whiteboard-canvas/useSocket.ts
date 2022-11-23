@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, Member, ServerToClientEvents } from '@pages/workspace/whiteboard-canvas/socket.types';
 
-function useSocket(canvas: fabric.Canvas | null) {
+function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [isConnected, setIsConnected] = useState(false);
 	const [members, setMembers] = useState<Member[]>([]);
 	const {

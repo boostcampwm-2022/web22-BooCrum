@@ -1,3 +1,4 @@
+import { CanvasObject } from './index.types';
 export interface ServerToClientEvents {
 	connect: () => void;
 	disconnect: () => void;
@@ -30,18 +31,6 @@ export interface Member {
 	userId: string;
 	nickname: string;
 	color: string;
-}
-
-export interface CanvasObject {
-	type: 'postit' | 'section' | 'draw';
-	objectId: string;
-	x: number;
-	y: number;
-	width: number;
-	height: number;
-	backgroundColor: string;
-	createdBy: string;
-	text?: string;
 }
 
 export interface MousePointer {

@@ -28,11 +28,6 @@ function useCanvas() {
 
 		drawingGird(fabricCanvas, canvasWidth, canvasHeight, grid);
 
-		// 이벤트 추가 예시
-		fabricCanvas.on('object:added', (e) => {
-			console.log(e);
-		});
-
 		return fabricCanvas;
 	};
 
