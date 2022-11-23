@@ -1,6 +1,6 @@
 import { useLocation } from 'react-router-dom';
 import WhiteboardCanvas from './whiteboard-canvas';
-import Toolkit from './toolkit';
+import Layout from './layout';
 
 function Workspace() {
 	const {
@@ -9,9 +9,9 @@ function Workspace() {
 
 	return (
 		<>
+			<Layout name={name} />
 			<h1>Workspace</h1>
 			<WhiteboardCanvas></WhiteboardCanvas>
-			<Toolkit />
 		</>
 	);
 }

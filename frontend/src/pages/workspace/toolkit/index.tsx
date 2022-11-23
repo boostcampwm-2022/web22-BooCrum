@@ -8,7 +8,7 @@ import section from '@assets/image/section.svg';
 import { toolItems } from '@data/workspace-tool';
 import { cursorState } from '@context/workspace';
 import { isSelectedCursor } from '@utils/is-selected-cursor.utils';
-import PenTypeBox from '../penTypeBox';
+import PenTypeBox from '../pen-type-box';
 
 function Toolkit() {
 	const [cursor, setCursor] = useRecoilState(cursorState);
