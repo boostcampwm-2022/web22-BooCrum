@@ -1,6 +1,6 @@
 import { cursorState } from '@context/workspace';
 import { toolItems } from '@data/workspace-tool';
-import { isSelectedCursor } from '@utils/isSelectedCursor';
+import { isSelectedCursor } from '@utils/is-selected-cursor.utils';
 import { useRecoilState } from 'recoil';
 import penTool from '@assets/image/pen.png';
 import eraserTool from '@assets/image/eraser.png';

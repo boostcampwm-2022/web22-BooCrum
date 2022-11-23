@@ -4,7 +4,7 @@ import { workspaceOrderState } from '@context/main-workspace';
 import WorkspaceCard from '@pages/main/workspace-card';
 import OrderDropdown from '@pages/main/order-dropdown';
 import { Title, TitleContainer, WorkspaceListContainer } from './index.style';
-import { compareStringByMillisecond, setTimestamp } from '@utils/convertTime';
+import { compareStringByMillisecond, setTimestamp } from '@utils/convert-time.utils';
 import { WorkspaceCardType } from './index.type';
 import { User } from '@api/user';
 

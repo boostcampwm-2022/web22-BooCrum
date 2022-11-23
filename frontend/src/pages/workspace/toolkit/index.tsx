@@ -7,7 +7,7 @@ import postIt from '@assets/image/post-it.svg';
 import section from '@assets/image/section.svg';
 import { toolItems } from '@data/workspace-tool';
 import { cursorState } from '@context/workspace';
-import { isSelectedCursor } from '@utils/isSelectedCursor';
+import { isSelectedCursor } from '@utils/is-selected-cursor.utils';
 import PenTypeBox from '../penTypeBox';
 
 function Toolkit() {
