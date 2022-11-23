@@ -37,7 +37,7 @@ function useCanvas() {
 	};
 
 	return {
-		canvas: canvas.current,
+		canvas,
 	};
 }
 
