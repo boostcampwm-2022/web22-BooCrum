@@ -5,7 +5,6 @@ import {
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -24,6 +23,9 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
 
   constructor(private readonly httpService: HttpService) {}
 
+  /**
+   * Client Socket이 연결되면 호출되는 메서드
+   */
   async handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
 
@@ -51,22 +53,35 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(userId);
 
     // 6. userMap 추가 (현재: key = client.id, 변경 시 : `${userId}_${workspaceId}`)
-    this.userMap.set(`${userId}_${workspaceId}`, new UserMapVO(client.id, userId, workspaceId, role, color));
+    // `${userId}_${workspaceId}`)일 경우 : 서버 부담 증가
+    // 1. userMap에서 value가 client.id인 user 및 workspace 찾고(for, filter), 2. userMap.get(`${userId}_${workspaceId}`)
+    // client.id일 경우
+    // 1. userMap.get(clinet.id).workspaceId
+    this.userMap.set(client.id, new UserMapVO(client.id, userId, workspaceId, role, color));
 
     // 7. Socket.io - Client 이벤트 호출
-    const members = Array.from(this.userMap.keys())
-      .filter((key: string) => key.split('_')[1] === workspaceId)
-      .map((key: string) => key.split('_')[0]);
+    // const members = Array.from(this.userMap.keys())
+    //   .filter((key: string) => key.split('_')[1] === workspaceId)
+    //   .map((key: ) => key.splistringt('_')[0]);
+    const members = Array.from(this.userMap.values())
+      .filter((vo: UserMapVO) => vo.workspaceId === workspaceId)
+      .map((vo: UserMapVO) => vo.userId);
     const objects = await this.getAllObjects(workspaceId);
 
     this.server.to(workspaceId).emit('init', { members, objects });
   }
 
+  /**
+   * Client Socket의 연결이 끊어지면 호출되는 메서드
+   */
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
     this.userMap.delete(client.id);
   }
 
+  /**
+   * Client Socket의 연결이 끊어지면 호출되는 메서드
+   */
   @SubscribeMessage('create')
   async createObject(@MessageBody() body: CreateObjectDTO, @ConnectedSocket() socket: Socket) {
     const result = await this.requestAPI(
@@ -74,6 +89,14 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
       'POST',
       body,
     );
+  }
+
+  /**
+   * 사용자가 마우스 포인터를 움직였을 때 호출되는 메서드
+   */
+  @SubscribeMessage('move_pointer')
+  async moveMoustPointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('move_pointer', { x, y });
   }
 
   async getAllObjects(workspaceId: string) {
