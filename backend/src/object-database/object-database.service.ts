@@ -105,7 +105,6 @@ export class ObjectDatabaseService {
         name: targetObjectTableName,
       }),
     );
-    console.log(isTableExist);
     if (!isTableExist) {
       await queryRunner.release();
       return false;
