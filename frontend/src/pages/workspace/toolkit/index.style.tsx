@@ -15,6 +15,8 @@ export const Container = styled.div`
 
 	background: ${({ theme }) => theme.white};
 
+	z-index: 5;
+
 	.cursor {
 		border-right: 1px solid ${({ theme }) => theme.gray_1};
 		width: 44px;
