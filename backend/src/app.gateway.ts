@@ -27,6 +27,8 @@ declare module 'http' {
   }
 }
 
+const API_ADDRESS = 'https://bc7m-j045.xyz:3000/api';
+
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
 //============================================================================================//
@@ -48,13 +50,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     );
   }
 
-  /**
-   * Client Socket이 연결되면 호출되는 메서드
-   */
   async handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
 
-    // 1. Workspace 존재 여부 체크
     const workspaceId = client.nsp.name.match(/workspace\/(.+)/)[1];
     const isValidWorkspace = await this.isExistWorkspace(workspaceId);
     if (!isValidWorkspace) {
@@ -86,32 +84,25 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       .map((vo) => vo.userId);
     const objects = await this.getAllObjects(workspaceId);
 
-    this.server.to(workspaceId).emit('init', { members, objects });
+    client.emit('init', { members, objects });
+    this.server.to(workspaceId).emit('enter_user', userId);
   }
 
-  /**
-   * Client Socket의 연결이 끊어지면 호출되는 메서드
-   */
   handleDisconnect(client: Socket) {
     this.logger.log(`Client disconnected: ${client.id}`);
     this.userMap.delete(client.id);
+    this.server.to(this.userMap.get(client.id).workspaceId).emit('leave_user', this.userMap.get(client.id).userId);
   }
 
-  /**
-   * Client Socket의 연결이 끊어지면 호출되는 메서드
-   */
   @SubscribeMessage('create')
   async createObject(@MessageBody() body: CreateObjectDTO, @ConnectedSocket() socket: Socket) {
     const result = await this.requestAPI(
-      `http://localhost:3000/api/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object`,
+      `${API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object`,
       'POST',
       body,
     );
   }
 
-  /**
-   * 사용자가 마우스 포인터를 움직였을 때 호출되는 메서드
-   */
   @SubscribeMessage('move_pointer')
   async moveMousePointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
     this.server.to(this.userMap.get(socket.id).workspaceId).emit('move_pointer', { x, y });
@@ -127,21 +118,23 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', objectId);
   }
 
+  // @SubscribeMessage('create_object')
+  // async createObject(@MessageBody() objectData: string, @ConnectedSocket() socket: Socket) {
+  //   this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', objectId);
+  // }
+
   async getAllObjects(workspaceId: string) {
     // TODO: Workspace에 해당하는 객체 API 호출 -> 객체 리스트 반환
-    return await this.requestAPI(`http://localhost:3000/api/object-database/${workspaceId}/object`, 'GET');
+    return await this.requestAPI(`${API_ADDRESS}/object-database/${workspaceId}/object`, 'GET');
   }
 
   async isExistWorkspace(workspaceId: string) {
     try {
-      const response = await this.httpService.axiosRef.get(
-        `http://localhost:3000/api/workspace/${workspaceId}/info/metadata`,
-        {
-          headers: {
-            accept: 'application/json',
-          },
+      const response = await this.httpService.axiosRef.get(`${API_ADDRESS}/workspace/${workspaceId}/info/metadata`, {
+        headers: {
+          accept: 'application/json',
         },
-      );
+      });
       if (response.data) return true;
     } catch (e) {
       return false;
@@ -154,7 +147,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     } else {
       const sessionId = cookieParser.signedCookie(decodeURIComponent(cookie.split('=')[1]), process.env.SESSION_SECRET);
 
-      const response = await this.httpService.axiosRef.get(`http://localhost:3000/api/auth/info/${sessionId}`, {
+      const response = await this.httpService.axiosRef.get(`${API_ADDRESS}/auth/info/${sessionId}`, {
         headers: {
           accept: 'application/json',
         },
@@ -164,14 +157,11 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   async getUserRole(workspaceId: string, userId: string) {
-    const response = await this.httpService.axiosRef.get(
-      `http://localhost:3000/api/workspace/${workspaceId}/role/${userId}`,
-      {
-        headers: {
-          accept: 'application/json',
-        },
+    const response = await this.httpService.axiosRef.get(`${API_ADDRESS}/api/workspace/${workspaceId}/role/${userId}`, {
+      headers: {
+        accept: 'application/json',
       },
-    );
+    });
     return response.data;
   }
 
