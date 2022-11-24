@@ -2,7 +2,7 @@ import { WhiteboardCanvasLayout } from './index.style';
 import useCanvas from './useCanvas';
 import useSocket from './useSocket';
 import useContextMenu from '@hooks/useContextMenu';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import ContextMenu from '@components/context-menu';
 import ObjectEditMenu from '../objectEditMenu';
 import { colorChips } from '@data/workspace-object-color';
@@ -28,6 +28,8 @@ function WhiteboardCanvas() {
 		canvas.current.on('selection:created', (e) => {
 			// todo select 로직
 			console.log(e);
+
+			toggleOpen(e.target?.left || 0, e.target?.top || 0);
 		});
 
 		canvas.current.on('selection:cleared', (e) => {
@@ -68,22 +70,16 @@ function WhiteboardCanvas() {
 		});
 	};
 
-	// object edit menu 초안 -> object를 선택했을 때 메뉴 뜨도록 추후 수정
-	const openContextMenu: React.MouseEventHandler<HTMLButtonElement> = (e) => {
-		toggleOpen(e.clientX, e.clientY);
-	};
-
 	// object color 수정 초안
-	const [color, setColor] = useState(colorChips[0]); // 나중에 object의 color로 대체
+	const [color, setColor] = useState(colorChips[0]); // 나중에 선택된 object의 color로 대체 예정
 	const setObjectColor = (color: string) => {
-		setColor(color);
+		setColor(color); // object의 color를 수정하는 로직으로 수정 예정
 	};
 
 	return (
 		<>
 			<button onClick={addObj}>add</button>
 			<button onClick={clearObjects}>CLEAR</button>
-			<button onClick={openContextMenu}>edit menu</button>
 			<canvas id="canvas"></canvas>
 
 			<ContextMenu isOpen={isOpen} menuRef={menuRef} posX={menuPosition.x} posY={menuPosition.y}>
