@@ -45,7 +45,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const workspaceId = client.nsp.name.match(/workspace\/(.+)/)[1];
     const isValidWorkspace = await this.isExistWorkspace(workspaceId);
     if (!isValidWorkspace) {
-      this.logger.log(`존재하지 않는 Workspace 접근`);
+      this.logger.error(`존재하지 않는 Workspace 접근`);
       client.disconnect();
       return;
     }
@@ -92,9 +92,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('move_pointer')
   async moveMousePointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
-    console.log('Hi');
     const userId = this.userMap.get(socket.id).userId;
-    console.log(userId);
     this.server.to(this.userMap.get(socket.id).workspaceId).emit('move_pointer', { x, y, userId });
   }
 
@@ -130,62 +128,32 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   @SubscribeMessage('delete_object')
   async deleteObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
     const workspaceId = this.userMap.get(socket.id).workspaceId;
-    await this.requestAPI(`${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectId}`, 'DELETE');
+    const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectId}`;
+    await this.requestAPI(requestURL, 'DELETE');
     this.server.to(this.userMap.get(socket.id).workspaceId).emit('delete_object', objectId);
   }
 
   async getAllObjects(workspaceId: string) {
-    // TODO: Workspace에 해당하는 객체 API 호출 -> 객체 리스트 반환
     return await this.requestAPI(`${process.env.API_ADDRESS}/object-database/${workspaceId}/object`, 'GET');
   }
 
   async isExistWorkspace(workspaceId: string) {
     try {
-      const response = await this.httpService.axiosRef.get(
-        `${process.env.API_ADDRESS}/workspace/${workspaceId}/info/metadata`,
-        {
-          headers: {
-            accept: 'application/json',
-          },
-        },
-      );
-      if (response.data) return true;
+      const requestURL = `${process.env.API_ADDRESS}/workspace/${workspaceId}/info/metadata`;
+      const response = await this.requestAPI(requestURL, 'GET');
+      if (response) return true;
     } catch (e) {
       return false;
     }
   }
 
-  async getUserId(cookie: string, clientId: string) {
-    if (!cookie) {
-      return clientId;
-    } else {
-      const sessionId = cookieParser.signedCookie(decodeURIComponent(cookie.split('=')[1]), process.env.SESSION_SECRET);
-
-      const response = await this.httpService.axiosRef.get(`${process.env.API_ADDRESS}/auth/info/${sessionId}`, {
-        headers: {
-          accept: 'application/json',
-        },
-      });
-      return response.data;
-    }
-  }
-
   async getUserRole(workspaceId: string, userId: string) {
-    const response = await this.httpService.axiosRef.get(
-      `${process.env.API_ADDRESS}/workspace/${workspaceId}/role/${userId}`,
-      {
-        headers: {
-          accept: 'application/json',
-        },
-      },
-    );
-    return response.data;
+    const requestURL = `${process.env.API_ADDRESS}/workspace/${workspaceId}/role/${userId}`;
+    return await this.requestAPI(requestURL, 'GET');
   }
 
   async requestAPI(address: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE', body?: object) {
-    const headers = {
-      accept: 'application/json',
-    };
+    const headers = { accept: 'application/json' };
 
     let response: AxiosResponse;
 
