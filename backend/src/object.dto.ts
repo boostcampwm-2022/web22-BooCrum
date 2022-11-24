@@ -1,7 +1,13 @@
 import { IsNumber, IsString, IsUUID } from 'class-validator';
 
 export class ObjectDTO {
-  @IsString()
+  // constructor(userId: string, workspaceId: string, role: number, color: string) {
+  //   this.userId = userId;
+  //   this.workspaceId = workspaceId;
+  //   this.role = role;
+  //   this.color = color;
+  // }
+
   objectId: string;
 
   @IsUUID()
@@ -11,10 +17,10 @@ export class ObjectDTO {
   type: number;
 
   @IsNumber()
-  xPos: number;
+  x_pos: number; // 커서 색상
 
   @IsNumber()
-  yPos: number;
+  y_pos: number; // 커서 색상
 
   @IsNumber()
   width: number;
