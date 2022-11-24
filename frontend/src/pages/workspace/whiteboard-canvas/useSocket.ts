@@ -1,59 +1,65 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, Member, ServerToClientEvents } from '@pages/workspace/whiteboard-canvas/socket.types';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
+	const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
 	const [isConnected, setIsConnected] = useState(false);
 	const [members, setMembers] = useState<Member[]>([]);
 	const {
 		state: { workspaceId },
 	} = useLocation();
-	const socket: Socket<ServerToClientEvents, ClientToServerEvents> = io(`/workspace/${workspaceId}`);
 
 	useEffect(() => {
-		socket.on('connect', () => {
+		socket.current = io(`/workspace/${workspaceId}`);
+		socket.current.on('connect', () => {
 			setIsConnected(true);
+			console.log('socket connected');
 		});
 
-		socket.on('disconnect', () => {
+		socket.current.on('disconnect', () => {
 			setIsConnected(false);
+			console.log('socket disconnected');
 		});
 
-		socket.on('init', ({ members, objects }) => {
+		socket.current.on('init', ({ members, objects }) => {
 			setMembers(members);
+			console.log('socket init');
 			//todo: objects 업데이트
 		});
 
-		socket.on('enter_user', ({ userData }) => {
+		socket.current.on('enter_user', ({ userData }) => {
 			setMembers((prev) => [...prev, userData]);
+			console.log('enter_user');
 		});
 
-		socket.on('leave_user', ({ userId }) => {
+		socket.current.on('leave_user', ({ userId }) => {
 			setMembers((prev) => prev.filter((user) => user.userId !== userId));
+			console.log('leave_user');
 		});
 
-		socket.on('move_pointer', ({ userId, x, y }) => {
+		socket.current.on('move_pointer', ({ userId, x, y }) => {
 			// todo move_pointer 업데이트
 		});
 
-		socket.on('select_object', ({ userId, objectId }) => {
+		socket.current.on('select_object', ({ userId, objectId }) => {
 			//todo select 업데아트
 		});
 
-		socket.on('unselect_object', ({ userId, objectId }) => {
+		socket.current.on('unselect_object', ({ userId, objectId }) => {
 			//todo unselect 업데아트
 		});
 
-		socket.on('create_object', ({ objectData }) => {
+		socket.current.on('create_object', ({ objectData }) => {
 			//todo object 추가
 		});
 
-		socket.on('delete_object', ({ objectId }) => {
+		socket.current.on('delete_object', ({ objectId }) => {
 			// todo object 삭제
 		});
 
-		socket.on('update_object', ({ objectData }) => {
+		socket.current.on('update_object', ({ objectData }) => {
 			//todo object 업데이트
 		});
 	}, []);
