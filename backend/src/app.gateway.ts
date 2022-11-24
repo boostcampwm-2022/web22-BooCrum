@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -129,12 +129,22 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('update_object')
   async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
-    await this.requestAPI(
+    const ret = await this.requestAPI(
       `${API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object/${objectData.objectId}`,
       'PATCH',
       objectData,
     );
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('update_object', objectData);
+    if (ret) this.server.to(this.userMap.get(socket.id).workspaceId).emit('update_object', objectData);
+    else throw new BadRequestException();
+  }
+
+  @SubscribeMessage('delete_object')
+  async deleteObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
+    await this.requestAPI(
+      `${API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object/${objectId}`,
+      'DELETE',
+    );
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('delete_object', objectId);
   }
 
   async getAllObjects(workspaceId: string) {
@@ -195,8 +205,10 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         return response.data;
       case 'PATCH':
         response = await this.httpService.axiosRef.patch(address, body, { headers });
-      default:
-        console.log('default');
+        return response.data;
+      case 'DELETE':
+        response = await this.httpService.axiosRef.delete(address, { headers });
+        return response.data;
     }
   }
 }
