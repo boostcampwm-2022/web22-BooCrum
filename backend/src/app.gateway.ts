@@ -127,7 +127,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   async deleteObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
     const workspaceId = this.userMap.get(socket.id).workspaceId;
     const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectId}`;
-    await this.appService.requestAPI(requestURL, 'DELETE');
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('delete_object', objectId);
+    const ret = await this.appService.requestAPI(requestURL, 'DELETE');
+    if (ret) this.server.to(this.userMap.get(socket.id).workspaceId).emit('delete_object', objectId);
+    else throw new BadRequestException('삭제 실패');
   }
 }
