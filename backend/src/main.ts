@@ -1,6 +1,6 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { createSessionMiddleware } from './util/session.util';
+import { createSessionMiddleware } from './middlewares/session.middleware';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -8,7 +8,6 @@ async function bootstrap() {
 
   // 세션 초기화
   app.use(createSessionMiddleware());
-
   await app.listen(3000);
 }
 bootstrap();
