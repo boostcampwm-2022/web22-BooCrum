@@ -2,6 +2,8 @@ import { WhiteboardCanvasLayout } from './index.style';
 import useCanvas from './useCanvas';
 import useSocket from './useSocket';
 import { useEffect } from 'react';
+import { cursorState } from '@context/workspace';
+import { useRecoilState } from 'recoil';
 
 function WhiteboardCanvas() {
 	const { canvas } = useCanvas();

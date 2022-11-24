@@ -1,12 +1,25 @@
 import { useRef, useEffect } from 'react';
 import { fabric } from 'fabric';
-import { initGrid, initZoom } from '@utils/fabric.utils';
-import { useRecoilState } from 'recoil';
-import { zoomState } from '@context/workspace';
+import { initGrid, initPanning, initZoom } from '@utils/fabric.utils';
+import { useRecoilState, useRecoilValue } from 'recoil';
+import { cursorState, zoomState } from '@context/workspace';
+import { toolItems } from '@data/workspace-tool';
 
 function useCanvas() {
 	const canvas = useRef<fabric.Canvas | null>(null);
 	const [zoom, setZoom] = useRecoilState(zoomState);
+	const cursor = useRecoilValue(cursorState);
+	useEffect(() => {
+		if (cursor.type === 1) {
+			if (canvas.current) {
+				canvas.current.moveMode = true;
+			}
+		} else {
+			if (canvas.current) {
+				canvas.current.moveMode = false;
+			}
+		}
+	}, [cursor]);
 
 	useEffect(() => {
 		if (canvas.current && zoom.event === 'control')
@@ -36,6 +49,7 @@ function useCanvas() {
 
 		initGrid(fabricCanvas, canvasWidth, canvasHeight, grid);
 		initZoom(fabricCanvas, setZoom);
+		initPanning(fabricCanvas);
 
 		return fabricCanvas;
 	};
