@@ -5,6 +5,7 @@ import {
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
+  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
@@ -13,9 +14,10 @@ import { AxiosResponse } from 'axios';
 import * as cookieParser from 'cookie-parser';
 import { Server, Socket } from 'socket.io';
 import { createSessionMiddleware } from './util/session.util';
-
 import { Request, Response, NextFunction } from 'express';
 import { Session } from 'express-session';
+import { CreateObjectDTO } from './object-database/dto/create-object.dto';
+import { UserMapVO } from './user-map.vo';
 
 declare module 'http' {
   interface IncomingMessage {
@@ -24,20 +26,6 @@ declare module 'http' {
     };
   }
 }
-
-class UserData {
-  constructor(socketId: string, userId: string, role: number) {
-    this.socketId = socketId;
-    this.userId = userId;
-    this.role = role;
-  }
-
-  socketId: string;
-  userId: string;
-  role: number;
-}
-import { CreateObjectDTO } from './object-database/dto/create-object.dto';
-import { UserMapVO } from './user-map.vo';
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -65,7 +53,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
    */
   async handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
-    console.log(client.request.session);
 
     // 1. Workspace 존재 여부 체크
     const workspaceId = client.nsp.name.match(/workspace\/(.+)/)[1];
@@ -132,7 +119,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   async getAllObjects(workspaceId: string) {
     // TODO: Workspace에 해당하는 객체 API 호출 -> 객체 리스트 반환
-    return [];
+    return await this.requestAPI(`http://localhost:3000/api/object-database/${workspaceId}/object`, 'GET');
   }
 
   async isExistWorkspace(workspaceId: string) {
@@ -178,7 +165,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     return response.data;
   }
 
-  async requestAPI(address: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE', body: object | null) {
+  async requestAPI(address: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE', body?: object) {
     const headers = {
       accept: 'application/json',
     };
