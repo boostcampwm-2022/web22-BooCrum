@@ -120,18 +120,16 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('create_object')
   async createObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
-    await this.requestAPI(
-      `${process.env.API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object`,
-      'POST',
-      objectData,
-    );
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('create_object', objectData);
+    const workspaceId = this.userMap.get(socket.id).workspaceId;
+    await this.requestAPI(`${process.env.API_ADDRESS}/object-database/${workspaceId}/object`, 'POST', objectData);
+    this.server.to(workspaceId).emit('create_object', objectData);
   }
 
   @SubscribeMessage('update_object')
   async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
+    const workspaceId = this.userMap.get(socket.id).workspaceId;
     const ret = await this.requestAPI(
-      `${process.env.API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object/${objectData.objectId}`,
+      `${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectData.objectId}`,
       'PATCH',
       objectData,
     );
@@ -141,10 +139,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('delete_object')
   async deleteObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
-    await this.requestAPI(
-      `${process.env.API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object/${objectId}`,
-      'DELETE',
-    );
+    const workspaceId = this.userMap.get(socket.id).workspaceId;
+    await this.requestAPI(`${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectId}`, 'DELETE');
     this.server.to(this.userMap.get(socket.id).workspaceId).emit('delete_object', objectId);
   }
 
