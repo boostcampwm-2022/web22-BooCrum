@@ -6,7 +6,7 @@ import useSocket from './useSocket';
 import useContextMenu from '@hooks/useContextMenu';
 import { useEffect, useState } from 'react';
 import ContextMenu from '@components/context-menu';
-import ObjectEditMenu from '../objectEditMenu';
+import ObjectEditMenu from '../object-edit-menu';
 import { colorChips } from '@data/workspace-object-color';
 import { toolItems } from '@data/workspace-tool';
 import { useRecoilValue } from 'recoil';
