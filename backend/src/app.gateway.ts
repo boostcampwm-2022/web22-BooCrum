@@ -16,7 +16,6 @@ import { Server, Socket } from 'socket.io';
 import { createSessionMiddleware } from './util/session.util';
 import { Request, Response, NextFunction } from 'express';
 import { Session } from 'express-session';
-import { CreateObjectDTO } from './object-database/dto/create-object.dto';
 import { UserMapVO } from './user-map.vo';
 import { ObjectDTO } from './object.dto';
 
@@ -28,7 +27,7 @@ declare module 'http' {
   }
 }
 
-const API_ADDRESS = 'https://bc7m-j045.xyz/api';
+const API_ADDRESS = process.env.API_ADDRESS;
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -128,6 +127,16 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.to(this.userMap.get(socket.id).workspaceId).emit('create_object', objectData);
   }
 
+  @SubscribeMessage('update_object')
+  async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
+    await this.requestAPI(
+      `${API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object/${objectData.objectId}`,
+      'PATCH',
+      objectData,
+    );
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('update_object', objectData);
+  }
+
   async getAllObjects(workspaceId: string) {
     // TODO: Workspace에 해당하는 객체 API 호출 -> 객체 리스트 반환
     return await this.requestAPI(`${API_ADDRESS}/object-database/${workspaceId}/object`, 'GET');
@@ -184,6 +193,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       case 'POST':
         response = await this.httpService.axiosRef.post(address, body, { headers });
         return response.data;
+      case 'PATCH':
+        response = await this.httpService.axiosRef.patch(address, body, { headers });
       default:
         console.log('default');
     }
