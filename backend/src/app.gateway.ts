@@ -18,6 +18,7 @@ import { Request, Response, NextFunction } from 'express';
 import { Session } from 'express-session';
 import { CreateObjectDTO } from './object-database/dto/create-object.dto';
 import { UserMapVO } from './user-map.vo';
+import { ObjectDTO } from './object.dto';
 
 declare module 'http' {
   interface IncomingMessage {
@@ -102,15 +103,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     }
   }
 
-  @SubscribeMessage('create')
-  async createObject(@MessageBody() body: CreateObjectDTO, @ConnectedSocket() socket: Socket) {
-    const result = await this.requestAPI(
-      `${API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object`,
-      'POST',
-      body,
-    );
-  }
-
   @SubscribeMessage('move_pointer')
   async moveMousePointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
     this.server.to(this.userMap.get(socket.id).workspaceId).emit('move_pointer', { x, y });
@@ -126,10 +118,15 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', objectId);
   }
 
-  // @SubscribeMessage('create_object')
-  // async createObject(@MessageBody() objectData: string, @ConnectedSocket() socket: Socket) {
-  //   this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', objectId);
-  // }
+  @SubscribeMessage('create_object')
+  async createObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
+    await this.requestAPI(
+      `${API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object`,
+      'POST',
+      objectData,
+    );
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('create_object', objectData);
+  }
 
   async getAllObjects(workspaceId: string) {
     // TODO: Workspace에 해당하는 객체 API 호출 -> 객체 리스트 반환
