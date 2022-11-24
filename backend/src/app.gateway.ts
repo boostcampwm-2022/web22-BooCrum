@@ -81,7 +81,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   handleDisconnect(client: Socket) {
     const clientId = client.id;
-    this.logger.log(`Client disconnected: ${clientId}`);
 
     if (this.userMap.get(clientId)) {
       this.logger.log(`Client disconnected: ${clientId}`);
@@ -112,20 +111,18 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   @SubscribeMessage('create_object')
   async createObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
     const workspaceId = this.userMap.get(socket.id).workspaceId;
-    await this.requestAPI(`${process.env.API_ADDRESS}/object-database/${workspaceId}/object`, 'POST', objectData);
+    const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object`;
+    await this.requestAPI(requestURL, 'POST', objectData);
     this.server.to(workspaceId).emit('create_object', objectData);
   }
 
   @SubscribeMessage('update_object')
   async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
     const workspaceId = this.userMap.get(socket.id).workspaceId;
-    const ret = await this.requestAPI(
-      `${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectData.objectId}`,
-      'PATCH',
-      objectData,
-    );
+    const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectData.objectId}`;
+    const ret = await this.requestAPI(requestURL, 'PATCH', objectData);
     if (ret) this.server.to(this.userMap.get(socket.id).workspaceId).emit('update_object', objectData);
-    else throw new BadRequestException();
+    else throw new BadRequestException('수정 실패');
   }
 
   @SubscribeMessage('delete_object')
@@ -137,7 +134,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   async getAllObjects(workspaceId: string) {
-    return await this.requestAPI(`${process.env.API_ADDRESS}/object-database/${workspaceId}/object`, 'GET');
+    const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object`;
+    return await this.requestAPI(requestURL, 'GET');
   }
 
   async isExistWorkspace(workspaceId: string) {
@@ -155,23 +153,23 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     return await this.requestAPI(requestURL, 'GET');
   }
 
-  async requestAPI(address: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE', body?: object) {
+  async requestAPI(requestURL: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE', body?: object) {
     const headers = { accept: 'application/json' };
 
     let response: AxiosResponse;
 
     switch (method) {
       case 'GET':
-        response = await this.httpService.axiosRef.get(address, { headers });
+        response = await this.httpService.axiosRef.get(requestURL, { headers });
         return response.data;
       case 'POST':
-        response = await this.httpService.axiosRef.post(address, body, { headers });
+        response = await this.httpService.axiosRef.post(requestURL, body, { headers });
         return response.data;
       case 'PATCH':
-        response = await this.httpService.axiosRef.patch(address, body, { headers });
+        response = await this.httpService.axiosRef.patch(requestURL, body, { headers });
         return response.data;
       case 'DELETE':
-        response = await this.httpService.axiosRef.delete(address, { headers });
+        response = await this.httpService.axiosRef.delete(requestURL, { headers });
         return response.data;
     }
   }
