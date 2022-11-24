@@ -15,17 +15,8 @@ import * as cookieParser from 'cookie-parser';
 import { Server, Socket } from 'socket.io';
 import { createSessionMiddleware } from './util/session.util';
 import { Request, Response, NextFunction } from 'express';
-import { Session } from 'express-session';
 import { UserMapVO } from './user-map.vo';
 import { ObjectDTO } from './object.dto';
-
-declare module 'http' {
-  interface IncomingMessage {
-    session: Session & {
-      authenticated: boolean;
-    };
-  }
-}
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -60,8 +51,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     }
 
     // 2. 쿠키 존재 여부 조회 => 비회원 or 회원
-    const cookie = client.handshake.headers.cookie;
-    const userId = await this.getUserId(cookie, client.id);
+    const userId = client.request.session.user.userId;
 
     // 3. WorkspaceMember 존재 여부 조회 후 role 부여
     const role = await this.getUserRole(workspaceId, userId);
