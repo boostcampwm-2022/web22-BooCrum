@@ -16,8 +16,8 @@ import { Server, Socket } from 'socket.io';
 import { createSessionMiddleware } from './util/session.util';
 import { Request, Response, NextFunction } from 'express';
 import { Session } from 'express-session';
-import { CreateObjectDTO } from './object-database/dto/create-object.dto';
 import { UserMapVO } from './user-map.vo';
+import { ObjectDTO } from './object.dto';
 
 declare module 'http' {
   interface IncomingMessage {
@@ -27,7 +27,7 @@ declare module 'http' {
   }
 }
 
-const API_ADDRESS = 'https://bc7m-j045.xyz:3000/api';
+const API_ADDRESS = process.env.API_ADDRESS;
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -89,18 +89,17 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected: ${client.id}`);
-    this.userMap.delete(client.id);
-    this.server.to(this.userMap.get(client.id).workspaceId).emit('leave_user', this.userMap.get(client.id).userId);
-  }
+    const clientId = client.id;
+    this.logger.log(`Client disconnected: ${clientId}`);
 
-  @SubscribeMessage('create')
-  async createObject(@MessageBody() body: CreateObjectDTO, @ConnectedSocket() socket: Socket) {
-    const result = await this.requestAPI(
-      `${API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object`,
-      'POST',
-      body,
-    );
+    if (this.userMap.get(clientId)) {
+      this.logger.log(`Client disconnected: ${clientId}`);
+
+      const workspaceId = this.userMap.get(clientId).workspaceId;
+      const userId = this.userMap.get(clientId).userId;
+      this.userMap.delete(clientId);
+      this.server.to(workspaceId).emit('leave_user', userId);
+    }
   }
 
   @SubscribeMessage('move_pointer')
@@ -118,10 +117,25 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', objectId);
   }
 
-  // @SubscribeMessage('create_object')
-  // async createObject(@MessageBody() objectData: string, @ConnectedSocket() socket: Socket) {
-  //   this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', objectId);
-  // }
+  @SubscribeMessage('create_object')
+  async createObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
+    await this.requestAPI(
+      `${API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object`,
+      'POST',
+      objectData,
+    );
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('create_object', objectData);
+  }
+
+  @SubscribeMessage('update_object')
+  async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
+    await this.requestAPI(
+      `${API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object/${objectData.objectId}`,
+      'PATCH',
+      objectData,
+    );
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('update_object', objectData);
+  }
 
   async getAllObjects(workspaceId: string) {
     // TODO: Workspace에 해당하는 객체 API 호출 -> 객체 리스트 반환
@@ -157,7 +171,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   async getUserRole(workspaceId: string, userId: string) {
-    const response = await this.httpService.axiosRef.get(`${API_ADDRESS}/api/workspace/${workspaceId}/role/${userId}`, {
+    const response = await this.httpService.axiosRef.get(`${API_ADDRESS}/workspace/${workspaceId}/role/${userId}`, {
       headers: {
         accept: 'application/json',
       },
@@ -179,6 +193,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       case 'POST':
         response = await this.httpService.axiosRef.post(address, body, { headers });
         return response.data;
+      case 'PATCH':
+        response = await this.httpService.axiosRef.patch(address, body, { headers });
       default:
         console.log('default');
     }
