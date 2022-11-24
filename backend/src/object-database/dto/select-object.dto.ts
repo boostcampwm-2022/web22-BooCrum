@@ -1,8 +1,10 @@
-import { IsNumber, IsUUID } from 'class-validator';
+import { IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class SelectObjectDTO {
   @IsUUID()
+  @IsOptional()
   workspaceId: string;
 
-  objectId: number;
+  @IsString()
+  objectId: string;
 }

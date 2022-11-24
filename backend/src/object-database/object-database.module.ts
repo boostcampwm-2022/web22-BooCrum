@@ -1,13 +1,12 @@
 import { Module } from '@nestjs/common';
-import { ObjectDatabaseService } from './object-database.service';
 import { ObjectDatabaseController } from './object-database.controller';
 import { ObjectHandlerService } from './object-handler.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
+import { WorkspaceObject } from './entity/workspace-object.entity';
 
 @Module({
-  imports: [TypeOrmModule.forFeature()],
+  imports: [TypeOrmModule.forFeature([WorkspaceObject])],
   controllers: [ObjectDatabaseController],
-  providers: [ObjectDatabaseService, ObjectHandlerService],
-  exports: [ObjectDatabaseService],
+  providers: [ObjectHandlerService],
 })
 export class ObjectDatabaseModule {}
