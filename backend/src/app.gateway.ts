@@ -13,7 +13,7 @@ import {
 import { AxiosResponse } from 'axios';
 import * as cookieParser from 'cookie-parser';
 import { Server, Socket } from 'socket.io';
-import { createSessionMiddleware } from './util/session.util';
+import { createSessionMiddleware } from './middlewares/session.middleware';
 import { Request, Response, NextFunction } from 'express';
 import { UserMapVO } from './user-map.vo';
 import { ObjectDTO } from './object.dto';
