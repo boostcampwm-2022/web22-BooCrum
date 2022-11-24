@@ -19,7 +19,7 @@ import { UserMapVO } from './user-map.vo';
 export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('AppGateway');
-  private userMap = new Map();
+  private userMap = new Map<string, UserMapVO>();
 
   constructor(private readonly httpService: HttpService) {}
 
@@ -52,20 +52,13 @@ export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
     client.join(workspaceId);
     client.join(userId);
 
-    // 6. userMap 추가 (현재: key = client.id, 변경 시 : `${userId}_${workspaceId}`)
-    // `${userId}_${workspaceId}`)일 경우 : 서버 부담 증가
-    // 1. userMap에서 value가 client.id인 user 및 workspace 찾고(for, filter), 2. userMap.get(`${userId}_${workspaceId}`)
-    // client.id일 경우
-    // 1. userMap.get(clinet.id).workspaceId
-    this.userMap.set(client.id, new UserMapVO(client.id, userId, workspaceId, role, color));
+    // 6. userMap 추가
+    this.userMap.set(client.id, new UserMapVO(userId, workspaceId, role, color));
 
     // 7. Socket.io - Client 이벤트 호출
-    // const members = Array.from(this.userMap.keys())
-    //   .filter((key: string) => key.split('_')[1] === workspaceId)
-    //   .map((key: ) => key.splistringt('_')[0]);
     const members = Array.from(this.userMap.values())
-      .filter((vo: UserMapVO) => vo.workspaceId === workspaceId)
-      .map((vo: UserMapVO) => vo.userId);
+      .filter((vo) => vo.workspaceId === workspaceId)
+      .map((vo) => vo.userId);
     const objects = await this.getAllObjects(workspaceId);
 
     this.server.to(workspaceId).emit('init', { members, objects });
