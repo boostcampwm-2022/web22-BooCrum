@@ -122,6 +122,11 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.server.to(this.userMap.get(socket.id).workspaceId).emit('select_object', objectId);
   }
 
+  @SubscribeMessage('unselect_object')
+  async unselectObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', objectId);
+  }
+
   async getAllObjects(workspaceId: string) {
     // TODO: Workspace에 해당하는 객체 API 호출 -> 객체 리스트 반환
     return await this.requestAPI(`http://localhost:3000/api/object-database/${workspaceId}/object`, 'GET');
