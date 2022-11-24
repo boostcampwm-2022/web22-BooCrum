@@ -11,7 +11,7 @@ function WhiteboardCanvas() {
 
 	useEffect(() => {
 		if (canvas.current && zoom.event === 'control')
-			canvas.current.zoomToPoint({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, zoom.zoom / 100);
+			canvas.current.zoomToPoint({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, zoom.percent / 100);
 	}, [zoom]);
 
 	useEffect(() => {

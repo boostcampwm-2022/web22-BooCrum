@@ -8,17 +8,17 @@ function ZoomController() {
 
 	const handleZoomOut = () => {
 		setZoom((prevZoom) =>
-			prevZoom.zoom - 10 >= 50
-				? { zoom: prevZoom.zoom - 10, event: 'control' }
-				: { zoom: prevZoom.zoom, event: 'control' }
+			prevZoom.percent - 10 >= 50
+				? { percent: prevZoom.percent - 10, event: 'control' }
+				: { percent: prevZoom.percent, event: 'control' }
 		);
 	};
 
 	const handleZoomIn = () => {
 		setZoom((prevZoom) =>
-			prevZoom.zoom + 10 <= 200
-				? { zoom: prevZoom.zoom + 10, event: 'control' }
-				: { zoom: prevZoom.zoom, event: 'control' }
+			prevZoom.percent + 10 <= 200
+				? { percent: prevZoom.percent + 10, event: 'control' }
+				: { percent: prevZoom.percent, event: 'control' }
 		);
 	};
 
@@ -27,7 +27,7 @@ function ZoomController() {
 			<div className="zoom" onClick={handleZoomOut}>
 				<img alt="zoom out" className="zoom-icon" src={zoomOut} />
 			</div>
-			<p className="zoom-percent">{zoom.zoom}%</p>
+			<p className="zoom-percent">{zoom.percent}%</p>
 			<div className="zoom" onClick={handleZoomIn}>
 				<img alt="zoom in" className="zoom-icon" src={zoomIn} />
 			</div>

@@ -25,7 +25,7 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 export const initZoom = (
 	canvas: fabric.Canvas,
 	setZoom: SetterOrUpdater<{
-		zoom: number;
+		percent: number;
 		event: string;
 	}>
 ) => {
@@ -35,7 +35,7 @@ export const initZoom = (
 		zoom += -delta / 1000;
 		if (zoom > 2) zoom = 2;
 		if (zoom < 0.5) zoom = 0.5;
-		setZoom({ zoom: Math.round(zoom * 100), event: 'wheel' });
+		setZoom({ percent: Math.round(zoom * 100), event: 'wheel' });
 		canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
 		opt.e.preventDefault();
 		opt.e.stopPropagation();
