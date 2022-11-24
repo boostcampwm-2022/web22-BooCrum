@@ -9,5 +9,5 @@ export const cursorState = atom({
 
 export const zoomState = atom({
 	key: 'zoom',
-	default: 100,
+	default: { percent: 100, event: '' },
 });

@@ -1,10 +1,12 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
+	position: relative;
 	height: 56px;
+	z-index: 5;
 
 	border-bottom: 1px solid ${({ theme }) => theme.gray_1};
-
+	background-color: white;
 	display: flex;
 	align-items: center;
 
