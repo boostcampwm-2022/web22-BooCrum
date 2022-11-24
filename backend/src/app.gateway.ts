@@ -50,8 +50,11 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       return;
     }
 
-    // 2. 쿠키 존재 여부 조회 => 비회원 or 회원
-    const userId = client.request.session.user.userId;
+    // 2. 쿠키 존재 여부 조회 및 userId 설정 : 회원(userId 사용), 비회원(소켓 ID 사용)
+    const session = client.request.session;
+    let userId: string;
+    if (session.user !== undefined) userId = session.user.userId;
+    else userId = client.id;
 
     // 3. WorkspaceMember 존재 여부 조회 후 role 부여
     const role = await this.getUserRole(workspaceId, userId);
