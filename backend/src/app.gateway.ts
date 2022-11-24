@@ -14,6 +14,7 @@ import { createSessionMiddleware } from './middlewares/session.middleware';
 import { Request, Response, NextFunction } from 'express';
 import { UserMapVO } from './util/socket/user-map.vo';
 import { ObjectDTO } from './util/socket/object.dto';
+import { UserDAO } from './util/socket/user.dao';
 import { AppService } from './app.service';
 
 //============================================================================================//
@@ -40,6 +41,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   async handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
 
+    // 1. 워크스페이스 조회
     const workspaceId = client.nsp.name.match(/workspace\/(.+)/)[1];
     const isValidWorkspace = await this.appService.isExistWorkspace(workspaceId);
     if (!isValidWorkspace) {
@@ -51,8 +53,14 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     // 2. 쿠키 존재 여부 조회 및 userId 설정 : 회원(userId 사용), 비회원(소켓 ID 사용)
     const session = client.request.session;
     let userId: string;
-    if (session.user !== undefined) userId = session.user.userId;
-    else userId = client.id;
+    let nickname: string;
+    if (session.user !== undefined) {
+      userId = session.user.userId;
+      nickname = session.user.nickname;
+    } else {
+      userId = 'undefined';
+      nickname = `undefined(${client.id})`;
+    }
 
     // 3. WorkspaceMember 존재 여부 조회 후 role 부여
     const role = await this.appService.getUserRole(workspaceId, userId);
@@ -65,7 +73,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     client.join(userId);
 
     // 6. userMap 추가
-    this.userMap.set(client.id, new UserMapVO(userId, workspaceId, role, color));
+    this.userMap.set(client.id, new UserMapVO(userId, nickname, workspaceId, role, color));
 
     // 7. Socket.io - Client 이벤트 호출
     const members = Array.from(this.userMap.values())
@@ -74,7 +82,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const objects = await this.appService.getAllObjects(workspaceId);
 
     client.emit('init', { members, objects });
-    this.server.to(workspaceId).emit('enter_user', userId);
+    const userData = new UserDAO(userId, nickname);
+    this.server.to(workspaceId).emit('enter_user', userData);
   }
 
   handleDisconnect(client: Socket) {
