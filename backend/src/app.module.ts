@@ -7,9 +7,8 @@ import { UserModule } from './user/user.module';
 import { TeamModule } from './team/team.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 import { ObjectDatabaseModule } from './object-database/object-database.module';
-import { AppGateway } from './app.gateway';
-import { HttpModule } from '@nestjs/axios';
 import { config } from './ormconfig';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
   imports: [
@@ -20,10 +19,10 @@ import { config } from './ormconfig';
     WorkspaceModule,
     AuthModule,
     ObjectDatabaseModule,
-    HttpModule,
+    SocketModule,
   ],
   controllers: [],
-  providers: [AppGateway],
+  providers: [],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

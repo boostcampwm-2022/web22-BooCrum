@@ -9,26 +9,27 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { AxiosResponse } from 'axios';
-import * as cookieParser from 'cookie-parser';
 import { Server, Socket } from 'socket.io';
-import { createSessionMiddleware } from './util/session.util';
+import { createSessionMiddleware } from '../middlewares/session.middleware';
 import { Request, Response, NextFunction } from 'express';
-import { UserMapVO } from './user-map.vo';
-import { ObjectDTO } from './object.dto';
+import { UserMapVO } from '../user-map.vo';
+import { ObjectDTO } from '../object.dto';
+import { ObjectHandlerService } from 'src/object-database/object-handler.service';
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
 //============================================================================================//
 
 @WebSocketGateway(8080, { cors: '*', namespace: /workspace\/.+/ })
-export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
-  private logger: Logger = new Logger('AppGateway');
+  private logger: Logger = new Logger('SocketGateway');
   private userMap = new Map<string, UserMapVO>();
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly httpService: HttpService, private objectHandlerService: ObjectHandlerService) {}
 
   // Socket Server가 실행된 직후 실행할 것들. (즉, server가 초기화된 직후.)
   async afterInit() {
@@ -51,7 +52,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     }
 
     // 2. 쿠키 존재 여부 조회 => 비회원 or 회원
-    const userId = client.request.session.user.userId;
+    const userId = client.request.session.user?.userId;
 
     // 3. WorkspaceMember 존재 여부 조회 후 role 부여
     const role = await this.getUserRole(workspaceId, userId);
@@ -60,8 +61,10 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
 
     // 5. room 추가
-    client.join(workspaceId);
-    client.join(userId);
+    //! Dynamic Namespace를 사용함으로써, 네임스페이스가 자동으로 워크스페이스 각각을 의미하게 됨.
+    //! 그러한 이유로 workspaceId에 대한 room 추가가 무의미해짐.
+    // client.join(workspaceId);
+    if (userId !== undefined) client.join(userId);
 
     // 6. userMap 추가
     this.userMap.set(client.id, new UserMapVO(userId, workspaceId, role, color));
@@ -70,49 +73,58 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const members = Array.from(this.userMap.values())
       .filter((vo) => vo.workspaceId === workspaceId)
       .map((vo) => vo.userId);
-    const objects = await this.getAllObjects(workspaceId);
+    const objects = await this.objectHandlerService.selectAllObjects(workspaceId);
 
     client.emit('init', { members, objects });
-    this.server.to(workspaceId).emit('enter_user', userId);
+    //? 자신 포함이야... 자신 제외하고 보내야 하는거야...?
+    client.broadcast.emit('enter_user', userId);
+    // client.nsp.emit('enter_user', userId);
   }
 
+  // Disconnect 이벤트가 발생하였을 때 수행할 처리를 기록한다.
   handleDisconnect(client: Socket) {
     const clientId = client.id;
     this.logger.log(`Client disconnected: ${clientId}`);
 
     if (this.userMap.get(clientId)) {
-      this.logger.log(`Client disconnected: ${clientId}`);
-
-      const workspaceId = this.userMap.get(clientId).workspaceId;
       const userId = this.userMap.get(clientId).userId;
       this.userMap.delete(clientId);
-      this.server.to(workspaceId).emit('leave_user', userId);
+      client.nsp.emit('leave_user', userId);
     }
   }
 
   @SubscribeMessage('move_pointer')
   async moveMousePointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
-    console.log('Hi');
-    const userId = this.userMap.get(socket.id).userId;
-    console.log(userId);
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('move_pointer', { x, y, userId });
+    const userId = this.userMap.get(socket.id)?.userId;
+    if (!userId) return;
+    //TODO: 게스트 마우스 포인터가 보일 필요가 있음?
+    socket.nsp.emit('move_pointer', { x, y, userId });
+    //this.server.to(this.userMap.get(socket.id).workspaceId).emit('move_pointer', { x, y });
   }
 
   @SubscribeMessage('select_object')
   async selectObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('select_object', objectId);
+    const userId = this.userMap.get(socket.id)?.userId;
+    if (!userId) return;
+    socket.nsp.emit('select_object', { objectId, userId });
+    //this.server.to(this.userMap.get(socket.id).workspaceId).emit('select_object', objectId);
   }
 
   @SubscribeMessage('unselect_object')
   async unselectObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', objectId);
+    const userId = this.userMap.get(socket.id)?.userId;
+    if (!userId) return;
+    socket.nsp.emit('unselect_object', { objectId, userId });
+    //this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', objectId);
   }
 
   @SubscribeMessage('create_object')
   async createObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
     const workspaceId = this.userMap.get(socket.id).workspaceId;
+    // await this.objectHandlerService.createObject(workspaceId, objectData);
     await this.requestAPI(`${process.env.API_ADDRESS}/object-database/${workspaceId}/object`, 'POST', objectData);
-    this.server.to(workspaceId).emit('create_object', objectData);
+    socket.nsp.emit('create_object', objectData);
+    //this.server.to(workspaceId).emit('create_object', objectData);
   }
 
   @SubscribeMessage('update_object')
@@ -123,20 +135,19 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       'PATCH',
       objectData,
     );
-    if (ret) this.server.to(this.userMap.get(socket.id).workspaceId).emit('update_object', objectData);
-    else throw new BadRequestException();
+    if (!ret) throw new WsException('업데이트 실패');
+    socket.nsp.emit('update_object', objectData);
+    // this.server.to(this.userMap.get(socket.id).workspaceId).emit('update_object', objectData);
+    // else throw new BadRequestException();
+    // WebSocket은 자체적인 오류 체계가 있습니다...
   }
 
   @SubscribeMessage('delete_object')
   async deleteObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
     const workspaceId = this.userMap.get(socket.id).workspaceId;
     await this.requestAPI(`${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectId}`, 'DELETE');
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('delete_object', objectId);
-  }
-
-  async getAllObjects(workspaceId: string) {
-    // TODO: Workspace에 해당하는 객체 API 호출 -> 객체 리스트 반환
-    return await this.requestAPI(`${process.env.API_ADDRESS}/object-database/${workspaceId}/object`, 'GET');
+    socket.nsp.emit('delete_object', objectId);
+    // this.server.to(this.userMap.get(socket.id).workspaceId).emit('delete_object', objectId);
   }
 
   async isExistWorkspace(workspaceId: string) {
@@ -152,21 +163,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       if (response.data) return true;
     } catch (e) {
       return false;
-    }
-  }
-
-  async getUserId(cookie: string, clientId: string) {
-    if (!cookie) {
-      return clientId;
-    } else {
-      const sessionId = cookieParser.signedCookie(decodeURIComponent(cookie.split('=')[1]), process.env.SESSION_SECRET);
-
-      const response = await this.httpService.axiosRef.get(`${process.env.API_ADDRESS}/auth/info/${sessionId}`, {
-        headers: {
-          accept: 'application/json',
-        },
-      });
-      return response.data;
     }
   }
 

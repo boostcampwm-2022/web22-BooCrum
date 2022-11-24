@@ -5,7 +5,7 @@ import { DataSource } from 'typeorm';
 export class AuthService {
   constructor(private dataSource: DataSource) {}
 
-  async getSessionData(sessionId: string) {
-    return await this.dataSource.query(`SELECT * FROM sessions where session_id = '${sessionId}'`);
-  }
+  // async getSessionData(sessionId: string) {
+  //   return await this.dataSource.query(`SELECT * FROM sessions where session_id = '${sessionId}'`);
+  // }
 }
