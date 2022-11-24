@@ -113,8 +113,13 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
    * 사용자가 마우스 포인터를 움직였을 때 호출되는 메서드
    */
   @SubscribeMessage('move_pointer')
-  async moveMoustPointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
+  async moveMousePointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
     this.server.to(this.userMap.get(socket.id).workspaceId).emit('move_pointer', { x, y });
+  }
+
+  @SubscribeMessage('select_object')
+  async selectObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('select_object', objectId);
   }
 
   async getAllObjects(workspaceId: string) {
