@@ -1,3 +1,4 @@
+import { WorkspaceObject } from '../../object-database/entity/workspace-object.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn, OneToMany } from 'typeorm';
 import { Team } from '../../team/entity/team.entity';
 import { WorkspaceMember } from './workspace-member.entity';
@@ -43,4 +44,7 @@ export class Workspace {
 
   @OneToMany(() => WorkspaceMember, (workspaceMember) => workspaceMember.workspace)
   workspaceMember: WorkspaceMember[];
+
+  @OneToMany(() => WorkspaceObject, (wo) => wo.workspace)
+  workspaceObjects: WorkspaceObject[];
 }
