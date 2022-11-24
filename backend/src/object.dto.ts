@@ -11,10 +11,10 @@ export class ObjectDTO {
   type: number;
 
   @IsNumber()
-  x_pos: number;
+  xPos: number;
 
   @IsNumber()
-  y_pos: number;
+  yPos: number;
 
   @IsNumber()
   width: number;
