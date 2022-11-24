@@ -10,7 +10,7 @@ function useCanvas() {
 	const [zoom, setZoom] = useRecoilState(zoomState);
 	const cursor = useRecoilValue(cursorState);
 	useEffect(() => {
-		if (cursor.type === 1) {
+		if (cursor.type === toolItems.MOVE) {
 			if (canvas.current) {
 				canvas.current.moveMode = true;
 			}
