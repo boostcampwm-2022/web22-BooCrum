@@ -1,6 +1,5 @@
 import {
   Controller,
-  Res,
   Get,
   Post,
   Delete,
@@ -11,7 +10,6 @@ import {
   InternalServerErrorException,
 } from '@nestjs/common';
 import { CreateTableRequestDto } from './dto/create-table-request.dto';
-import { Response } from 'express';
 import { ObjectHandlerService } from './object-handler.service';
 import { SelectObjectDTO } from './dto/select-object.dto';
 import { CreateObjectDTO } from './dto/create-object.dto';

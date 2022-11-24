@@ -8,5 +8,6 @@ import { WorkspaceObject } from './entity/workspace-object.entity';
   imports: [TypeOrmModule.forFeature([WorkspaceObject])],
   controllers: [ObjectDatabaseController],
   providers: [ObjectHandlerService],
+  exports: [ObjectHandlerService, TypeOrmModule],
 })
 export class ObjectDatabaseModule {}
