@@ -14,8 +14,14 @@ export class ObjectDatabaseController {
   ) {}
 
   @Post('/:workspaceId')
-  async createObjectTable(@Param(new ValidationPipe()) { workspaceId }: CreateTableRequestDto) {
-    await this.objectDatabaseService.createObjectTable(workspaceId);
+  async createObjectTable(
+    @Param(new ValidationPipe()) { workspaceId }: CreateTableRequestDto,
+    @Body() { targetTable },
+    @Res() res: Response,
+  ) {
+    if (targetTable)
+      res.sendStatus((await this.objectDatabaseService.copyObjectTable(workspaceId, targetTable)) ? 201 : 400);
+    else await this.objectDatabaseService.createObjectTable(workspaceId);
   }
 
   @Delete('/:workspaceId')

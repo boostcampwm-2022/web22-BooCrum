@@ -6,7 +6,7 @@ import { TeamMember } from './entity/team-member.entity';
 import { IsTeam } from './enum/is-team.enum';
 import { Role } from './enum/role.enum';
 import { TeamDTO } from './dto/team.dto';
-import { User } from 'src/user/entity/user.entity';
+import { User } from '../user/entity/user.entity';
 import { UserService } from 'src/user/user.service';
 
 @Injectable()

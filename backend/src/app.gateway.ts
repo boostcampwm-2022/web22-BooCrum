@@ -12,22 +12,60 @@ import {
 import { AxiosResponse } from 'axios';
 import * as cookieParser from 'cookie-parser';
 import { Server, Socket } from 'socket.io';
+import { createSessionMiddleware } from './util/session.util';
+
+import { Request, Response, NextFunction } from 'express';
+import { Session } from 'express-session';
+
+declare module 'http' {
+  interface IncomingMessage {
+    session: Session & {
+      authenticated: boolean;
+    };
+  }
+}
+
+class UserData {
+  constructor(socketId: string, userId: string, role: number) {
+    this.socketId = socketId;
+    this.userId = userId;
+    this.role = role;
+  }
+
+  socketId: string;
+  userId: string;
+  role: number;
+}
 import { CreateObjectDTO } from './object-database/dto/create-object.dto';
 import { UserMapVO } from './user-map.vo';
 
+//============================================================================================//
+//==================================== Socket.io 서버 정의 ====================================//
+//============================================================================================//
+
 @WebSocketGateway(8080, { cors: '*', namespace: /workspace\/.+/ })
-export class AppGateway implements OnGatewayConnection, OnGatewayDisconnect {
+export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('AppGateway');
   private userMap = new Map<string, UserMapVO>();
 
   constructor(private readonly httpService: HttpService) {}
 
+  // Socket Server가 실행된 직후 실행할 것들. (즉, server가 초기화된 직후.)
+  async afterInit() {
+    // REST API 서버에서 사용하는 세션 정보를 express-session을 이용하여 가져옴.
+    const sessionMiddleware = createSessionMiddleware();
+    this.server.use((socket, next) =>
+      sessionMiddleware(socket.request as Request, {} as Response, next as NextFunction),
+    );
+  }
+
   /**
    * Client Socket이 연결되면 호출되는 메서드
    */
   async handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
+    console.log(client.request.session);
 
     // 1. Workspace 존재 여부 체크
     const workspaceId = client.nsp.name.match(/workspace\/(.+)/)[1];
