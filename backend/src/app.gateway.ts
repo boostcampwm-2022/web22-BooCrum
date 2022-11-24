@@ -1,4 +1,3 @@
-import { HttpService } from '@nestjs/axios';
 import { BadRequestException, Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
@@ -10,13 +9,12 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { AxiosResponse } from 'axios';
-import * as cookieParser from 'cookie-parser';
 import { Server, Socket } from 'socket.io';
 import { createSessionMiddleware } from './middlewares/session.middleware';
 import { Request, Response, NextFunction } from 'express';
-import { UserMapVO } from './user-map.vo';
-import { ObjectDTO } from './object.dto';
+import { UserMapVO } from './util/socket/user-map.vo';
+import { ObjectDTO } from './util/socket/object.dto';
+import { AppService } from './app.service';
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -28,7 +26,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   private logger: Logger = new Logger('AppGateway');
   private userMap = new Map<string, UserMapVO>();
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly appService: AppService) {}
 
   // Socket Server가 실행된 직후 실행할 것들. (즉, server가 초기화된 직후.)
   async afterInit() {
@@ -43,7 +41,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     this.logger.log(`Client connected: ${client.id}`);
 
     const workspaceId = client.nsp.name.match(/workspace\/(.+)/)[1];
-    const isValidWorkspace = await this.isExistWorkspace(workspaceId);
+    const isValidWorkspace = await this.appService.isExistWorkspace(workspaceId);
     if (!isValidWorkspace) {
       this.logger.error(`존재하지 않는 Workspace 접근`);
       client.disconnect();
@@ -57,7 +55,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     else userId = client.id;
 
     // 3. WorkspaceMember 존재 여부 조회 후 role 부여
-    const role = await this.getUserRole(workspaceId, userId);
+    const role = await this.appService.getUserRole(workspaceId, userId);
 
     // 4. Random 색상 지정
     const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
@@ -73,7 +71,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const members = Array.from(this.userMap.values())
       .filter((vo) => vo.workspaceId === workspaceId)
       .map((vo) => vo.userId);
-    const objects = await this.getAllObjects(workspaceId);
+    const objects = await this.appService.getAllObjects(workspaceId);
 
     client.emit('init', { members, objects });
     this.server.to(workspaceId).emit('enter_user', userId);
@@ -112,7 +110,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   async createObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
     const workspaceId = this.userMap.get(socket.id).workspaceId;
     const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object`;
-    await this.requestAPI(requestURL, 'POST', objectData);
+    await this.appService.requestAPI(requestURL, 'POST', objectData);
     this.server.to(workspaceId).emit('create_object', objectData);
   }
 
@@ -120,7 +118,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
     const workspaceId = this.userMap.get(socket.id).workspaceId;
     const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectData.objectId}`;
-    const ret = await this.requestAPI(requestURL, 'PATCH', objectData);
+    const ret = await this.appService.requestAPI(requestURL, 'PATCH', objectData);
     if (ret) this.server.to(this.userMap.get(socket.id).workspaceId).emit('update_object', objectData);
     else throw new BadRequestException('수정 실패');
   }
@@ -129,48 +127,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   async deleteObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
     const workspaceId = this.userMap.get(socket.id).workspaceId;
     const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectId}`;
-    await this.requestAPI(requestURL, 'DELETE');
+    await this.appService.requestAPI(requestURL, 'DELETE');
     this.server.to(this.userMap.get(socket.id).workspaceId).emit('delete_object', objectId);
-  }
-
-  async getAllObjects(workspaceId: string) {
-    const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object`;
-    return await this.requestAPI(requestURL, 'GET');
-  }
-
-  async isExistWorkspace(workspaceId: string) {
-    try {
-      const requestURL = `${process.env.API_ADDRESS}/workspace/${workspaceId}/info/metadata`;
-      const response = await this.requestAPI(requestURL, 'GET');
-      if (response) return true;
-    } catch (e) {
-      return false;
-    }
-  }
-
-  async getUserRole(workspaceId: string, userId: string) {
-    const requestURL = `${process.env.API_ADDRESS}/workspace/${workspaceId}/role/${userId}`;
-    return await this.requestAPI(requestURL, 'GET');
-  }
-
-  async requestAPI(requestURL: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE', body?: object) {
-    const headers = { accept: 'application/json' };
-
-    let response: AxiosResponse;
-
-    switch (method) {
-      case 'GET':
-        response = await this.httpService.axiosRef.get(requestURL, { headers });
-        return response.data;
-      case 'POST':
-        response = await this.httpService.axiosRef.post(requestURL, body, { headers });
-        return response.data;
-      case 'PATCH':
-        response = await this.httpService.axiosRef.patch(requestURL, body, { headers });
-        return response.data;
-      case 'DELETE':
-        response = await this.httpService.axiosRef.delete(requestURL, { headers });
-        return response.data;
-    }
   }
 }

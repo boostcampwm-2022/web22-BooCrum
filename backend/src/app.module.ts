@@ -10,6 +10,7 @@ import { ObjectDatabaseModule } from './object-database/object-database.module';
 import { AppGateway } from './app.gateway';
 import { HttpModule } from '@nestjs/axios';
 import { config } from './ormconfig';
+import { AppService } from './app.service';
 
 @Module({
   imports: [
@@ -23,7 +24,7 @@ import { config } from './ormconfig';
     HttpModule,
   ],
   controllers: [],
-  providers: [AppGateway],
+  providers: [AppService, AppGateway],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
