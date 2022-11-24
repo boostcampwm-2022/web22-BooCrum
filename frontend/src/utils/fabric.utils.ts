@@ -1,9 +1,12 @@
+import { CanvasObject } from '@pages/workspace/whiteboard-canvas/index.types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
+import { v4 } from 'uuid';
 
 export const initGrid = (canvas: fabric.Canvas, width: number, height: number, gridSize: number) => {
 	for (let i = -width / gridSize; i <= (2 * width) / gridSize; i++) {
 		const lineY = new fabric.Line([i * gridSize, -height, i * gridSize, height * 2], {
+			objectId: v4(),
 			type: 'line',
 			stroke: '#ccc',
 			selectable: false,
@@ -13,6 +16,7 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 	}
 	for (let i = -height / gridSize; i <= (2 * height) / gridSize; i++) {
 		const lineX = new fabric.Line([-width, i * gridSize, width * 2, i * gridSize], {
+			objectId: v4(),
 			type: 'line',
 			stroke: '#ccc',
 			selectable: false,
@@ -39,5 +43,19 @@ export const initZoom = (
 		canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
 		opt.e.preventDefault();
 		opt.e.stopPropagation();
+	});
+};
+
+export const createObjectFromServer = (canvas: fabric.Canvas, newObject: CanvasObject) => {
+	const rect = new fabric.Rect({
+		...newObject,
+	});
+
+	canvas.add(rect);
+};
+
+export const deleteObjectFromServer = (canvas: fabric.Canvas, objectId: string) => {
+	canvas.forEachObject((object) => {
+		if (object.objectId === objectId) canvas.remove(object);
 	});
 };
