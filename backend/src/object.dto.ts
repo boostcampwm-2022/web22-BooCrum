@@ -29,5 +29,5 @@ export class ObjectDTO {
   text: string;
 
   @IsString()
-  craetor: string;
+  creator: string;
 }
