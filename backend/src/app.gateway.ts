@@ -27,7 +27,7 @@ declare module 'http' {
   }
 }
 
-const API_ADDRESS = 'https://bc7m-j045.xyz:3000/api';
+const API_ADDRESS = 'https://bc7m-j045.xyz/api';
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -89,9 +89,17 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected: ${client.id}`);
-    this.userMap.delete(client.id);
-    this.server.to(this.userMap.get(client.id).workspaceId).emit('leave_user', this.userMap.get(client.id).userId);
+    const clientId = client.id;
+    this.logger.log(`Client disconnected: ${clientId}`);
+
+    if (this.userMap.get(clientId)) {
+      this.logger.log(`Client disconnected: ${clientId}`);
+
+      const workspaceId = this.userMap.get(clientId).workspaceId;
+      const userId = this.userMap.get(clientId).userId;
+      this.userMap.delete(clientId);
+      this.server.to(workspaceId).emit('leave_user', userId);
+    }
   }
 
   @SubscribeMessage('create')
@@ -157,7 +165,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   async getUserRole(workspaceId: string, userId: string) {
-    const response = await this.httpService.axiosRef.get(`${API_ADDRESS}/api/workspace/${workspaceId}/role/${userId}`, {
+    const response = await this.httpService.axiosRef.get(`${API_ADDRESS}/workspace/${workspaceId}/role/${userId}`, {
       headers: {
         accept: 'application/json',
       },
