@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Logger } from '@nestjs/common';
+import { BadRequestException, Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -26,8 +26,6 @@ declare module 'http' {
     };
   }
 }
-
-const API_ADDRESS = process.env.API_ADDRESS;
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -104,7 +102,10 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('move_pointer')
   async moveMousePointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('move_pointer', { x, y });
+    console.log('Hi');
+    const userId = this.userMap.get(socket.id).userId;
+    console.log(userId);
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('move_pointer', { x, y, userId });
   }
 
   @SubscribeMessage('select_object')
@@ -120,7 +121,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   @SubscribeMessage('create_object')
   async createObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
     await this.requestAPI(
-      `${API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object`,
+      `${process.env.API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object`,
       'POST',
       objectData,
     );
@@ -129,26 +130,39 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('update_object')
   async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
-    await this.requestAPI(
-      `${API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object/${objectData.objectId}`,
+    const ret = await this.requestAPI(
+      `${process.env.API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object/${objectData.objectId}`,
       'PATCH',
       objectData,
     );
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('update_object', objectData);
+    if (ret) this.server.to(this.userMap.get(socket.id).workspaceId).emit('update_object', objectData);
+    else throw new BadRequestException();
+  }
+
+  @SubscribeMessage('delete_object')
+  async deleteObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
+    await this.requestAPI(
+      `${process.env.API_ADDRESS}/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object/${objectId}`,
+      'DELETE',
+    );
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('delete_object', objectId);
   }
 
   async getAllObjects(workspaceId: string) {
     // TODO: Workspace에 해당하는 객체 API 호출 -> 객체 리스트 반환
-    return await this.requestAPI(`${API_ADDRESS}/object-database/${workspaceId}/object`, 'GET');
+    return await this.requestAPI(`${process.env.API_ADDRESS}/object-database/${workspaceId}/object`, 'GET');
   }
 
   async isExistWorkspace(workspaceId: string) {
     try {
-      const response = await this.httpService.axiosRef.get(`${API_ADDRESS}/workspace/${workspaceId}/info/metadata`, {
-        headers: {
-          accept: 'application/json',
+      const response = await this.httpService.axiosRef.get(
+        `${process.env.API_ADDRESS}/workspace/${workspaceId}/info/metadata`,
+        {
+          headers: {
+            accept: 'application/json',
+          },
         },
-      });
+      );
       if (response.data) return true;
     } catch (e) {
       return false;
@@ -161,7 +175,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     } else {
       const sessionId = cookieParser.signedCookie(decodeURIComponent(cookie.split('=')[1]), process.env.SESSION_SECRET);
 
-      const response = await this.httpService.axiosRef.get(`${API_ADDRESS}/auth/info/${sessionId}`, {
+      const response = await this.httpService.axiosRef.get(`${process.env.API_ADDRESS}/auth/info/${sessionId}`, {
         headers: {
           accept: 'application/json',
         },
@@ -171,11 +185,14 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   }
 
   async getUserRole(workspaceId: string, userId: string) {
-    const response = await this.httpService.axiosRef.get(`${API_ADDRESS}/workspace/${workspaceId}/role/${userId}`, {
-      headers: {
-        accept: 'application/json',
+    const response = await this.httpService.axiosRef.get(
+      `${process.env.API_ADDRESS}/workspace/${workspaceId}/role/${userId}`,
+      {
+        headers: {
+          accept: 'application/json',
+        },
       },
-    });
+    );
     return response.data;
   }
 
@@ -195,8 +212,10 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
         return response.data;
       case 'PATCH':
         response = await this.httpService.axiosRef.patch(address, body, { headers });
-      default:
-        console.log('default');
+        return response.data;
+      case 'DELETE':
+        response = await this.httpService.axiosRef.delete(address, { headers });
+        return response.data;
     }
   }
 }
