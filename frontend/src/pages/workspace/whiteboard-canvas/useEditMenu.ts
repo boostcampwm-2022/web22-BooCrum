@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
+import { fabric } from 'fabric';
 
-function useContextMenu() {
+function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [isOpen, setIsOpen] = useState(false);
 	const menuRef = useRef<HTMLDivElement>(null);
 	const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
@@ -13,21 +14,19 @@ function useContextMenu() {
 		};
 	}, [isOpen]);
 
-	const toggleOpen = (x: number, y: number) => {
+	const openMenu = (x: number, y: number) => {
 		setIsOpen(!isOpen);
 		setMenuPosition({ x: x, y: y });
 	};
 
-	const openContextMenu = () => {
-		setIsOpen(true);
-	};
-
 	const handleOutsideClick = (e: Event) => {
-		const current = menuRef.current;
-		if (isOpen && current && !current.contains(e.target as Node)) setIsOpen(false);
+		if (!canvas.current) return;
+
+		if (isOpen && menuRef.current && !menuRef.current.contains(e.target as Node) && !canvas.current.getActiveObject())
+			setIsOpen(false);
 	};
 
-	return { isOpen, menuRef, toggleOpen, menuPosition, openContextMenu };
+	return { isOpen, menuRef, openMenu, menuPosition };
 }
 
-export default useContextMenu;
+export default useEditMenu;

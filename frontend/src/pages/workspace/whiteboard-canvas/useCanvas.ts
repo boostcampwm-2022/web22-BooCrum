@@ -1,6 +1,6 @@
 import { useRef, useEffect } from 'react';
 import { fabric } from 'fabric';
-import { initGrid, initDragPanning, initWheelPanning, initZoom } from '@utils/fabric.utils';
+import { initObject, initDragPanning, initWheelPanning, initZoom } from '@utils/fabric.utils';
 import { toolItems } from '@data/workspace-tool';
 import { v4 } from 'uuid';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -39,6 +39,7 @@ function useCanvas() {
 		initZoom(fabricCanvas, setZoom);
 		initDragPanning(fabricCanvas);
 		initWheelPanning(fabricCanvas);
+		initObject(fabricCanvas);
 
 		return fabricCanvas;
 	};

@@ -1,9 +1,9 @@
 import { CanvasObject } from '@pages/workspace/whiteboard-canvas/index.types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
+import { v4 } from 'uuid';
 import { addPostIt, addSection } from './object.utils';
 
-<<<<<<< HEAD
 export const initGrid = (canvas: fabric.Canvas, width: number, height: number, gridSize: number) => {
 	for (let i = -width / gridSize + 1; i <= (2 * width) / gridSize; i++) {
 		const lineY = new fabric.Line([i * gridSize, -height, i * gridSize, height * 2], {
@@ -27,8 +27,6 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 	}
 };
 
-=======
->>>>>>> 601262f (chore: fe - grabbing cursor 추가 #105)
 export const initZoom = (
 	canvas: fabric.Canvas,
 	setZoom: SetterOrUpdater<{
@@ -58,10 +56,6 @@ export const initDragPanning = (canvas: fabric.Canvas) => {
 			canvas.isDragging = true;
 			canvas.lastPosX = evt.clientX;
 			canvas.lastPosY = evt.clientY;
-		} else if (canvas.mode === 'section' && !canvas.getActiveObject()) {
-			addSection(canvas, evt.clientX, evt.clientY);
-		} else if (canvas.mode === 'postit' && !canvas.getActiveObject()) {
-			addPostIt(canvas, evt.clientX, evt.clientY);
 		}
 	});
 	canvas.on('mouse:move', function (opt) {
@@ -101,6 +95,17 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 		}
 		canvas.requestRenderAll();
 		if (canvas.viewportTransform) canvas.setViewportTransform(canvas.viewportTransform);
+	});
+};
+
+export const initObject = (canvas: fabric.Canvas) => {
+	canvas.on('mouse:down', function (opt) {
+		const evt = opt.e;
+		if (canvas.mode === 'section' && !canvas.getActiveObject()) {
+			addSection(canvas, evt.clientX, evt.clientY);
+		} else if (canvas.mode === 'postit' && !canvas.getActiveObject()) {
+			addPostIt(canvas, evt.clientX, evt.clientY);
+		}
 	});
 };
 
