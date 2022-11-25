@@ -29,3 +29,11 @@ export const addPostIt = (canvas: fabric.Canvas, x: number, y: number) => {
 		})
 	);
 };
+
+export const setEditMenu = (object: fabric.Object) => {
+	const width = object?.width || 0;
+	const top = object?.top ? object.top - 50 : 0;
+	const left = object?.left ? object.left + width / 2 : 0;
+
+	return [left, top];
+};

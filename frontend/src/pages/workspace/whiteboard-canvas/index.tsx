@@ -1,21 +1,16 @@
 import { WhiteboardCanvasLayout } from './index.style';
-import { fabric } from 'fabric';
 import useCanvas from './useCanvas';
 import useSocket from './useSocket';
 import { useEffect, useState } from 'react';
 import ContextMenu from '@components/context-menu';
 import ObjectEditMenu from '../object-edit-menu';
 import { colorChips } from '@data/workspace-object-color';
-import { toolItems } from '@data/workspace-tool';
-import { useRecoilValue } from 'recoil';
-import { cursorState } from '@context/workspace';
 import useEditMenu from './useEditMenu';
 
 function WhiteboardCanvas() {
 	const { canvas } = useCanvas();
 	const { socket } = useSocket(canvas);
 	const { isOpen, menuRef, openMenu, menuPosition } = useEditMenu(canvas);
-	const cursor = useRecoilValue(cursorState);
 
 	useEffect(() => {
 		if (!canvas.current) return;
@@ -33,11 +28,11 @@ function WhiteboardCanvas() {
 		canvas.current.on('selection:created', (e) => {
 			// todo select 로직
 			console.log(e);
-			setEditMenu();
+			openMenu();
 		});
 
 		canvas.current.on('selection:updated', (e) => {
-			setEditMenu();
+			openMenu();
 		});
 
 		canvas.current.on('selection:cleared', (e) => {
@@ -55,37 +50,6 @@ function WhiteboardCanvas() {
 			console.log(e);
 		});
 	}, []);
-	useEffect(() => {
-		if (!canvas.current) return;
-
-		const fabricCanvas = canvas.current as fabric.Canvas;
-		if (cursor.type === toolItems.SECTION || cursor.type === toolItems.POST_IT) {
-			fabricCanvas.defaultCursor = 'context-menu';
-			fabricCanvas.selection = true;
-			if (cursor.type === toolItems.SECTION) fabricCanvas.mode = 'section';
-			else fabricCanvas.mode = 'postit';
-		} else if (cursor.type === toolItems.MOVE) {
-			fabricCanvas.defaultCursor = 'grab';
-			fabricCanvas.mode = 'move';
-			fabricCanvas.selection = false;
-		} else if (cursor.type === toolItems.SELECT) {
-			fabricCanvas.defaultCursor = 'default';
-			fabricCanvas.mode = 'select';
-			fabricCanvas.selection = true;
-		} else {
-			fabricCanvas.defaultCursor = 'default';
-			fabricCanvas.mode = 'draw';
-		}
-	}, [cursor]);
-
-	const setEditMenu = () => {
-		const currentObject = canvas.current?.getActiveObject();
-		const width = currentObject?.width || 0;
-		const top = currentObject?.top ? currentObject.top - 50 : 0;
-		const left = currentObject?.left ? currentObject.left + width / 2 : 0;
-
-		openMenu(left, top);
-	};
 
 	// object color 수정 초안
 	const [color, setColor] = useState(colorChips[0]); // 나중에 선택된 object의 color로 대체 예정
