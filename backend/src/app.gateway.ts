@@ -108,12 +108,14 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
   @SubscribeMessage('select_object')
   async selectObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('select_object', objectId);
+    const userId = this.userMap.get(socket.id).userId;
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('select_object', { objectId, userId });
   }
 
   @SubscribeMessage('unselect_object')
   async unselectObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', objectId);
+    const userId = this.userMap.get(socket.id).userId;
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', { objectId, userId });
   }
 
   @SubscribeMessage('create_object')
