@@ -1,4 +1,3 @@
-import { CanvasObject } from '@pages/workspace/whiteboard-canvas/index.types';
 import { fabric } from 'fabric';
 
 export const createObjectFromServer = (canvas: fabric.Canvas, newObject: CanvasObject) => {
