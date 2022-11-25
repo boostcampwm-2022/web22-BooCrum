@@ -1,5 +1,4 @@
 import { WhiteboardCanvasLayout } from './index.style';
-import { fabric } from 'fabric';
 import useCanvas from './useCanvas';
 import useSocket from './useSocket';
 import { useEffect, useState } from 'react';

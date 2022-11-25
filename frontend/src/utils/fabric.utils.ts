@@ -2,9 +2,10 @@ import { CanvasObject } from '@pages/workspace/whiteboard-canvas/index.types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
+import { addPostIt, addSection } from './object.utils';
 
 export const initGrid = (canvas: fabric.Canvas, width: number, height: number, gridSize: number) => {
-	for (let i = -width / gridSize; i <= (2 * width) / gridSize; i++) {
+	for (let i = -width / gridSize + 1; i <= (2 * width) / gridSize; i++) {
 		const lineY = new fabric.Line([i * gridSize, -height, i * gridSize, height * 2], {
 			objectId: v4(),
 			type: 'line',
@@ -14,7 +15,7 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 
 		canvas.sendToBack(lineY);
 	}
-	for (let i = -height / gridSize; i <= (2 * height) / gridSize; i++) {
+	for (let i = -height / gridSize + 1; i <= (2 * height) / gridSize; i++) {
 		const lineX = new fabric.Line([-width, i * gridSize, width * 2, i * gridSize], {
 			objectId: v4(),
 			type: 'line',
@@ -34,6 +35,7 @@ export const initZoom = (
 	}>
 ) => {
 	canvas.on('mouse:wheel', function (opt) {
+		if (opt.e.ctrlKey === false) return;
 		const delta = opt.e.deltaY;
 		let zoom = canvas.getZoom();
 		zoom += -delta / 1000;
@@ -46,12 +48,12 @@ export const initZoom = (
 	});
 };
 
-export const initPanning = (canvas: fabric.Canvas) => {
+export const initDragPanning = (canvas: fabric.Canvas) => {
 	canvas.on('mouse:down', function (opt) {
 		const evt = opt.e;
-		if (canvas.moveMode) {
+		if (canvas.mode === 'move') {
+			canvas.defaultCursor = 'grabbing';
 			canvas.isDragging = true;
-			canvas.selection = false;
 			canvas.lastPosX = evt.clientX;
 			canvas.lastPosY = evt.clientY;
 		}
@@ -60,6 +62,7 @@ export const initPanning = (canvas: fabric.Canvas) => {
 		if (canvas.viewportTransform && canvas.isDragging) {
 			const e = opt.e;
 			const vpt = canvas.viewportTransform;
+
 			if (canvas.lastPosX && canvas.lastPosY) {
 				vpt[4] += e.clientX - canvas.lastPosX;
 				vpt[5] += e.clientY - canvas.lastPosY;
@@ -70,11 +73,39 @@ export const initPanning = (canvas: fabric.Canvas) => {
 		}
 	});
 	canvas.on('mouse:up', function (opt) {
-		// on mouse up we want to recalculate new interaction
-		// for all objects, so we call setViewportTransform
 		if (canvas.viewportTransform) canvas.setViewportTransform(canvas.viewportTransform);
-		canvas.isDragging = false;
-		canvas.selection = true;
+
+		if (canvas.mode === 'move') {
+			canvas.defaultCursor = 'grab';
+			canvas.isDragging = false;
+		}
+	});
+};
+
+export const initWheelPanning = (canvas: fabric.Canvas) => {
+	canvas.on('mouse:wheel', (opt) => {
+		const evt = opt.e;
+		if (evt.ctrlKey === true) return;
+		const deltaX = evt.deltaX;
+		const deltaY = evt.deltaY;
+		if (canvas.viewportTransform) {
+			const vpt = canvas.viewportTransform;
+			vpt[4] += -deltaX / canvas.getZoom();
+			vpt[5] += -deltaY / canvas.getZoom();
+		}
+		canvas.requestRenderAll();
+		if (canvas.viewportTransform) canvas.setViewportTransform(canvas.viewportTransform);
+	});
+};
+
+export const addObject = (canvas: fabric.Canvas) => {
+	canvas.on('mouse:down', function (opt) {
+		const evt = opt.e;
+		if (canvas.mode === 'section' && !canvas.getActiveObject()) {
+			addSection(canvas, evt.clientX, evt.clientY);
+		} else if (canvas.mode === 'postit' && !canvas.getActiveObject()) {
+			addPostIt(canvas, evt.clientX, evt.clientY);
+		}
 	});
 };
 

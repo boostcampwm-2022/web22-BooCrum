@@ -9,7 +9,7 @@ index 107db96..46a7ec2 100644
 +    isDragging?:boolean;
 +    lastPosX?:number;
 +    lastPosY?:number;
-+    moveMode?:boolean;
++    mode?:string;
      /**
       * When true, objects can be transformed by one side (unproportionally)
       * when dragged on the corners that normally would not do that.

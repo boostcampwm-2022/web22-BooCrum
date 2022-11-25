@@ -60,8 +60,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       nickname = session.user.nickname;
       client.join(userId);
     } else {
-      userId = 'Guest';
-      nickname = `Guest(${client.id})`;
+      userId = `Guest_${client.id}`;
+      nickname = `Guest_${client.id}`;
     }
 
     // 3. WorkspaceMember 존재 여부 조회 후 role 부여
@@ -83,7 +83,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const objects = await this.appService.getAllObjects(workspaceId);
 
     client.emit('init', { members, objects });
-    const userData = new UserDAO(userId, nickname);
+    const userData = new UserDAO(userId, nickname, color);
     this.server.to(workspaceId).emit('enter_user', userData);
   }
 
