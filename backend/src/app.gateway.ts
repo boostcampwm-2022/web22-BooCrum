@@ -1,4 +1,4 @@
-import { BadRequestException, Logger } from '@nestjs/common';
+import { Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -8,6 +8,7 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
 import { createSessionMiddleware } from './middlewares/session.middleware';
@@ -129,7 +130,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectData.objectId}`;
     const ret = await this.appService.requestAPI(requestURL, 'PATCH', objectData);
     if (ret) this.server.to(this.userMap.get(socket.id).workspaceId).emit('update_object', objectData);
-    else throw new BadRequestException('수정 실패');
+    else throw new WsException('수정 실패');
   }
 
   @SubscribeMessage('delete_object')
@@ -138,6 +139,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectId}`;
     const ret = await this.appService.requestAPI(requestURL, 'DELETE');
     if (ret) this.server.to(this.userMap.get(socket.id).workspaceId).emit('delete_object', objectId);
-    else throw new BadRequestException('삭제 실패');
+    else throw new WsException('삭제 실패');
   }
 }
