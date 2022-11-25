@@ -62,6 +62,12 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('update_object', ({ objectData }) => {
 			//todo object 업데이트
 		});
+
+		return () => {
+			if (socket.current) {
+				socket.current.disconnect();
+			}
+		};
 	}, []);
 
 	return {
