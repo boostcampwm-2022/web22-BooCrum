@@ -1,18 +1,3 @@
-interface Member {
-	userId: string;
-	nickname: string;
-	color: string;
-}
-
-interface MousePointer {
-	x: number;
-	y: number;
-}
-
-interface UserMousePointer extends MousePointer {
-	userId: string;
-}
-
 interface UpdatedObject {
 	objectId: string;
 	x?: number;
