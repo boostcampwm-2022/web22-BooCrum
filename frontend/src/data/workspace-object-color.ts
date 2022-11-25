@@ -1,4 +1,4 @@
-export const colorChips = [
+export const colorChips: string[] = [
 	'rgb(175, 188, 207)',
 	'rgb(252, 163, 151)',
 	'rgb(255, 196, 112)',

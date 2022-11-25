@@ -1,4 +1,3 @@
-import { HttpService } from '@nestjs/axios';
 import { Logger } from '@nestjs/common';
 import {
   ConnectedSocket,
@@ -9,23 +8,15 @@ import {
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
+  WsException,
 } from '@nestjs/websockets';
-import { AxiosResponse } from 'axios';
-import * as cookieParser from 'cookie-parser';
 import { Server, Socket } from 'socket.io';
-import { createSessionMiddleware } from './util/session.util';
+import { createSessionMiddleware } from './middlewares/session.middleware';
 import { Request, Response, NextFunction } from 'express';
-import { Session } from 'express-session';
-import { CreateObjectDTO } from './object-database/dto/create-object.dto';
-import { UserMapVO } from './user-map.vo';
-
-declare module 'http' {
-  interface IncomingMessage {
-    session: Session & {
-      authenticated: boolean;
-    };
-  }
-}
+import { UserMapVO } from './util/socket/user-map.vo';
+import { ObjectDTO } from './util/socket/object.dto';
+import { UserDAO } from './util/socket/user.dao';
+import { AppService } from './app.service';
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -37,7 +28,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   private logger: Logger = new Logger('AppGateway');
   private userMap = new Map<string, UserMapVO>();
 
-  constructor(private readonly httpService: HttpService) {}
+  constructor(private readonly appService: AppService) {}
 
   // Socket Server가 실행된 직후 실행할 것들. (즉, server가 초기화된 직후.)
   async afterInit() {
@@ -48,149 +39,109 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     );
   }
 
-  /**
-   * Client Socket이 연결되면 호출되는 메서드
-   */
   async handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
 
-    // 1. Workspace 존재 여부 체크
+    // 1. 워크스페이스 조회
     const workspaceId = client.nsp.name.match(/workspace\/(.+)/)[1];
-    const isValidWorkspace = await this.isExistWorkspace(workspaceId);
+    const isValidWorkspace = await this.appService.isExistWorkspace(workspaceId);
     if (!isValidWorkspace) {
-      this.logger.log(`존재하지 않는 Workspace 접근`);
+      this.logger.error(`존재하지 않는 Workspace 접근`);
       client.disconnect();
       return;
     }
 
-    // 2. 쿠키 존재 여부 조회 => 비회원 or 회원
-    const cookie = client.handshake.headers.cookie;
-    const userId = await this.getUserId(cookie, client.id);
+    // 2. 쿠키 존재 여부 조회 및 userId 설정 : 회원(userId 사용), 비회원(소켓 ID 사용)
+    const session = client.request.session;
+    let userId: string;
+    let nickname: string;
+    if (session.user !== undefined) {
+      userId = session.user.userId;
+      nickname = session.user.nickname;
+      client.join(userId);
+    } else {
+      userId = 'Guest';
+      nickname = `Guest(${client.id})`;
+    }
 
     // 3. WorkspaceMember 존재 여부 조회 후 role 부여
-    const role = await this.getUserRole(workspaceId, userId);
+    const role = await this.appService.getUserRole(workspaceId, userId);
 
     // 4. Random 색상 지정
     const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
 
     // 5. room 추가
     client.join(workspaceId);
-    client.join(userId);
 
     // 6. userMap 추가
-    this.userMap.set(client.id, new UserMapVO(userId, workspaceId, role, color));
+    this.userMap.set(client.id, new UserMapVO(userId, nickname, workspaceId, role, color));
 
     // 7. Socket.io - Client 이벤트 호출
     const members = Array.from(this.userMap.values())
       .filter((vo) => vo.workspaceId === workspaceId)
       .map((vo) => vo.userId);
-    const objects = await this.getAllObjects(workspaceId);
+    const objects = await this.appService.getAllObjects(workspaceId);
 
-    this.server.to(workspaceId).emit('init', { members, objects });
+    client.emit('init', { members, objects });
+    const userData = new UserDAO(userId, nickname);
+    this.server.to(workspaceId).emit('enter_user', userData);
   }
 
-  /**
-   * Client Socket의 연결이 끊어지면 호출되는 메서드
-   */
   handleDisconnect(client: Socket) {
-    this.logger.log(`Client disconnected: ${client.id}`);
-    this.userMap.delete(client.id);
+    const clientId = client.id;
+
+    if (this.userMap.get(clientId)) {
+      this.logger.log(`Client disconnected: ${clientId}`);
+
+      const workspaceId = this.userMap.get(clientId).workspaceId;
+      const userId = this.userMap.get(clientId).userId;
+      this.userMap.delete(clientId);
+      this.server.to(workspaceId).emit('leave_user', userId);
+    }
   }
 
-  /**
-   * Client Socket의 연결이 끊어지면 호출되는 메서드
-   */
-  @SubscribeMessage('create')
-  async createObject(@MessageBody() body: CreateObjectDTO, @ConnectedSocket() socket: Socket) {
-    const result = await this.requestAPI(
-      `http://localhost:3000/api/object-database/694cc960-0aed-4292-8eac-4a7f447f42ae/object`,
-      'POST',
-      body,
-    );
-  }
-
-  /**
-   * 사용자가 마우스 포인터를 움직였을 때 호출되는 메서드
-   */
   @SubscribeMessage('move_pointer')
   async moveMousePointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('move_pointer', { x, y });
+    const userId = this.userMap.get(socket.id).userId;
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('move_pointer', { x, y, userId });
   }
 
   @SubscribeMessage('select_object')
   async selectObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('select_object', objectId);
+    const userId = this.userMap.get(socket.id).userId;
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('select_object', { objectId, userId });
   }
 
   @SubscribeMessage('unselect_object')
   async unselectObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
-    this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', objectId);
+    const userId = this.userMap.get(socket.id).userId;
+    this.server.to(this.userMap.get(socket.id).workspaceId).emit('unselect_object', { objectId, userId });
   }
 
-  async getAllObjects(workspaceId: string) {
-    // TODO: Workspace에 해당하는 객체 API 호출 -> 객체 리스트 반환
-    return await this.requestAPI(`http://localhost:3000/api/object-database/${workspaceId}/object`, 'GET');
+  @SubscribeMessage('create_object')
+  async createObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
+    const workspaceId = this.userMap.get(socket.id).workspaceId;
+    const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object`;
+    const ret = await this.appService.requestAPI(requestURL, 'POST', objectData);
+    if (ret) this.server.to(workspaceId).emit('create_object', objectData);
+    else throw new WsException('생성 실패');
   }
 
-  async isExistWorkspace(workspaceId: string) {
-    try {
-      const response = await this.httpService.axiosRef.get(
-        `http://localhost:3000/api/workspace/${workspaceId}/info/metadata`,
-        {
-          headers: {
-            accept: 'application/json',
-          },
-        },
-      );
-      if (response.data) return true;
-    } catch (e) {
-      return false;
-    }
+  @SubscribeMessage('update_object')
+  async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
+    const workspaceId = this.userMap.get(socket.id).workspaceId;
+    const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectData.objectId}`;
+    const ret = await this.appService.requestAPI(requestURL, 'PATCH', objectData);
+    if (ret) this.server.to(this.userMap.get(socket.id).workspaceId).emit('update_object', objectData);
+    else throw new WsException('수정 실패');
   }
 
-  async getUserId(cookie: string, clientId: string) {
-    if (!cookie) {
-      return clientId;
-    } else {
-      const sessionId = cookieParser.signedCookie(decodeURIComponent(cookie.split('=')[1]), process.env.SESSION_SECRET);
-
-      const response = await this.httpService.axiosRef.get(`http://localhost:3000/api/auth/info/${sessionId}`, {
-        headers: {
-          accept: 'application/json',
-        },
-      });
-      return response.data;
-    }
-  }
-
-  async getUserRole(workspaceId: string, userId: string) {
-    const response = await this.httpService.axiosRef.get(
-      `http://localhost:3000/api/workspace/${workspaceId}/role/${userId}`,
-      {
-        headers: {
-          accept: 'application/json',
-        },
-      },
-    );
-    return response.data;
-  }
-
-  async requestAPI(address: string, method: 'GET' | 'POST' | 'PATCH' | 'DELETE', body?: object) {
-    const headers = {
-      accept: 'application/json',
-    };
-
-    let response: AxiosResponse;
-
-    switch (method) {
-      case 'GET':
-        response = await this.httpService.axiosRef.get(address, { headers });
-        return response.data;
-      case 'POST':
-        response = await this.httpService.axiosRef.post(address, body, { headers });
-        return response.data;
-      default:
-        console.log('default');
-    }
+  @SubscribeMessage('delete_object')
+  async deleteObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
+    const workspaceId = this.userMap.get(socket.id).workspaceId;
+    const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object/${objectId}`;
+    const ret = await this.appService.requestAPI(requestURL, 'DELETE');
+    if (ret) this.server.to(this.userMap.get(socket.id).workspaceId).emit('delete_object', objectId);
+    else throw new WsException('삭제 실패');
   }
 }

@@ -6,10 +6,8 @@ export const Container = styled.div`
 	.user-profile {
 		width: 30px;
 
-		margin-left: 8px;
-
-		:first-child {
-			margin-left: 0px;
+		+ .user-profile {
+			margin-left: 8px;
 		}
 	}
 `;
