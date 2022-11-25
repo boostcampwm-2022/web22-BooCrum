@@ -93,9 +93,9 @@ export class ObjectHandlerService {
    * @param updateObjectDTO 수정하기를 원하는 값
    * @returns 성공할 경우 true, 실패할 경우 false를 반환합니다.
    */
-  async updateObject(workspaceId: string, objectId: string, updateObjectDTO: UpdateObjectDTO): Promise<boolean> {
+  async updateObject(workspaceId: string, updateObjectDTO: UpdateObjectDTO): Promise<boolean> {
     // selectObjectById에서 워크스페이스 및 오브젝트 존재 여부를 검증하므로, 여기서 검증은 생략한다.
-    const object = await this.selectObjectById(workspaceId, objectId);
+    const object = await this.selectObjectById(workspaceId, updateObjectDTO.objectId);
     const res = await this.objectRepository.update(object.objectId, updateObjectDTO);
     return res.affected > 0;
   }

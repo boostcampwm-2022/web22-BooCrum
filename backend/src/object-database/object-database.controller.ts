@@ -42,7 +42,7 @@ export class ObjectDatabaseController {
     @Param(new ValidationPipe()) { workspaceId, objectId }: SelectObjectDTO,
     @Body() createObjectDTO: CreateObjectDTO,
   ) {
-    const result = await this.objectHandlerService.updateObject(workspaceId, objectId, createObjectDTO);
+    const result = await this.objectHandlerService.updateObject(workspaceId, createObjectDTO);
     if (!result) throw new InternalServerErrorException('알 수 없는 이유로 데이터 갱신에 실패하였습니다.');
   }
 
