@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, ValidationPipe } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -132,46 +132,60 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('move_pointer')
   async moveMousePointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
     const userData = this.userMap.get(socket.id);
-    if (!userData || userData.isGuest) return; // Guest 차단.
     socket.nsp.emit('move_pointer', { x, y, userId: userData.userId });
   }
 
   @SubscribeMessage('select_object')
   async selectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
     const userData = this.userMap.get(socket.id);
-    if (!userData || userData.isGuest) return; // Guest 차단.
+    if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('select_object', { objectId, userId: userData.userId });
   }
 
   @SubscribeMessage('unselect_object')
   async unselectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
     const userData = this.userMap.get(socket.id);
-    if (!userData || userData.isGuest) return; // Guest 차단.
+    if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('unselect_object', { objectId, userId: userData.userId });
   }
 
   @SubscribeMessage('create_object')
-  async createObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
-    const workspaceId = this.userMap.get(socket.id).workspaceId;
+  async createObject(@MessageBody(new ValidationPipe()) objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
+    const userData = this.userMap.get(socket.id);
+    if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+
+    // Optional 값들 중 값을 채워줘야 하는 것은 값을 넣어준다.
     if (!objectData.text) objectData.text = '';
+    objectData.workspaceId = userData.workspaceId;
     objectData.creator = socket.request.session.user.userId;
-    const ret = await this.objectHandlerService.createObject(workspaceId, objectData);
+
+    // 생성을 시도하고, 성공하면 이를 전달한다.
+    const ret = await this.objectHandlerService.createObject(userData.workspaceId, objectData);
     if (!ret) throw new WsException('생성 실패');
     socket.nsp.emit('create_object', objectData);
   }
 
   @SubscribeMessage('update_object')
   async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
-    const workspaceId = this.userMap.get(socket.id).workspaceId;
-    const ret = await this.objectHandlerService.updateObject(workspaceId, objectData);
+    const userData = this.userMap.get(socket.id);
+    if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+
+    // 변경되어서는 안되는 값들은 미리 제거하거나 덮어버린다.
+    delete objectData.creator, objectData.objectId;
+    objectData.workspaceId = userData.workspaceId;
+
+    // 수정을 시도하고, 성공하면 이를 전달한다.
+    const ret = await this.objectHandlerService.updateObject(userData.workspaceId, objectData);
     if (!ret) throw new WsException('수정 실패');
     socket.nsp.emit('update_object', objectData);
   }
 
   @SubscribeMessage('delete_object')
   async deleteObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
-    const workspaceId = this.userMap.get(socket.id).workspaceId;
-    const ret = await this.objectHandlerService.deleteObject(workspaceId, objectId);
+    const userData = this.userMap.get(socket.id);
+    if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+
+    const ret = await this.objectHandlerService.deleteObject(userData.workspaceId, objectId);
     if (!ret) new WsException('삭제 실패');
     socket.nsp.emit('delete_object', { objectId });
   }
