@@ -1,7 +1,7 @@
 import { Socket } from 'socket.io-client';
 import { ServerToClientEvents, ClientToServerEvents } from '@pages/workspace/whiteboard-canvas/socket.types';
 import { useEffect } from 'react';
-import useContextMenu from '@hooks/useContextMenu';
+import useEditMenu from './useEditMenu';
 
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
@@ -9,7 +9,7 @@ interface UseCanvasToSocketProps {
 }
 
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
-	const { isOpen, menuRef, toggleOpen, menuPosition } = useContextMenu();
+	const { isOpen, menuRef, openMenu, menuPosition } = useEditMenu(canvas);
 	useEffect(() => {
 		if (!canvas.current) return;
 
@@ -27,7 +27,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			// todo select 로직
 			console.log(e);
 
-			toggleOpen(e.target?.left || 0, e.target?.top || 0);
+			openMenu();
 		});
 
 		canvas.current.on('selection:cleared', (e) => {

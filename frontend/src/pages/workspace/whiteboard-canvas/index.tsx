@@ -8,7 +8,7 @@ import { colorChips } from '@data/workspace-object-color';
 import { toolItems } from '@data/workspace-tool';
 import { useRecoilValue } from 'recoil';
 import { cursorState } from '@context/workspace';
-import useCanvasToSocket from './useCanvasEvent';
+import useCanvasToSocket from './useCanvasToSocket';
 
 function WhiteboardCanvas() {
 	const { canvas } = useCanvas();
