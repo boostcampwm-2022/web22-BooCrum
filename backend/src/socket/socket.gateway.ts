@@ -24,10 +24,6 @@ import { DbAccessService } from './db-access.service';
 //==================================== Socket.io 서버 정의 ====================================//
 //============================================================================================//
 
-function fitFormatToUserDAO(userId: string, nickname: string) {
-  return new UserDAO(userId, nickname);
-}
-
 @WebSocketGateway(8080, { cors: '*', namespace: /workspace\/.+/ })
 export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
@@ -40,7 +36,29 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     private dataSource: DataSource,
   ) {}
 
-  // Socket Server가 실행된 직후 실행할 것들. (즉, server가 초기화된 직후.)
+  /**
+   * 소켓과 워크스페이스 ID를 이용하여 UserMapVO로 포맷팅한다.
+   * @param client 현재 연결된 Socket
+   * @param workspaceId 해당 소켓과 연관된 Workspace ID
+   * @returns UserMapVO로 포맷팅한 객체
+   */
+  private async formatDataToUserMapVO(client: Socket, workspaceId: string): Promise<UserMapVO> {
+    const sessionUserData = client.request.session.user;
+
+    const userId = sessionUserData?.userId ?? 'Guest';
+    const nickname = sessionUserData?.nickname ?? `Guest(${client.id})`;
+    const role = !sessionUserData ? 0 : await this.dbAccessService.getUserRoleAt(userId, workspaceId);
+    const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
+
+    return new UserMapVO(userId, nickname, workspaceId, role, color, !!sessionUserData);
+  }
+
+  /**
+   * 소켓 서버 초기화 직후 실행할 처리를 정의한다.
+   *
+   * 처리 과정:
+   * 1. Express-session을 Socket 서버와 연결한다.
+   */
   async afterInit() {
     // REST API 서버에서 사용하는 세션 정보를 express-session을 이용하여 가져옴.
     const sessionMiddleware = createSessionMiddleware();
@@ -49,58 +67,58 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     );
   }
 
+  /**
+   * 소켓 연결 직후 처리를 정의한다.
+   *
+   * - 아웃바운드 이벤트: init(타겟 소켓) / enter_user(네임스페이스 단위)
+   *
+   * @param client 현재 연결된(connect 이벤트를 발생시킨) 소켓
+   * @param args 같이 넘어온 인자
+   */
   async handleConnection(client: Socket, ...args: any[]) {
     this.logger.log(`Client connected: ${client.id}`);
 
-    const queryRunner = this.dataSource.createQueryRunner();
-    await queryRunner.connect();
-
     // 1. 워크스페이스 조회
     const workspaceId = client.nsp.name.match(/workspace\/(.+)/)[1];
-    const isValidWorkspace = await this.dbAccessService.isWorkspaceExist(workspaceId, queryRunner);
-    if (!isValidWorkspace) {
+    if (!(await this.dbAccessService.isWorkspaceExist(workspaceId))) {
       this.logger.error(`존재하지 않는 Workspace 접근`);
       client.disconnect();
       return;
     }
 
-    // 2. 쿠키 존재 여부 조회 및 userId 설정 : 회원(userId 사용), 비회원(소켓 ID 사용)
-    const session = client.request.session;
-    const userData =
-      session.user !== undefined
-        ? fitFormatToUserDAO(session.user.userId, session.user.nickname)
-        : fitFormatToUserDAO('Guest', `Guest(${client.id})`);
+    // 2. 데이터 가공 수행
+    const userMapVO = await this.formatDataToUserMapVO(client, workspaceId);
 
-    // 3. WorkspaceMember 존재 여부 조회 후 role 부여
-    const role = await this.dbAccessService.getUserRoleAt(userData.userId, workspaceId, queryRunner);
-    // 4. Random 색상 지정
-    const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
-
-    // 5. room 추가
+    // 3. 로그인 유저 userId room에 추가
     //! Dynamic Namespace를 사용함으로써, 네임스페이스가 자동으로 워크스페이스 각각을 의미하게 됨.
     //! 그러한 이유로 workspaceId에 대한 room 추가가 무의미해짐.
-    // client.join(workspaceId);
-    if (session.user !== undefined) client.join(userData.userId);
+    if (!userMapVO.isGuest) client.join(userMapVO.userId);
 
-    // 6. userMap 추가
-    // 중복 유저가 존재한다면 그건 어떻게 처리할 것인가? (소켓이 여러개 인거지, 사람이 여러 명인건 아님.)
-    this.userMap.set(client.id, new UserMapVO(userData.userId, userData.nickname, workspaceId, role, color));
+    // 4. userMap 추가: socket과 데이터를 1:1 매핑
+    this.userMap.set(client.id, userMapVO);
 
-    // 7. Socket.io - Client 이벤트 호출
-    // TODO: 전체 순환을 써도 되는가? 이건 workspaceId -> VO로 연결하는 것이 낫지 않냐?
+    // 5. Init 목적 데이터 가공
+    // TODO: 전체 순환을 써도 되는가? 이건 workspaceId -> VO로 연결하는 것이 낫지 않나?
+    //? 중복 유저가 존재한다면 그건 어떻게 처리할 것인가? (소켓이 여러개 인거지, 사람이 여러 명인건 아님.)
     const members = Array.from(this.userMap.values())
       .filter((vo) => vo.workspaceId === workspaceId)
       .map((vo) => new UserDAO(vo.userId, vo.nickname));
     const objects = await this.objectHandlerService.selectAllObjects(workspaceId);
 
+    // 6. Socket 이벤트 Emit
     //? 자신 포함이야... 자신 제외하고 보내야 하는거야...?
     client.emit('init', { members, objects });
-    client.nsp.emit('enter_user', userData);
-
-    await queryRunner.release();
+    client.nsp.emit('enter_user', new UserDAO(userMapVO.userId, userMapVO.nickname));
   }
 
-  // Disconnect 이벤트가 발생하였을 때 수행할 처리를 기록한다.
+  /**
+   * Disconnect 이벤트가 발생하였을 때 수행할 처리를 기록한다.
+   *
+   * - **발생 조건**: 클라이언트 측에서 창을 끄거나, disconnect를 실행할 경우.
+   *
+   * - **server to client**: 'leave_user'
+   * @param client 연결을 끊기 직전인(disconnect 이벤트를 발생시킨) 소켓
+   */
   handleDisconnect(client: Socket) {
     const clientId = client.id;
     this.logger.log(`Client disconnected: ${clientId}`);
@@ -113,24 +131,23 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   @SubscribeMessage('move_pointer')
   async moveMousePointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
-    const userId = this.userMap.get(socket.id)?.userId;
-    if (!userId) return;
-    //TODO: 게스트 마우스 포인터가 보일 필요가 있음?
-    socket.nsp.emit('move_pointer', { x, y, userId });
+    const userData = this.userMap.get(socket.id);
+    if (!userData || userData.isGuest) return; // Guest 차단.
+    socket.nsp.emit('move_pointer', { x, y, userId: userData.userId });
   }
 
   @SubscribeMessage('select_object')
   async selectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
-    const userId = this.userMap.get(socket.id)?.userId;
-    if (!userId) return;
-    socket.nsp.emit('select_object', { objectId, userId });
+    const userData = this.userMap.get(socket.id);
+    if (!userData || userData.isGuest) return; // Guest 차단.
+    socket.nsp.emit('select_object', { objectId, userId: userData.userId });
   }
 
   @SubscribeMessage('unselect_object')
   async unselectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
-    const userId = this.userMap.get(socket.id)?.userId;
-    if (!userId) return;
-    socket.nsp.emit('unselect_object', { objectId, userId });
+    const userData = this.userMap.get(socket.id);
+    if (!userData || userData.isGuest) return; // Guest 차단.
+    socket.nsp.emit('unselect_object', { objectId, userId: userData.userId });
   }
 
   @SubscribeMessage('create_object')
