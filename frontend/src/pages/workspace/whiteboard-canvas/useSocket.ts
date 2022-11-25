@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import { ClientToServerEvents, Member, ServerToClientEvents } from '@pages/workspace/whiteboard-canvas/socket.types';
+import { ClientToServerEvents, ServerToClientEvents } from '@pages/workspace/whiteboard-canvas/socket.types';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
@@ -24,14 +24,17 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('init', ({ members, objects }) => {
+			console.log(members, objects);
 			setMembers(members);
 			console.log('socket init');
 			//todo: objects 업데이트
 		});
 
 		socket.current.on('enter_user', ({ userData }) => {
+			// todo mousepointer 객체 생성 후 추가
 			setMembers((prev) => [...prev, userData]);
 			console.log('enter_user');
+			console.log(userData);
 		});
 
 		socket.current.on('leave_user', ({ userId }) => {
@@ -41,6 +44,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		socket.current.on('move_pointer', ({ userId, x, y }) => {
 			// todo move_pointer 업데이트
+			console.log(userId, x, y);
 		});
 
 		socket.current.on('select_object', ({ userId, objectId }) => {

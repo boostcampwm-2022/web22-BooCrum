@@ -21,34 +21,3 @@ export interface ClientToServerEvents {
 	delete_object: (arg: { objectId: string }) => void;
 	update_object: (arg: UpdatedObject) => void;
 }
-
-export interface AllWorkspaceData {
-	members: Member[];
-	objects: CanvasObject[];
-}
-
-export interface Member {
-	userId: string;
-	nickname: string;
-	color: string;
-}
-
-export interface MousePointer {
-	x: number;
-	y: number;
-}
-
-export interface UserMousePointer extends MousePointer {
-	userId: string;
-}
-
-export interface UpdatedObject {
-	objectId: string;
-	x?: number;
-	y?: number;
-	width?: number;
-	height?: number;
-	backgroundColor?: string;
-	createdBy?: string;
-	text?: string;
-}
