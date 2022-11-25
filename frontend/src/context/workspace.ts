@@ -11,3 +11,8 @@ export const zoomState = atom({
 	key: 'zoom',
 	default: { percent: 100, event: '' },
 });
+
+export const membersState = atom<Member[]>({
+	key: 'members',
+	default: [],
+});

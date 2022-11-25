@@ -1,8 +1,6 @@
 import { WhiteboardCanvasLayout } from './index.style';
-import { fabric } from 'fabric';
 import useCanvas from './useCanvas';
 import useSocket from './useSocket';
-import useContextMenu from '@hooks/useContextMenu';
 import { useEffect, useState } from 'react';
 import ContextMenu from '@components/context-menu';
 import ObjectEditMenu from '../object-edit-menu';
@@ -10,48 +8,15 @@ import { colorChips } from '@data/workspace-object-color';
 import { toolItems } from '@data/workspace-tool';
 import { useRecoilValue } from 'recoil';
 import { cursorState } from '@context/workspace';
+import useCanvasToSocket from './useCanvasToSocket';
 
 function WhiteboardCanvas() {
 	const { canvas } = useCanvas();
 	const { socket } = useSocket(canvas);
-	const { isOpen, menuRef, toggleOpen, menuPosition } = useContextMenu();
+
+	const { isOpen, menuRef, menuPosition } = useCanvasToSocket({ canvas, socket });
 	const cursor = useRecoilValue(cursorState);
 
-	useEffect(() => {
-		if (!canvas.current) return;
-
-		canvas.current.on('object:added', (e) => {
-			// todo object 추가 로직
-			// socket.emit('create_object', { e });
-			console.log(e);
-		});
-
-		canvas.current.on('object:removed', (e) => {
-			console.log(e);
-		});
-
-		canvas.current.on('selection:created', (e) => {
-			// todo select 로직
-			console.log(e);
-
-			toggleOpen(e.target?.left || 0, e.target?.top || 0);
-		});
-
-		canvas.current.on('selection:cleared', (e) => {
-			// todo unselect 로직
-			console.log(e);
-		});
-
-		canvas.current.on('object:moving', (e) => {
-			// todo object update 로직
-			console.log(e);
-		});
-
-		canvas.current.on('object:scaling', (e) => {
-			// todo object update 로직
-			console.log(e);
-		});
-	}, []);
 	useEffect(() => {
 		if (!canvas.current) return;
 
