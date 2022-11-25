@@ -47,6 +47,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		socket.current.on('leave_user', ({ userId }) => {
 			setMembers((prev) => prev.filter((user) => user.userId !== userId));
+			membersInCanvas.current = membersInCanvas.current.filter((memberInCanvas) => memberInCanvas.userId !== userId);
 			console.log('leave_user');
 		});
 
