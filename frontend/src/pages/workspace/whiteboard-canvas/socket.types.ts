@@ -3,7 +3,7 @@ export interface ServerToClientEvents {
 	connect: () => void;
 	disconnect: () => void;
 	init: (arg: AllWorkspaceData) => void;
-	enter_user: (arg: { userData: Member }) => void;
+	enter_user: (arg: Member) => void;
 	leave_user: (arg: { userId: string }) => void;
 	move_pointer: (arg: UserMousePointer) => void;
 	select_object: (arg: { userId: string; objectId: string }) => void;

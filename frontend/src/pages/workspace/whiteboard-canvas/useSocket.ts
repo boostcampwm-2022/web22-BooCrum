@@ -8,7 +8,7 @@ import { fabric } from 'fabric';
 
 import cursorSvg from '@assets/icon/cursor.svg';
 import { v4 } from 'uuid';
-import { getCursorObject } from '@utils/fabric.utils';
+import { createCursorObject, moveCursorFromServer } from '@utils/fabric.utils';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [members, setMembers] = useRecoilState(membersState);
@@ -40,15 +40,15 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			//todo: objects 업데이트
 		});
 
-		socket.current.on('enter_user', ({ userData }) => {
+		socket.current.on('enter_user', (userData) => {
 			console.log('enter_user');
 			setMembers((prev) => [...prev, userData]);
-			const cursorObject = getCursorObject('#FF0000');
+			const cursorObject = createCursorObject(userData.color);
 
 			const newMemberInCanvas: MemberInCanvas = {
-				// 임시 id, color 추후 서버에서 보내 줌
-				userId: v4(),
-				color: '#FF0000',
+				// 임시 color 추후 서버에서 보내 줌
+				userId: userData.userId,
+				color: userData.color,
 				cursorObject,
 			};
 			canvas.current?.add(cursorObject);
@@ -61,9 +61,11 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			console.log('leave_user');
 		});
 
-		socket.current.on('move_pointer', ({ userId, x, y }) => {
-			// todo move_pointer 업데이트
-			console.log(userId, x, y);
+		socket.current.on('move_pointer', (userMousePointer) => {
+			if (!canvas.current) return;
+			moveCursorFromServer(membersInCanvas.current, userMousePointer);
+
+			canvas.current.renderAll();
 		});
 
 		socket.current.on('select_object', ({ userId, objectId }) => {
