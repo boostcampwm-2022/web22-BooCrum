@@ -94,7 +94,9 @@ export const deleteObjectFromServer = (canvas: fabric.Canvas, objectId: string) 
 
 export const moveCursorFromServer = (membersInCanvas: MemberInCanvas[], userMousePointer: UserMousePointer) => {
 	const { userId, x, y } = userMousePointer;
-	membersInCanvas.filter((memberInCanvas) => memberInCanvas.userId === userId)[0].cursorObject.set({ top: y, left: x });
+	const memberInCanvasById = membersInCanvas.filter((memberInCanvas) => memberInCanvas.userId === userId);
+	if (memberInCanvasById.length === 0) return;
+	memberInCanvasById[0].cursorObject.set({ top: y, left: x });
 };
 
 export const createCursorObject = (color: string) => {
