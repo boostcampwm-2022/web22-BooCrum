@@ -2,11 +2,13 @@ import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, ServerToClientEvents } from '@pages/workspace/whiteboard-canvas/socket.types';
+import { useRecoilState } from 'recoil';
+import { membersState } from '@context/workspace';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
 	const [isConnected, setIsConnected] = useState(false);
-	const [members, setMembers] = useState<Member[]>([]);
+	const [members, setMembers] = useRecoilState(membersState);
 	const {
 		state: { workspaceId },
 	} = useLocation();
