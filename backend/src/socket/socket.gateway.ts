@@ -45,7 +45,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   private async formatDataToUserMapVO(client: Socket, workspaceId: string): Promise<UserMapVO> {
     const sessionUserData = client.request.session.user;
 
-    const userId = sessionUserData?.userId ?? 'Guest';
+    const userId = sessionUserData?.userId ?? `Guest(${client.id})`;
     const nickname = sessionUserData?.nickname ?? `Guest(${client.id})`;
     const role = !sessionUserData ? 0 : await this.dbAccessService.getUserRoleAt(userId, workspaceId);
     const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
