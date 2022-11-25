@@ -19,7 +19,6 @@ function useContextMenu() {
 	};
 
 	const openContextMenu = () => {
-		console.log('asda');
 		setIsOpen(true);
 	};
 

@@ -2,6 +2,7 @@ import { CanvasObject } from '@pages/workspace/whiteboard-canvas/index.types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
+import { addPostIt, addSection } from './object.utils';
 
 export const initGrid = (canvas: fabric.Canvas, width: number, height: number, gridSize: number) => {
 	for (let i = -width / gridSize + 1; i <= (2 * width) / gridSize; i++) {
@@ -50,9 +51,9 @@ export const initZoom = (
 export const initDragPanning = (canvas: fabric.Canvas) => {
 	canvas.on('mouse:down', function (opt) {
 		const evt = opt.e;
-		if (canvas.moveMode) {
+		if (canvas.mode === 'move') {
+			canvas.defaultCursor = 'grabbing';
 			canvas.isDragging = true;
-			canvas.selection = false;
 			canvas.lastPosX = evt.clientX;
 			canvas.lastPosY = evt.clientY;
 		}
@@ -72,11 +73,12 @@ export const initDragPanning = (canvas: fabric.Canvas) => {
 		}
 	});
 	canvas.on('mouse:up', function (opt) {
-		// on mouse up we want to recalculate new interaction
-		// for all objects, so we call setViewportTransform
 		if (canvas.viewportTransform) canvas.setViewportTransform(canvas.viewportTransform);
-		canvas.isDragging = false;
-		canvas.selection = true;
+
+		if (canvas.mode === 'move') {
+			canvas.defaultCursor = 'grab';
+			canvas.isDragging = false;
+		}
 	});
 };
 
@@ -93,6 +95,17 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 		}
 		canvas.requestRenderAll();
 		if (canvas.viewportTransform) canvas.setViewportTransform(canvas.viewportTransform);
+	});
+};
+
+export const addObject = (canvas: fabric.Canvas) => {
+	canvas.on('mouse:down', function (opt) {
+		const evt = opt.e;
+		if (canvas.mode === 'section' && !canvas.getActiveObject()) {
+			addSection(canvas, evt.clientX, evt.clientY);
+		} else if (canvas.mode === 'postit' && !canvas.getActiveObject()) {
+			addPostIt(canvas, evt.clientX, evt.clientY);
+		}
 	});
 };
 

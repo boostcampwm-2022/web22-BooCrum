@@ -1,26 +1,14 @@
 import { useRef, useEffect } from 'react';
 import { fabric } from 'fabric';
-import { initGrid, initDragPanning, initWheelPanning, initZoom } from '@utils/fabric.utils';
+import { addObject, initDragPanning, initWheelPanning, initZoom, initGrid } from '@utils/fabric.utils';
+import { toolItems } from '@data/workspace-tool';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { cursorState, zoomState } from '@context/workspace';
-import { toolItems } from '@data/workspace-tool';
-import { v4 } from 'uuid';
 
 function useCanvas() {
 	const canvas = useRef<fabric.Canvas | null>(null);
 	const [zoom, setZoom] = useRecoilState(zoomState);
 	const cursor = useRecoilValue(cursorState);
-	useEffect(() => {
-		if (cursor.type === toolItems.MOVE) {
-			if (canvas.current) {
-				canvas.current.moveMode = true;
-			}
-		} else {
-			if (canvas.current) {
-				canvas.current.moveMode = false;
-			}
-		}
-	}, [cursor]);
 
 	useEffect(() => {
 		if (canvas.current && zoom.event === 'control')
@@ -37,6 +25,29 @@ function useCanvas() {
 		};
 	}, []);
 
+	useEffect(() => {
+		if (!canvas.current) return;
+
+		const fabricCanvas = canvas.current as fabric.Canvas;
+		if (cursor.type === toolItems.SECTION || cursor.type === toolItems.POST_IT) {
+			fabricCanvas.defaultCursor = 'context-menu';
+			fabricCanvas.selection = true;
+			if (cursor.type === toolItems.SECTION) fabricCanvas.mode = 'section';
+			else fabricCanvas.mode = 'postit';
+		} else if (cursor.type === toolItems.MOVE) {
+			fabricCanvas.defaultCursor = 'grab';
+			fabricCanvas.mode = 'move';
+			fabricCanvas.selection = false;
+		} else if (cursor.type === toolItems.SELECT) {
+			fabricCanvas.defaultCursor = 'default';
+			fabricCanvas.mode = 'select';
+			fabricCanvas.selection = true;
+		} else {
+			fabricCanvas.defaultCursor = 'default';
+			fabricCanvas.mode = 'draw';
+		}
+	}, [cursor]);
+
 	const initCanvas = () => {
 		const grid = 50;
 		const canvasWidth = window.innerWidth;
@@ -52,6 +63,7 @@ function useCanvas() {
 		initZoom(fabricCanvas, setZoom);
 		initDragPanning(fabricCanvas);
 		initWheelPanning(fabricCanvas);
+		addObject(fabricCanvas);
 
 		return fabricCanvas;
 	};

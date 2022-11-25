@@ -11,17 +11,13 @@ import { User } from '@api/user';
 function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }) {
 	const orderType = useRecoilValue(workspaceOrderState);
 	const [workspaces, setWorkspaces] = useState<WorkspaceCardType[]>([]);
+
 	async function setWorkspaceList() {
 		const result = await User.getWorkspace();
 		const sortedWorkspace = sortWorkspace(result);
 		setWorkspaces(sortedWorkspace);
 	}
 	useEffect(() => {
-		// async function setWorkspaceList() {
-		// 	const result = await User.getWorkspace();
-		// 	const sortedWorkspace = sortWorkspace(result);
-		// 	setWorkspaces(sortedWorkspace);
-		// }
 		setWorkspaceList();
 	}, []);
 	useEffect(() => {
