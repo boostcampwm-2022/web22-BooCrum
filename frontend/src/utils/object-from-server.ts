@@ -1,3 +1,4 @@
+import { CanvasObject, MemberInCanvas, UserMousePointer } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 
 export const createObjectFromServer = (canvas: fabric.Canvas, newObject: CanvasObject) => {

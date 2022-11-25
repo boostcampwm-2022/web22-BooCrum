@@ -1,5 +1,5 @@
 import { Socket } from 'socket.io-client';
-import { ServerToClientEvents, ClientToServerEvents } from '@pages/workspace/whiteboard-canvas/socket.types';
+import { ServerToClientEvents, ClientToServerEvents, MousePointer } from './types';
 import { useEffect } from 'react';
 import useEditMenu from './useEditMenu';
 
@@ -16,7 +16,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('object:added', (e) => {
 			// todo object 추가 로직
 			// socket.emit('create_object', { e });
-			console.log(e);
+			console.log(e.target);
 		});
 
 		canvas.current.on('object:removed', (e) => {

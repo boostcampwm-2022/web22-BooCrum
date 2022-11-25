@@ -1,5 +1,6 @@
 import { colorChips } from '@data/workspace-object-color';
 import { toolItems } from '@data/workspace-tool';
+import { Member } from '@pages/workspace/whiteboard-canvas/types';
 import { atom } from 'recoil';
 
 export const cursorState = atom({
