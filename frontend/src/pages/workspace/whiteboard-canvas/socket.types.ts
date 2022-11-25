@@ -1,4 +1,3 @@
-import { CanvasObject } from './index.types';
 export interface ServerToClientEvents {
 	connect: () => void;
 	disconnect: () => void;

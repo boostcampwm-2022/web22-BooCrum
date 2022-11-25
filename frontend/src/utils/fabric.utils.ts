@@ -1,4 +1,3 @@
-import { CanvasObject } from '@pages/workspace/whiteboard-canvas/index.types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
