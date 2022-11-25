@@ -1,8 +1,19 @@
 diff --git a/node_modules/@types/fabric/fabric-impl.d.ts b/node_modules/@types/fabric/fabric-impl.d.ts
-index 107db96..950df29 100755
+index 107db96..46a7ec2 100644
 --- a/node_modules/@types/fabric/fabric-impl.d.ts
 +++ b/node_modules/@types/fabric/fabric-impl.d.ts
-@@ -2695,6 +2695,7 @@ export class Line {
+@@ -1693,6 +1693,10 @@ export class StaticCanvas {
+ }
+ 
+ interface ICanvasOptions extends IStaticCanvasOptions {
++    isDragging?:boolean;
++    lastPosX?:number;
++    lastPosY?:number;
++    moveMode?:boolean;
+     /**
+      * When true, objects can be transformed by one side (unproportionally)
+      * when dragged on the corners that normally would not do that.
+@@ -2695,6 +2699,7 @@ export class Line {
  }
  
  interface IObjectOptions {

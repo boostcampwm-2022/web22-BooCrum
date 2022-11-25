@@ -46,6 +46,38 @@ export const initZoom = (
 	});
 };
 
+export const initPanning = (canvas: fabric.Canvas) => {
+	canvas.on('mouse:down', function (opt) {
+		const evt = opt.e;
+		if (canvas.moveMode) {
+			canvas.isDragging = true;
+			canvas.selection = false;
+			canvas.lastPosX = evt.clientX;
+			canvas.lastPosY = evt.clientY;
+		}
+	});
+	canvas.on('mouse:move', function (opt) {
+		if (canvas.viewportTransform && canvas.isDragging) {
+			const e = opt.e;
+			const vpt = canvas.viewportTransform;
+			if (canvas.lastPosX && canvas.lastPosY) {
+				vpt[4] += e.clientX - canvas.lastPosX;
+				vpt[5] += e.clientY - canvas.lastPosY;
+			}
+			canvas.requestRenderAll();
+			canvas.lastPosX = e.clientX;
+			canvas.lastPosY = e.clientY;
+		}
+	});
+	canvas.on('mouse:up', function (opt) {
+		// on mouse up we want to recalculate new interaction
+		// for all objects, so we call setViewportTransform
+		if (canvas.viewportTransform) canvas.setViewportTransform(canvas.viewportTransform);
+		canvas.isDragging = false;
+		canvas.selection = true;
+	});
+};
+
 export const createObjectFromServer = (canvas: fabric.Canvas, newObject: CanvasObject) => {
 	const rect = new fabric.Rect({
 		...newObject,
