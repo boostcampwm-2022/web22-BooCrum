@@ -102,13 +102,13 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     //? 중복 유저가 존재한다면 그건 어떻게 처리할 것인가? (소켓이 여러개 인거지, 사람이 여러 명인건 아님.)
     const members = Array.from(this.userMap.values())
       .filter((vo) => vo.workspaceId === workspaceId)
-      .map((vo) => new UserDAO(vo.userId, vo.nickname));
+      .map((vo) => new UserDAO(vo.userId, vo.nickname, vo.color));
     const objects = await this.objectHandlerService.selectAllObjects(workspaceId);
 
     // 6. Socket 이벤트 Emit
     //? 자신 포함이야... 자신 제외하고 보내야 하는거야...?
     client.emit('init', { members, objects });
-    client.nsp.emit('enter_user', new UserDAO(userMapVO.userId, userMapVO.nickname));
+    client.nsp.emit('enter_user', new UserDAO(userMapVO.userId, userMapVO.nickname, userMapVO.color));
   }
 
   /**
