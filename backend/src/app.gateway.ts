@@ -83,7 +83,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     const objects = await this.appService.getAllObjects(workspaceId);
 
     client.emit('init', { members, objects });
-    const userData = new UserDAO(userId, nickname);
+    const userData = new UserDAO(userId, nickname, color);
     this.server.to(workspaceId).emit('enter_user', userData);
   }
 
