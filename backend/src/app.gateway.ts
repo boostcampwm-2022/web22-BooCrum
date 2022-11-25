@@ -60,8 +60,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       nickname = session.user.nickname;
       client.join(userId);
     } else {
-      userId = 'Guest';
-      nickname = `Guest(${client.id})`;
+      userId = `Guest_${client.id}`;
+      nickname = `Guest_${client.id}`;
     }
 
     // 3. WorkspaceMember 존재 여부 조회 후 role 부여
