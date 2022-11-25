@@ -1,7 +1,7 @@
 import { CanvasObject } from '@pages/workspace/whiteboard-canvas/index.types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
-import { v4 } from 'uuid';
+import { addPostIt, addSection } from './object.utils';
 
 <<<<<<< HEAD
 export const initGrid = (canvas: fabric.Canvas, width: number, height: number, gridSize: number) => {
@@ -53,11 +53,15 @@ export const initZoom = (
 export const initDragPanning = (canvas: fabric.Canvas) => {
 	canvas.on('mouse:down', function (opt) {
 		const evt = opt.e;
-		if (canvas.moveMode) {
+		if (canvas.mode === 'move') {
 			canvas.defaultCursor = 'grabbing';
 			canvas.isDragging = true;
 			canvas.lastPosX = evt.clientX;
 			canvas.lastPosY = evt.clientY;
+		} else if (canvas.mode === 'section' && !canvas.getActiveObject()) {
+			addSection(canvas, evt.clientX, evt.clientY);
+		} else if (canvas.mode === 'postit' && !canvas.getActiveObject()) {
+			addPostIt(canvas, evt.clientX, evt.clientY);
 		}
 	});
 	canvas.on('mouse:move', function (opt) {
@@ -77,7 +81,7 @@ export const initDragPanning = (canvas: fabric.Canvas) => {
 	canvas.on('mouse:up', function (opt) {
 		if (canvas.viewportTransform) canvas.setViewportTransform(canvas.viewportTransform);
 
-		if (canvas.moveMode) {
+		if (canvas.mode === 'move') {
 			canvas.defaultCursor = 'grab';
 			canvas.isDragging = false;
 		}

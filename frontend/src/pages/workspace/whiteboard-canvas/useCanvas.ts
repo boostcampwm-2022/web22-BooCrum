@@ -27,7 +27,6 @@ function useCanvas() {
 	}, []);
 
 	const initCanvas = () => {
-		const grid = 50;
 		const canvasWidth = window.innerWidth;
 		const canvasHeight = window.innerHeight;
 

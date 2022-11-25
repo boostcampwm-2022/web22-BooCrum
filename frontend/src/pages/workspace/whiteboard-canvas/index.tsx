@@ -58,15 +58,16 @@ function WhiteboardCanvas() {
 		const fabricCanvas = canvas.current as fabric.Canvas;
 		if (cursor.type === toolItems.SECTION || cursor.type === toolItems.POST_IT) {
 			fabricCanvas.defaultCursor = 'context-menu';
-			fabricCanvas.moveMode = false;
 			fabricCanvas.selection = true;
+			if (cursor.type === toolItems.SECTION) fabricCanvas.mode = 'section';
+			else fabricCanvas.mode = 'postit';
 		} else if (cursor.type === toolItems.MOVE) {
 			fabricCanvas.defaultCursor = 'grab';
-			fabricCanvas.moveMode = true;
+			fabricCanvas.mode = 'move';
 			fabricCanvas.selection = false;
-		} else {
+		} else if (cursor.type === toolItems.SELECT) {
 			fabricCanvas.defaultCursor = 'default';
-			fabricCanvas.moveMode = false;
+			fabricCanvas.mode = 'select';
 			fabricCanvas.selection = true;
 		}
 	}, [cursor]);
