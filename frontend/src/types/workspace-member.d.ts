@@ -18,4 +18,5 @@ interface MemberInCanvas {
 	color: string;
 	pointer?: MousePointer;
 	selectedObjectId?: string;
+	cursorObject: fabric.Path;
 }

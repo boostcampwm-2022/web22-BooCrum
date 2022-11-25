@@ -4,6 +4,11 @@ import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, ServerToClientEvents } from '@pages/workspace/whiteboard-canvas/socket.types';
 import { useRecoilState } from 'recoil';
 import { membersState } from '@context/workspace';
+import { fabric } from 'fabric';
+
+import cursorSvg from '@assets/icon/cursor.svg';
+import { v4 } from 'uuid';
+import { getCursorObject } from '@utils/fabric.utils';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [members, setMembers] = useRecoilState(membersState);
@@ -38,10 +43,15 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('enter_user', ({ userData }) => {
 			console.log('enter_user');
 			setMembers((prev) => [...prev, userData]);
+			const cursorObject = getCursorObject('#FF0000');
+
 			const newMemberInCanvas: MemberInCanvas = {
-				userId: userData.userId,
-				color: userData.color,
+				// 임시 id, color 추후 서버에서 보내 줌
+				userId: v4(),
+				color: '#FF0000',
+				cursorObject,
 			};
+			canvas.current?.add(cursorObject);
 			membersInCanvas.current.push(newMemberInCanvas);
 		});
 
