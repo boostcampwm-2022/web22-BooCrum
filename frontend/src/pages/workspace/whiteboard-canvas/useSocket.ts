@@ -96,7 +96,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	return {
 		isConnected,
 		socket,
-		members,
+		membersInCanvas,
 	};
 }
 
