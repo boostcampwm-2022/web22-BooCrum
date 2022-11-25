@@ -98,7 +98,7 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 	});
 };
 
-export const initObject = (canvas: fabric.Canvas) => {
+export const addObject = (canvas: fabric.Canvas) => {
 	canvas.on('mouse:down', function (opt) {
 		const evt = opt.e;
 		if (canvas.mode === 'section' && !canvas.getActiveObject()) {
