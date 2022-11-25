@@ -3,12 +3,12 @@ import { ServerToClientEvents, ClientToServerEvents } from '@pages/workspace/whi
 import { useEffect } from 'react';
 import useContextMenu from '@hooks/useContextMenu';
 
-interface UseCanvasEventProps {
+interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
 	socket: React.MutableRefObject<Socket<ServerToClientEvents, ClientToServerEvents> | null>;
 }
 
-function useCanvasEvent({ canvas, socket }: UseCanvasEventProps) {
+function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 	const { isOpen, menuRef, toggleOpen, menuPosition } = useContextMenu();
 	useEffect(() => {
 		if (!canvas.current) return;
@@ -64,4 +64,4 @@ function useCanvasEvent({ canvas, socket }: UseCanvasEventProps) {
 	};
 }
 
-export default useCanvasEvent;
+export default useCanvasToSocket;

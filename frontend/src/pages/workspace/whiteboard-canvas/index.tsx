@@ -9,13 +9,13 @@ import { colorChips } from '@data/workspace-object-color';
 import { toolItems } from '@data/workspace-tool';
 import { useRecoilValue } from 'recoil';
 import { cursorState } from '@context/workspace';
-import useCanvasEvent from './useCanvasEvent';
+import useCanvasToSocket from './useCanvasEvent';
 
 function WhiteboardCanvas() {
 	const { canvas } = useCanvas();
 	const { socket } = useSocket(canvas);
 
-	const { isOpen, menuRef, menuPosition } = useCanvasEvent({ canvas, socket });
+	const { isOpen, menuRef, menuPosition } = useCanvasToSocket({ canvas, socket });
 	const cursor = useRecoilValue(cursorState);
 
 	useEffect(() => {
