@@ -4,6 +4,8 @@ export const WorkspaceMenuList = styled.ul`
 	margin: 0;
 	padding: 0;
 	list-style: none;
+
+	box-shadow: 3px 3px 3px rgba(0, 0, 0, 0.25);
 `;
 
 export const WorkspaceMenuItem = styled.li`

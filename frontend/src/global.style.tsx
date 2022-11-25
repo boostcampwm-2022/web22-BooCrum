@@ -17,6 +17,8 @@ export const theme = {
 	logo: '#2071ff',
 	gray_1: '#d9d9d9',
 	gray_2: '#d8d8d8',
+	gray_3: '#777777',
+	gray_4: '#282828',
 	blue_1: '#005CFD',
 	blue_2: '#2071FF',
 	blue_3: '#5794FF',
