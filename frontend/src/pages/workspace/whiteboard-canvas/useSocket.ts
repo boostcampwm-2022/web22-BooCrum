@@ -6,9 +6,12 @@ import { useRecoilState } from 'recoil';
 import { membersState } from '@context/workspace';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
-	const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
-	const [isConnected, setIsConnected] = useState(false);
 	const [members, setMembers] = useRecoilState(membersState);
+
+	const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+	const membersInCanvas = useRef<MemberInCanvas[]>([]);
+	const [isConnected, setIsConnected] = useState(false);
+
 	const {
 		state: { workspaceId },
 	} = useLocation();
@@ -33,10 +36,13 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('enter_user', ({ userData }) => {
-			// todo mousepointer 객체 생성 후 추가
-			setMembers((prev) => [...prev, userData]);
 			console.log('enter_user');
-			console.log(userData);
+			setMembers((prev) => [...prev, userData]);
+			const newMemberInCanvas: MemberInCanvas = {
+				userId: userData.userId,
+				color: userData.color,
+			};
+			membersInCanvas.current.push(newMemberInCanvas);
 		});
 
 		socket.current.on('leave_user', ({ userId }) => {
