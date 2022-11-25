@@ -1,5 +1,4 @@
 import { WhiteboardCanvasLayout } from './index.style';
-import { v4 } from 'uuid';
 import { fabric } from 'fabric';
 import useCanvas from './useCanvas';
 import useSocket from './useSocket';

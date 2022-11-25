@@ -23,19 +23,25 @@ function ObjectEditMenu({ selectedObject, color, setObjectColor }: ObjectEditMen
 		setSelected((prevSelect) => (prevSelect === selectedType.COLOR ? selectedType.NONE : selectedType.COLOR));
 	};
 
+	const renderOptionBySelect = () => {
+		if (selectedObject === 'section') {
+			return (
+				<Rename selected={selected === selectedType.TYPE} onClick={() => setSelected(selectedType.TYPE)}>
+					<RenameSection stroke={selected === selectedType.TYPE ? 'white' : '#777777'} />
+				</Rename>
+			);
+		} else {
+			<FontSize selected={selected === selectedType.TYPE} onClick={() => setSelected(selectedType.TYPE)}></FontSize>;
+		}
+	};
+
 	return (
 		<Container>
 			<ColorSelect color={color} onClick={toggleColorSelect}>
 				<div className="selected-color" />
 				<img alt="set color" className="dropdown-color" src={dropdownColor} />
 			</ColorSelect>
-			{selectedObject === 'section' ? (
-				<Rename selected={selected === selectedType.TYPE} onClick={() => setSelected(selectedType.TYPE)}>
-					<RenameSection stroke={selected === selectedType.TYPE ? 'white' : '#777777'} />
-				</Rename>
-			) : (
-				<FontSize selected={selected === selectedType.TYPE} onClick={() => setSelected(selectedType.TYPE)}></FontSize>
-			)}
+			{renderOptionBySelect()}
 			{selected === selectedType.COLOR && (
 				<ColorChip>
 					{colorChips.map((color) => (
