@@ -1,9 +1,10 @@
 import { useRef, useEffect } from 'react';
 import { fabric } from 'fabric';
-import { initGrid, initPanning, initZoom } from '@utils/fabric.utils';
+import { initGrid, initDragPanning, initWheelPanning, initZoom } from '@utils/fabric.utils';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { cursorState, zoomState } from '@context/workspace';
 import { toolItems } from '@data/workspace-tool';
+import { v4 } from 'uuid';
 
 function useCanvas() {
 	const canvas = useRef<fabric.Canvas | null>(null);
@@ -49,7 +50,17 @@ function useCanvas() {
 
 		initGrid(fabricCanvas, canvasWidth, canvasHeight, grid);
 		initZoom(fabricCanvas, setZoom);
-		initPanning(fabricCanvas);
+		initDragPanning(fabricCanvas);
+		initWheelPanning(fabricCanvas);
+
+		fabricCanvas.add(
+			new fabric.Rect({
+				objectId: v4(),
+				width: 200,
+				height: 200,
+				fill: 'red',
+			})
+		);
 
 		return fabricCanvas;
 	};
