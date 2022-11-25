@@ -7,8 +7,8 @@ export class ObjectDTO {
   @IsUUID()
   workspaceId: string;
 
-  @IsNumber()
-  type: number;
+  @IsString()
+  type: string;
 
   @IsNumber()
   xPos: number;
