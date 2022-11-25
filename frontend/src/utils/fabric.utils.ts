@@ -1,3 +1,4 @@
+import { CanvasType } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
@@ -100,9 +101,9 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 export const addObject = (canvas: fabric.Canvas) => {
 	canvas.on('mouse:down', function (opt) {
 		const evt = opt.e;
-		if (canvas.mode === 'section' && !canvas.getActiveObject()) {
+		if (canvas.mode === CanvasType.section && !canvas.getActiveObject()) {
 			addSection(canvas, evt.clientX, evt.clientY);
-		} else if (canvas.mode === 'postit' && !canvas.getActiveObject()) {
+		} else if (canvas.mode === CanvasType.postit && !canvas.getActiveObject()) {
 			addPostIt(canvas, evt.clientX, evt.clientY);
 		}
 	});

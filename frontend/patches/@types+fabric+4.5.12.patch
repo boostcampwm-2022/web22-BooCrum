@@ -1,5 +1,5 @@
 diff --git a/node_modules/@types/fabric/fabric-impl.d.ts b/node_modules/@types/fabric/fabric-impl.d.ts
-index 107db96..46a7ec2 100644
+index 107db96..676c07d 100755
 --- a/node_modules/@types/fabric/fabric-impl.d.ts
 +++ b/node_modules/@types/fabric/fabric-impl.d.ts
 @@ -1693,6 +1693,10 @@ export class StaticCanvas {
@@ -9,7 +9,7 @@ index 107db96..46a7ec2 100644
 +    isDragging?:boolean;
 +    lastPosX?:number;
 +    lastPosY?:number;
-+    mode?:string;
++    mode: 'postit' | 'section' | 'move' | 'select' | 'draw';
      /**
       * When true, objects can be transformed by one side (unproportionally)
       * when dragged on the corners that normally would not do that.
