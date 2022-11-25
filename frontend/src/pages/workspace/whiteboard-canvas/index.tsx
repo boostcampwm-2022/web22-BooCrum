@@ -56,17 +56,19 @@ function WhiteboardCanvas() {
 		if (!canvas.current) return;
 
 		const fabricCanvas = canvas.current as fabric.Canvas;
-		if (cursor.type === toolItems.MOVE) {
-			fabricCanvas.defaultCursor = 'grab';
-			fabricCanvas.selection = false;
-		} else if (cursor.type === toolItems.SECTION || cursor.type === toolItems.POST_IT) {
+		if (cursor.type === toolItems.SECTION || cursor.type === toolItems.POST_IT) {
 			fabricCanvas.defaultCursor = 'context-menu';
+			fabricCanvas.moveMode = false;
 			fabricCanvas.selection = true;
+		} else if (cursor.type === toolItems.MOVE) {
+			fabricCanvas.defaultCursor = 'grab';
+			fabricCanvas.moveMode = true;
+			fabricCanvas.selection = false;
 		} else {
 			fabricCanvas.defaultCursor = 'default';
+			fabricCanvas.moveMode = false;
 			fabricCanvas.selection = true;
 		}
-		// grab 상태에서 화면 움직이는 경우 grabbing으로 수정하는 부분 추가 필요
 	}, [cursor]);
 
 	// object color 수정 초안

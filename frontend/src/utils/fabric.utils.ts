@@ -3,6 +3,7 @@ import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
 
+<<<<<<< HEAD
 export const initGrid = (canvas: fabric.Canvas, width: number, height: number, gridSize: number) => {
 	for (let i = -width / gridSize + 1; i <= (2 * width) / gridSize; i++) {
 		const lineY = new fabric.Line([i * gridSize, -height, i * gridSize, height * 2], {
@@ -26,6 +27,8 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 	}
 };
 
+=======
+>>>>>>> 601262f (chore: fe - grabbing cursor 추가 #105)
 export const initZoom = (
 	canvas: fabric.Canvas,
 	setZoom: SetterOrUpdater<{
@@ -51,8 +54,8 @@ export const initDragPanning = (canvas: fabric.Canvas) => {
 	canvas.on('mouse:down', function (opt) {
 		const evt = opt.e;
 		if (canvas.moveMode) {
+			canvas.defaultCursor = 'grabbing';
 			canvas.isDragging = true;
-			canvas.selection = false;
 			canvas.lastPosX = evt.clientX;
 			canvas.lastPosY = evt.clientY;
 		}
@@ -72,11 +75,12 @@ export const initDragPanning = (canvas: fabric.Canvas) => {
 		}
 	});
 	canvas.on('mouse:up', function (opt) {
-		// on mouse up we want to recalculate new interaction
-		// for all objects, so we call setViewportTransform
 		if (canvas.viewportTransform) canvas.setViewportTransform(canvas.viewportTransform);
-		canvas.isDragging = false;
-		canvas.selection = true;
+
+		if (canvas.moveMode) {
+			canvas.defaultCursor = 'grab';
+			canvas.isDragging = false;
+		}
 	});
 };
 
