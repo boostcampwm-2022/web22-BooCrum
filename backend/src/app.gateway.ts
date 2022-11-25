@@ -58,6 +58,7 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
     if (session.user !== undefined) {
       userId = session.user.userId;
       nickname = session.user.nickname;
+      client.join(userId);
     } else {
       userId = 'undefined';
       nickname = `undefined(${client.id})`;
@@ -71,7 +72,6 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
 
     // 5. room 추가
     client.join(workspaceId);
-    client.join(userId);
 
     // 6. userMap 추가
     this.userMap.set(client.id, new UserMapVO(userId, nickname, workspaceId, role, color));
