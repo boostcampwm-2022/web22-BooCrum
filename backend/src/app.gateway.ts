@@ -60,8 +60,8 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
       nickname = session.user.nickname;
       client.join(userId);
     } else {
-      userId = 'undefined';
-      nickname = `undefined(${client.id})`;
+      userId = 'Guest';
+      nickname = `Guest(${client.id})`;
     }
 
     // 3. WorkspaceMember 존재 여부 조회 후 role 부여
@@ -120,8 +120,9 @@ export class AppGateway implements OnGatewayInit, OnGatewayConnection, OnGateway
   async createObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
     const workspaceId = this.userMap.get(socket.id).workspaceId;
     const requestURL = `${process.env.API_ADDRESS}/object-database/${workspaceId}/object`;
-    await this.appService.requestAPI(requestURL, 'POST', objectData);
-    this.server.to(workspaceId).emit('create_object', objectData);
+    const ret = await this.appService.requestAPI(requestURL, 'POST', objectData);
+    if (ret) this.server.to(workspaceId).emit('create_object', objectData);
+    else throw new WsException('생성 실패');
   }
 
   @SubscribeMessage('update_object')
