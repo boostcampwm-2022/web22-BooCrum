@@ -1,12 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import { ClientToServerEvents, Member, ServerToClientEvents } from '@pages/workspace/whiteboard-canvas/socket.types';
+import { ClientToServerEvents, ServerToClientEvents } from '@pages/workspace/whiteboard-canvas/socket.types';
+import { useRecoilState } from 'recoil';
+import { membersState } from '@context/workspace';
+import { fabric } from 'fabric';
+
+import cursorSvg from '@assets/icon/cursor.svg';
+import { v4 } from 'uuid';
+import { createCursorObject, moveCursorFromServer } from '@utils/fabric.utils';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
+	const [members, setMembers] = useRecoilState(membersState);
+
 	const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
+	const membersInCanvas = useRef<MemberInCanvas[]>([]);
 	const [isConnected, setIsConnected] = useState(false);
-	const [members, setMembers] = useState<Member[]>([]);
+
 	const {
 		state: { workspaceId },
 	} = useLocation();
@@ -24,23 +34,38 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('init', ({ members, objects }) => {
+			console.log(members, objects);
 			setMembers(members);
 			console.log('socket init');
 			//todo: objects 업데이트
 		});
 
-		socket.current.on('enter_user', ({ userData }) => {
-			setMembers((prev) => [...prev, userData]);
+		socket.current.on('enter_user', (userData) => {
 			console.log('enter_user');
+			setMembers((prev) => [...prev, userData]);
+			const cursorObject = createCursorObject(userData.color);
+
+			const newMemberInCanvas: MemberInCanvas = {
+				// 임시 color 추후 서버에서 보내 줌
+				userId: userData.userId,
+				color: userData.color,
+				cursorObject,
+			};
+			canvas.current?.add(cursorObject);
+			membersInCanvas.current.push(newMemberInCanvas);
 		});
 
 		socket.current.on('leave_user', ({ userId }) => {
 			setMembers((prev) => prev.filter((user) => user.userId !== userId));
+			membersInCanvas.current = membersInCanvas.current.filter((memberInCanvas) => memberInCanvas.userId !== userId);
 			console.log('leave_user');
 		});
 
-		socket.current.on('move_pointer', ({ userId, x, y }) => {
-			// todo move_pointer 업데이트
+		socket.current.on('move_pointer', (userMousePointer) => {
+			if (!canvas.current) return;
+			moveCursorFromServer(membersInCanvas.current, userMousePointer);
+
+			canvas.current.renderAll();
 		});
 
 		socket.current.on('select_object', ({ userId, objectId }) => {
@@ -73,7 +98,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	return {
 		isConnected,
 		socket,
-		members,
+		membersInCanvas,
 	};
 }
 
