@@ -87,13 +87,14 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     this.userMap.set(client.id, new UserMapVO(userData.userId, userData.nickname, workspaceId, role, color));
 
     // 7. Socket.io - Client 이벤트 호출
+    // TODO: 전체 순환을 써도 되는가? 이건 workspaceId -> VO로 연결하는 것이 낫지 않냐?
     const members = Array.from(this.userMap.values())
       .filter((vo) => vo.workspaceId === workspaceId)
       .map((vo) => new UserDAO(vo.userId, vo.nickname));
     const objects = await this.objectHandlerService.selectAllObjects(workspaceId);
 
     //? 자신 포함이야... 자신 제외하고 보내야 하는거야...?
-    client.emit('init', { members, objects }); // TODO: 왜 member 전송 시에 nickname이 없는거지?
+    client.emit('init', { members, objects });
     client.nsp.emit('enter_user', userData);
 
     await queryRunner.release();
@@ -119,14 +120,14 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('select_object')
-  async selectObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
+  async selectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
     const userId = this.userMap.get(socket.id)?.userId;
     if (!userId) return;
     socket.nsp.emit('select_object', { objectId, userId });
   }
 
   @SubscribeMessage('unselect_object')
-  async unselectObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
+  async unselectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
     const userId = this.userMap.get(socket.id)?.userId;
     if (!userId) return;
     socket.nsp.emit('unselect_object', { objectId, userId });
@@ -135,6 +136,8 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('create_object')
   async createObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
     const workspaceId = this.userMap.get(socket.id).workspaceId;
+    if (!objectData.text) objectData.text = '';
+    objectData.creator = socket.request.session.user.userId;
     const ret = await this.objectHandlerService.createObject(workspaceId, objectData);
     if (!ret) throw new WsException('생성 실패');
     socket.nsp.emit('create_object', objectData);
@@ -149,10 +152,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('delete_object')
-  async deleteObject(@MessageBody() objectId: string, @ConnectedSocket() socket: Socket) {
+  async deleteObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
     const workspaceId = this.userMap.get(socket.id).workspaceId;
     const ret = await this.objectHandlerService.deleteObject(workspaceId, objectId);
     if (!ret) new WsException('삭제 실패');
-    socket.nsp.emit('delete_object', objectId);
+    socket.nsp.emit('delete_object', { objectId });
   }
 }
