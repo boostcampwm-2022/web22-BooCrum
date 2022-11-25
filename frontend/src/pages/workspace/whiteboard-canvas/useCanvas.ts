@@ -53,15 +53,6 @@ function useCanvas() {
 		initDragPanning(fabricCanvas);
 		initWheelPanning(fabricCanvas);
 
-		fabricCanvas.add(
-			new fabric.Rect({
-				objectId: v4(),
-				width: 200,
-				height: 200,
-				fill: 'red',
-			})
-		);
-
 		return fabricCanvas;
 	};
 
