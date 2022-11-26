@@ -13,7 +13,7 @@ export const config: DataSourceOptions = {
   entities: [join(__dirname, '/**/*.entity{.ts,.js}')],
   migrations: [
     process.env.NODE_ENV !== 'develop' && process.env.NODE_ENV !== 'production'
-      ? 'migrations/**/*.ts'
+      ? 'src/migrations/**/*.ts'
       : 'dist/migrations/**/*.js',
   ],
   migrationsTableName: 'migrations',

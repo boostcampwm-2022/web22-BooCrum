@@ -8,7 +8,6 @@ async function bootstrap() {
 
   // 세션 초기화
   app.use(createSessionMiddleware());
-
   await app.listen(3000);
 }
 bootstrap();

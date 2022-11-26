@@ -1,10 +1,11 @@
-import { IsNumber, IsString, IsUUID } from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class ObjectDTO {
   @IsString()
   objectId: string;
 
   @IsUUID()
+  @IsOptional()
   workspaceId: string;
 
   @IsString()
@@ -26,8 +27,10 @@ export class ObjectDTO {
   color: string;
 
   @IsString()
+  @IsOptional()
   text: string;
 
   @IsString()
-  craetor: string;
+  @IsOptional()
+  creator: string;
 }

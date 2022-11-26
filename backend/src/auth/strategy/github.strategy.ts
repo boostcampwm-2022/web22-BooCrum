@@ -15,13 +15,17 @@ export class GithubStrategy extends PassportStrategy(Strategy, 'github') {
     super(options);
   }
 
-  async validate(_accessToken: string, _refreshToken: string, profile: Profile) {
+  async validate(_accessToken: string, _refreshToken: string, profile: Profile): Promise<UserSessionData> {
     const userData: UserDto = {
       userId: profile.id,
       nickname: profile.username,
     };
     const user = await this.userService.createOrFindUser(userData);
-    const ret = { ...user, userTeamId: (await this.teamService.findUserTeam(user.userId)).teamId };
+    const ret = {
+      ...user,
+      registerDate: (user.registerDate as unknown as Date).toISOString(),
+      userTeamId: (await this.teamService.findUserTeam(user.userId)).teamId,
+    };
     return ret; // req.user에 담기는 정보
   }
 }

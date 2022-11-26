@@ -1,16 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import {
-  Controller,
-  UseGuards,
-  UseFilters,
-  Get,
-  Put,
-  Req,
-  Res,
-  Session,
-  UnauthorizedException,
-  Param,
-} from '@nestjs/common';
+import { Controller, UseGuards, UseFilters, Get, Put, Req, Res, Session, UnauthorizedException } from '@nestjs/common';
 import { Request, Response } from 'express';
 import { AuthService } from './auth.service';
 import { UnAuthRedirectionFilter } from './filter/unauth-redirect.filter';
@@ -44,14 +33,15 @@ export class AuthController {
 
   @Get('/status')
   checkLoginStatus(@Session() session: Record<string, any>, @Res() res: Response): void {
+    console.log(session.user);
     if (!session.user) throw new UnauthorizedException();
     res.sendStatus(200);
   }
 
-  @Get('/info/:sessionId')
-  async getSessionData(@Param('sessionId') sessionId: string) {
-    const { data } = (await this.authService.getSessionData(sessionId))[0];
-    const { user } = JSON.parse(data);
-    return user.userId;
-  }
+  // @Get('/info/:sessionId')
+  // async getSessionData(@Param('sessionId') sessionId: string) {
+  //   const { data } = (await this.authService.getSessionData(sessionId))[0];
+  //   const { user } = JSON.parse(data);
+  //   return user.userId;
+  // }
 }

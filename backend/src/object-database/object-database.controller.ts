@@ -1,38 +1,22 @@
-import { Controller, Res, Get, Post, Delete, Param, ValidationPipe, Body, Patch } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Delete,
+  Param,
+  ValidationPipe,
+  Body,
+  Patch,
+  InternalServerErrorException,
+} from '@nestjs/common';
 import { CreateTableRequestDto } from './dto/create-table-request.dto';
-import { ObjectDatabaseService } from './object-database.service';
-import { Response } from 'express';
 import { ObjectHandlerService } from './object-handler.service';
 import { SelectObjectDTO } from './dto/select-object.dto';
 import { CreateObjectDTO } from './dto/create-object.dto';
 
 @Controller('object-database')
 export class ObjectDatabaseController {
-  constructor(
-    private objectDatabaseService: ObjectDatabaseService,
-    private objectHandlerService: ObjectHandlerService,
-  ) {}
-
-  @Post('/:workspaceId')
-  async createObjectTable(
-    @Param(new ValidationPipe()) { workspaceId }: CreateTableRequestDto,
-    @Body() { targetTable },
-    @Res() res: Response,
-  ) {
-    if (targetTable)
-      res.sendStatus((await this.objectDatabaseService.copyObjectTable(workspaceId, targetTable)) ? 201 : 400);
-    else await this.objectDatabaseService.createObjectTable(workspaceId);
-  }
-
-  @Delete('/:workspaceId')
-  async deleteObjectTable(@Param(new ValidationPipe()) { workspaceId }: CreateTableRequestDto) {
-    await this.objectDatabaseService.deleteObjectTable(workspaceId);
-  }
-
-  @Get('/:workspaceId')
-  async workspaceExist(@Param(new ValidationPipe()) { workspaceId }: CreateTableRequestDto, @Res() res: Response) {
-    return res.sendStatus((await this.objectDatabaseService.isObjectTableExist(workspaceId)) ? 200 : 404);
-  }
+  constructor(private objectHandlerService: ObjectHandlerService) {}
 
   @Get('/:workspaceId/object')
   async selectAllObjects(@Param(new ValidationPipe()) { workspaceId }: CreateTableRequestDto) {
@@ -40,7 +24,7 @@ export class ObjectDatabaseController {
   }
 
   @Get('/:workspaceId/object/:objectId')
-  async selectOneObjects(@Param(new ValidationPipe()) { workspaceId, objectId }: SelectObjectDTO) {
+  async selectOneObject(@Param(new ValidationPipe()) { workspaceId, objectId }: SelectObjectDTO) {
     return await this.objectHandlerService.selectObjectById(workspaceId, objectId);
   }
 
@@ -49,7 +33,8 @@ export class ObjectDatabaseController {
     @Param(new ValidationPipe()) { workspaceId }: CreateTableRequestDto,
     @Body(new ValidationPipe()) createObjectDTO: CreateObjectDTO,
   ) {
-    return await this.objectHandlerService.createObject(workspaceId, createObjectDTO);
+    const result = await this.objectHandlerService.createObject(workspaceId, createObjectDTO);
+    if (!result) throw new InternalServerErrorException('알 수 없는 이유로 데이터 추가에 실패하였습니다.');
   }
 
   @Patch('/:workspaceId/object/:objectId')
@@ -57,11 +42,13 @@ export class ObjectDatabaseController {
     @Param(new ValidationPipe()) { workspaceId, objectId }: SelectObjectDTO,
     @Body() createObjectDTO: CreateObjectDTO,
   ) {
-    return await this.objectHandlerService.updateObject(workspaceId, objectId, createObjectDTO);
+    const result = await this.objectHandlerService.updateObject(workspaceId, createObjectDTO);
+    if (!result) throw new InternalServerErrorException('알 수 없는 이유로 데이터 갱신에 실패하였습니다.');
   }
 
   @Delete('/:workspaceId/object/:objectId')
   async deleteObject(@Param(new ValidationPipe()) { workspaceId, objectId }: SelectObjectDTO) {
-    return await this.objectHandlerService.deleteObject(workspaceId, objectId);
+    const result = await this.objectHandlerService.deleteObject(workspaceId, objectId);
+    if (!result) throw new InternalServerErrorException('알 수 없는 이유로 데이터 삭제에 실패하였습니다.');
   }
 }

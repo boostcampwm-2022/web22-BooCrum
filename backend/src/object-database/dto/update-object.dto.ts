@@ -1,35 +1,30 @@
-import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class CreateObjectDTO {
+export class UpdateObjectDTO {
   @IsString()
   objectId: string;
 
-  @IsString()
-  type: string;
-
   @IsNumber()
+  @IsOptional()
   xPos: number;
 
   @IsNumber()
+  @IsOptional()
   yPos: number;
 
   @IsNumber()
+  @IsOptional()
   width: number;
 
   @IsNumber()
+  @IsOptional()
   height: number;
 
   @IsString()
+  @IsOptional()
   color: string;
 
   @IsString()
   @IsOptional()
   text: string;
-
-  @IsString()
-  creator: string;
-
-  @IsUUID()
-  @IsOptional()
-  workspaceId: string;
 }
