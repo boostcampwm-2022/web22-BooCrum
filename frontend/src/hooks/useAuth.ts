@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { authState } from '@context/auth';
+import { authState } from '@context/user';
 import { useRecoilState } from 'recoil';
 import axios from 'axios';
 

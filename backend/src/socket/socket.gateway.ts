@@ -30,11 +30,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   private logger: Logger = new Logger('SocketGateway');
   private userMap = new Map<string, UserMapVO>();
 
-  constructor(
-    private objectHandlerService: ObjectHandlerService,
-    private dbAccessService: DbAccessService,
-    private dataSource: DataSource,
-  ) {}
+  constructor(private objectHandlerService: ObjectHandlerService, private dbAccessService: DbAccessService) {}
 
   /**
    * 소켓과 워크스페이스 ID를 이용하여 UserMapVO로 포맷팅한다.
@@ -45,12 +41,17 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   private async formatDataToUserMapVO(client: Socket, workspaceId: string): Promise<UserMapVO> {
     const sessionUserData = client.request.session.user;
 
-    const userId = sessionUserData?.userId ?? `Guest(${client.id})`;
-    const nickname = sessionUserData?.nickname ?? `Guest(${client.id})`;
-    const role = !sessionUserData ? 0 : await this.dbAccessService.getUserRoleAt(userId, workspaceId);
-    const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
+    try {
+      const userId = sessionUserData?.userId ?? `Guest(${client.id})`;
+      const nickname = sessionUserData?.nickname ?? `Guest(${client.id})`;
+      const role = !sessionUserData ? 0 : await this.dbAccessService.getOrCreateUserRoleAt(userId, workspaceId, 1); // 지금은 테스트 목적으로 초기권한 1로 잡음.
+      const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
 
-    return new UserMapVO(userId, nickname, workspaceId, role, color, !!sessionUserData);
+      return new UserMapVO(userId, nickname, workspaceId, role, color, !!sessionUserData);
+    } catch (e) {
+      this.logger.error(e);
+      return null;
+    }
   }
 
   /**
@@ -82,12 +83,17 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const workspaceId = client.nsp.name.match(/workspace\/(.+)/)[1];
     if (!(await this.dbAccessService.isWorkspaceExist(workspaceId))) {
       this.logger.error(`존재하지 않는 Workspace 접근`);
+      client.emit('exception', { message: `존재하지 않는 Workspace 접근` });
       client.disconnect();
       return;
     }
 
     // 2. 데이터 가공 수행
     const userMapVO = await this.formatDataToUserMapVO(client, workspaceId);
+    if (!userMapVO) {
+      client.emit('exception', { message: 'User Data 초기화 중 Role 획득 실패' });
+      return client.disconnect();
+    }
 
     // 3. 로그인 유저 userId room에 추가
     //! Dynamic Namespace를 사용함으로써, 네임스페이스가 자동으로 워크스페이스 각각을 의미하게 됨.
@@ -100,6 +106,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     // 5. Init 목적 데이터 가공
     // TODO: 전체 순환을 써도 되는가? 이건 workspaceId -> VO로 연결하는 것이 낫지 않나?
     //? 중복 유저가 존재한다면 그건 어떻게 처리할 것인가? (소켓이 여러개 인거지, 사람이 여러 명인건 아님.)
+    //? workspaceId -> { idList: string[], userData: Map<string, UserData> } 형식으로?
     const members = Array.from(this.userMap.values())
       .filter((vo) => vo.workspaceId === workspaceId)
       .map((vo) => new UserDAO(vo.userId, vo.nickname, vo.color));

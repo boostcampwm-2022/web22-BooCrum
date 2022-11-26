@@ -33,7 +33,6 @@ export class AuthController {
 
   @Get('/status')
   checkLoginStatus(@Session() session: Record<string, any>, @Res() res: Response): void {
-    console.log(session.user);
     if (!session.user) throw new UnauthorizedException();
     res.sendStatus(200);
   }

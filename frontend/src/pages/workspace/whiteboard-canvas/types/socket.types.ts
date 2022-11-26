@@ -1,4 +1,7 @@
-import { CanvasObject } from './index.types';
+import { Member, UserMousePointer, MousePointer } from './workspace-member.types';
+import { CanvasObject, UpdatedObject } from './workspace-object.types';
+import { AllWorkspaceData } from './workspace.types';
+
 export interface ServerToClientEvents {
 	connect: () => void;
 	disconnect: () => void;

@@ -4,6 +4,7 @@ import { addObject, initDragPanning, initWheelPanning, initZoom, initGrid } from
 import { toolItems } from '@data/workspace-tool';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { cursorState, zoomState } from '@context/workspace';
+import { CanvasType } from './types';
 
 function useCanvas() {
 	const canvas = useRef<fabric.Canvas | null>(null);
@@ -32,19 +33,19 @@ function useCanvas() {
 		if (cursor.type === toolItems.SECTION || cursor.type === toolItems.POST_IT) {
 			fabricCanvas.defaultCursor = 'context-menu';
 			fabricCanvas.selection = true;
-			if (cursor.type === toolItems.SECTION) fabricCanvas.mode = 'section';
-			else fabricCanvas.mode = 'postit';
+			if (cursor.type === toolItems.SECTION) fabricCanvas.mode = CanvasType.section;
+			else fabricCanvas.mode = CanvasType.postit;
 		} else if (cursor.type === toolItems.MOVE) {
 			fabricCanvas.defaultCursor = 'grab';
-			fabricCanvas.mode = 'move';
+			fabricCanvas.mode = CanvasType.move;
 			fabricCanvas.selection = false;
 		} else if (cursor.type === toolItems.SELECT) {
 			fabricCanvas.defaultCursor = 'default';
-			fabricCanvas.mode = 'select';
+			fabricCanvas.mode = CanvasType.select;
 			fabricCanvas.selection = true;
 		} else {
 			fabricCanvas.defaultCursor = 'default';
-			fabricCanvas.mode = 'draw';
+			fabricCanvas.mode = CanvasType.draw;
 		}
 	}, [cursor]);
 
@@ -54,6 +55,7 @@ function useCanvas() {
 		const canvasHeight = window.innerHeight;
 
 		const fabricCanvas = new fabric.Canvas('canvas', {
+			mode: CanvasType.select,
 			height: canvasHeight,
 			width: canvasWidth,
 			backgroundColor: '#f1f1f1',
