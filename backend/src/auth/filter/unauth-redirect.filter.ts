@@ -7,7 +7,6 @@ export class UnAuthRedirectionFilter implements ExceptionFilter {
     const context = host.switchToHttp();
     const res = context.getResponse<Response>();
     const statusCode = exception.getStatus();
-    console.log(process.env.REDIRECT_FAIL_LOGIN);
     res.status(statusCode).redirect(process.env.REDIRECT_FAIL_LOGIN);
   }
 }
