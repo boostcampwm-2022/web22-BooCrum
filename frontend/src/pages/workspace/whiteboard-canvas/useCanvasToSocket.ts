@@ -43,7 +43,12 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('mouse:move', (e) => {
 			// todo object update 로직
 			if (!e.pointer) return;
-			const { x, y } = e.pointer;
+			if (!canvas.current) return;
+			const vpt = canvas.current?.viewportTransform;
+			if (!vpt) return;
+			const zoom = canvas.current.getZoom();
+			const x = (e.e.offsetX - vpt[4]) / zoom;
+			const y = (e.e.offsetY - vpt[5]) / zoom;
 			const message: MousePointer = {
 				x,
 				y,
