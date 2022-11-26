@@ -114,8 +114,6 @@ export class TeamService {
 
   // 팀 멤버 수정 : 권한 수정
   async updateTeamMember(teamId: number, teamMember: TeamMember): Promise<boolean> {
-    console.log(teamId);
-    console.log(teamMember.user, teamMember.role);
     const result = await this.teamMemberRepository
       .createQueryBuilder()
       .update('team_member')
