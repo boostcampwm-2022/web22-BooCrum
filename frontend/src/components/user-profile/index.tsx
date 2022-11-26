@@ -5,20 +5,22 @@ import logoutIcon from '@assets/icon/logout.svg';
 import useContextMenu from '@hooks/useContextMenu';
 import useAuth from '@hooks/useAuth';
 import { User } from '@api/user';
+import { useRecoilValueLoadable } from 'recoil';
+import { userProfileState } from '@context/user';
 
 function UserProfile() {
+	const userProfileLoadable = useRecoilValueLoadable(userProfileState);
 	const [nickName, setNickName] = useState<string>('');
 	const { logout } = useAuth();
 
 	const { isOpen, menuRef, openContextMenu } = useContextMenu();
 
 	useEffect(() => {
-		async function setUserData() {
-			const { nickname } = await User.getProfile();
+		if (userProfileLoadable.state === 'hasValue') {
+			const { nickname } = userProfileLoadable.contents;
 			setNickName(nickname);
 		}
-		setUserData();
-	}, []);
+	}, [userProfileLoadable]);
 
 	return (
 		<Wrapper onClick={openContextMenu}>
