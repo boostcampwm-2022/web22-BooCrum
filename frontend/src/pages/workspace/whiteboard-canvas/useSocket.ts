@@ -1,14 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { useLocation } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import { ClientToServerEvents, ServerToClientEvents } from '@pages/workspace/whiteboard-canvas/socket.types';
+import { ClientToServerEvents, MemberInCanvas, ServerToClientEvents } from './types';
 import { useRecoilState } from 'recoil';
 import { membersState } from '@context/workspace';
 import { fabric } from 'fabric';
-
-import cursorSvg from '@assets/icon/cursor.svg';
-import { v4 } from 'uuid';
-import { createCursorObject, moveCursorFromServer } from '@utils/fabric.utils';
+import { createCursorObject, moveCursorFromServer } from '@utils/object-from-server';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [members, setMembers] = useRecoilState(membersState);

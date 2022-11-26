@@ -1,19 +1,19 @@
-interface Member {
+export interface Member {
 	userId: string;
 	nickname: string;
 	color: string;
 }
 
-interface MousePointer {
+export interface MousePointer {
 	x: number;
 	y: number;
 }
 
-interface UserMousePointer extends MousePointer {
+export interface UserMousePointer extends MousePointer {
 	userId: string;
 }
 
-interface MemberInCanvas {
+export interface MemberInCanvas {
 	userId: string;
 	color: string;
 	selectedObjectId?: string;
