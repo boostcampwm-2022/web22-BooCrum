@@ -1,11 +1,11 @@
-import { CanvasObject } from '@pages/workspace/whiteboard-canvas/types';
+import { CanvasObject, CanvasType } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 import { v4 } from 'uuid';
 export const createMessageForCreateObjectEvent = (canvas: fabric.Canvas, object: fabric.Object) => {
 	const message: CanvasObject = {
 		// todo mode 타입 정의 필요
 		objectId: v4(),
-		type: canvas.mode,
+		type: canvas.mode as CanvasType,
 		xPos: object.left,
 		yPos: object.top,
 		width: object.width,

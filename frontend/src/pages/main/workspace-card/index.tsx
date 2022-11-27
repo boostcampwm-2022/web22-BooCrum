@@ -8,8 +8,7 @@ function WorkspaceCard({ workspaceId, role, title, timestamp, imgSrc, setWorkspa
 	const { isOpen, menuRef, toggleOpen, menuPosition } = useContextMenu();
 	const openContextMenu: React.MouseEventHandler<HTMLDivElement> = (e) => {
 		e.preventDefault();
-		toggleOpen(e.clientX, e.clientY);
-		console.log(menuPosition);
+		toggleOpen(e.pageX, e.pageY);
 	};
 	return (
 		<>
