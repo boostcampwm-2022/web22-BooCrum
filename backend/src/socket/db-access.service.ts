@@ -3,7 +3,6 @@ import { DataSource, QueryRunner } from 'typeorm';
 import { isUUID } from 'class-validator';
 import { Workspace } from '../workspace/entity/workspace.entity';
 import { WorkspaceMember } from '../workspace/entity/workspace-member.entity';
-import { WsException } from '@nestjs/websockets';
 import { User } from '../user/entity/user.entity';
 
 @Injectable()
@@ -88,7 +87,7 @@ export class DbAccessService {
     if (defaultRole < 0) throw new Error('부적절한 기본 부여 권한');
 
     const queryRunner = this.dataSoruce.createQueryRunner();
-    queryRunner.connect();
+    await queryRunner.connect();
     try {
       const userRole = await this.getUserRoleAt(userId, workspaceId, queryRunner);
       if (userRole >= 0) return userRole;
@@ -100,7 +99,29 @@ export class DbAccessService {
       this.logger.error(e);
       return -1;
     } finally {
-      queryRunner.release();
+      await queryRunner.release();
     }
+  }
+
+  async renewUpdateDateOfMember(userId: string, workspaceId: string): Promise<boolean> {
+    const queryRunner = this.dataSoruce.createQueryRunner();
+    await queryRunner.connect();
+    const [userFind, workspaceFind] = await Promise.all([
+      queryRunner.manager.findOne(User, { where: { userId } }),
+      queryRunner.manager.findOne(Workspace, { where: { workspaceId } }),
+    ]);
+    if (!userFind) throw new Error('존재하지 않는 유저입니다.');
+    if (!workspaceFind) throw new Error('존재하지 않는 워크스페이스입니다.');
+    const memberFind = await queryRunner.manager.findOne(WorkspaceMember, {
+      where: { user: userFind, workspace: workspaceFind },
+    });
+    if (!memberFind) throw new Error('워크스페이스에 존재하지 않는 멤버입니다.');
+    const ret = await queryRunner.manager.update<WorkspaceMember>(
+      WorkspaceMember,
+      { user: userFind, workspace: workspaceFind },
+      { updateDate: new Date() as any },
+    );
+    await queryRunner.release();
+    return ret.affected > 0;
   }
 }

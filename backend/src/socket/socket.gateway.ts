@@ -102,12 +102,19 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
    * - **server to client**: 'leave_user'
    * @param client 연결을 끊기 직전인(disconnect 이벤트를 발생시킨) 소켓
    */
-  handleDisconnect(client: Socket) {
+  async handleDisconnect(client: Socket) {
     const clientId = client.id;
     this.logger.log(`Client disconnected: ${clientId}`);
     try {
       const userData = this.dataManagementService.deleteUserData(client);
       if (userData) client.nsp.emit('leave_user', { userId: userData.userId });
+      if (!userData.isGuest) {
+        const res = await this.dbAccessService.renewUpdateDateOfMember(userData.userId, userData.workspaceId);
+        if (!res)
+          this.logger.error(
+            `멤버 최종 updateDate 갱신 실패 (워크스페이스 ID: ${userData.workspaceId}, 유저 ID: ${userData.userId})`,
+          );
+      }
     } catch (e) {
       this.logger.error(e);
       throw new WsException(e.message);

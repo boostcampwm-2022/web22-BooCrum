@@ -26,7 +26,7 @@ export class DataManagementService {
       const role = !sessionUserData ? 0 : await this.dbAccessService.getOrCreateUserRoleAt(userId, workspaceId, 1); // 지금은 테스트 목적으로 초기권한 1로 잡음.
       const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
 
-      return new UserMapVO(userId, nickname, workspaceId, role, color, !!sessionUserData);
+      return new UserMapVO(userId, nickname, workspaceId, role, color, !sessionUserData);
     } catch (e) {
       this.logger.error(e);
       return null;
