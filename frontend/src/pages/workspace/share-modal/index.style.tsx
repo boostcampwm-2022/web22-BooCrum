@@ -91,3 +91,30 @@ export const Invite = styled.div<{ isValid: boolean }>`
 		cursor: pointer;
 	}
 `;
+
+export const ParticipantList = styled.div`
+	height: 230px;
+	overflow: auto;
+
+	.participant-box {
+		display: flex;
+		align-items: center;
+
+		padding: 8px 20px;
+	}
+
+	.participant-profile {
+		width: 32px;
+		height: 32px;
+	}
+
+	.participant-name {
+		font-size: 16px;
+		line-height: 22px;
+		font-weight: 400;
+
+		color: ${({ theme }) => theme.black};
+
+		margin-left: 12px;
+	}
+`;
