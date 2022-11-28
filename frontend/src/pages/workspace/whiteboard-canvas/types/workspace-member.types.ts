@@ -2,6 +2,7 @@ export interface Member {
 	userId: string;
 	nickname: string;
 	color: string;
+	Role: string;
 }
 
 export interface MousePointer {

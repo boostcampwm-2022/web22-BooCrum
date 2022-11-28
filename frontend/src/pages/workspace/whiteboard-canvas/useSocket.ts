@@ -8,6 +8,7 @@ import { fabric } from 'fabric';
 import { createCursorObject, moveCursorFromServer } from '@utils/object-from-server';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
+	// 자신의 정보 role을 이용해 작업하기 위해 생성
 	const [myInfoInWorkspace, setMyInfoInWorkspace] = useState<Member>();
 	const [members, setMembers] = useRecoilState(membersState);
 
@@ -29,14 +30,15 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			console.log('socket disconnected');
 		});
 
-		socket.current.on('init', ({ members, objects }) => {
-			console.log(members, objects);
+		socket.current.on('init', ({ members, objects, userData }) => {
+			setMyInfoInWorkspace(userData);
 			setMembers(members);
 			console.log('socket init');
 			//todo: objects 업데이트
 		});
 
 		socket.current.on('enter_user', (userData) => {
+			console.log(userData);
 			console.log('enter_user');
 			setMembers((prev) => [...prev, userData]);
 			const cursorObject = createCursorObject(userData.color);
@@ -95,6 +97,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		isConnected,
 		socket,
 		membersInCanvas,
+		myInfoInWorkspace,
 	};
 }
 
