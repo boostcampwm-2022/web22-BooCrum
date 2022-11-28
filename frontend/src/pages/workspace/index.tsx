@@ -1,16 +1,19 @@
-import { useParams } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import WhiteboardCanvas from './whiteboard-canvas';
-import Layout from './layout';
+import Header from './header';
+import Toolkit from './toolkit';
 
 function Workspace() {
 	const { workspaceId } = useParams();
 
-	console.log(workspaceId);
-	//name은?
+	if (workspaceId === undefined) {
+		return <Navigate to="/" />;
+	}
 
 	return (
 		<>
-			<Layout name={'unde'} />
+			<Header name={'name'} workspaceId={workspaceId} />
+			<Toolkit />
 			<WhiteboardCanvas></WhiteboardCanvas>
 		</>
 	);
