@@ -5,10 +5,12 @@ import copyLink from '@assets/icon/copy-link.svg';
 import userProfile from '@assets/icon/user-profile.svg';
 import { Workspace } from '@api/workspace';
 import { ParticipantInfo, ShareModalProps } from './index.type';
+import ToastMessage from '@components/toast-message';
 
 function ShareModal({ id, modalRef, closeModal }: ShareModalProps) {
 	const [email, setEmail] = useState('');
 	const [participant, setParticipant] = useState<ParticipantInfo[]>([]);
+	const [openToast, setOpenToast] = useState(false);
 
 	useEffect(() => {
 		async function getParticipant() {
@@ -18,6 +20,16 @@ function ShareModal({ id, modalRef, closeModal }: ShareModalProps) {
 
 		getParticipant();
 	}, []);
+
+	const handleCopyLink = () => {
+		navigator.clipboard.writeText(`https://bc7m-j045.xyz/workspace/${id}`);
+		setOpenToast(true);
+
+		const timer = setTimeout(() => {
+			setOpenToast(false);
+			clearTimeout(timer);
+		}, 3000);
+	};
 
 	return (
 		<Container ref={modalRef}>
@@ -41,9 +53,13 @@ function ShareModal({ id, modalRef, closeModal }: ShareModalProps) {
 			</ParticipantList>
 
 			<div className="bottom">
-				<img alt="copy workspace url" src={copyLink} className="copy-icon" />
-				copy link
+				<div className="copy-link" onClick={handleCopyLink}>
+					<img alt="copy workspace url" src={copyLink} className="copy-icon" />
+					copy link
+				</div>
 			</div>
+
+			{openToast && <ToastMessage message="clipboard에 복사되었습니다!" />}
 		</Container>
 	);
 }

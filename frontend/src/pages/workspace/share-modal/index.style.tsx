@@ -56,11 +56,16 @@ export const Container = styled.div`
 		font-weight: 400;
 	}
 
+	.copy-link {
+		display: flex;
+		align-items: center;
+
+		cursor: pointer;
+	}
+
 	.copy-icon {
 		width: 36px;
 		height: 36px;
-
-		cursor: pointer;
 	}
 `;
 
