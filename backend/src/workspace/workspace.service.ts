@@ -8,6 +8,7 @@ import { WorkspaceCreateRequestDto } from './dto/workspaceCreateRequest.dto';
 import { WorkspaceMetadataDto } from './dto/workspaceMetadata.dto';
 import { WorkspaceMember } from './entity/workspace-member.entity';
 import { Workspace } from './entity/workspace.entity';
+import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 
 @Injectable()
 export class WorkspaceService {
@@ -27,7 +28,7 @@ export class WorkspaceService {
           .where('user_id = :uid', { uid: userId })
           .andWhere('workspace_id = :wid', { wid: workspaceId })
           .getOne()
-      )?.role ?? 0
+      )?.role ?? WORKSPACE_ROLE.VIEWER
     );
   }
 
@@ -54,7 +55,7 @@ export class WorkspaceService {
         throw new BadRequestException('잘못된 사용자 ID 혹은 팀 ID 입니다.');
       }
 
-      workspaceMember.role = 2;
+      workspaceMember.role = WORKSPACE_ROLE.OWNER;
       workspaceMember.user = userFind;
       workspaceMember.workspace = newWorkspace;
 
@@ -162,7 +163,11 @@ export class WorkspaceService {
    * @param role 유저가 해당 워크스페이스에 갖게될 권한입니다.
    * @returns 추가 결과를 반환합니다.
    */
-  async addUserIntoWorkspace(userId: string, workspaceId: string, role = 0): Promise<WorkspaceMember> {
+  async addUserIntoWorkspace(
+    userId: string,
+    workspaceId: string,
+    role = WORKSPACE_ROLE.VIEWER,
+  ): Promise<WorkspaceMember> {
     const userFind = await this.workspaceMemberRepository
       .createQueryBuilder('wm')
       .where('wm.user_id = :id', { id: userId })

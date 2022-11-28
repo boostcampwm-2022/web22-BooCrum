@@ -10,7 +10,6 @@ import {
   WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
-import { DataSource } from 'typeorm';
 import { Server, Socket } from 'socket.io';
 import { createSessionMiddleware } from '../middlewares/session.middleware';
 import { Request, Response, NextFunction } from 'express';
@@ -19,6 +18,7 @@ import { UserMapVO } from './dto/user-map.vo';
 import { ObjectDTO } from './dto/object.dto';
 import { UserDAO } from './dto/user.dao';
 import { DbAccessService } from './db-access.service';
+import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -44,7 +44,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     try {
       const userId = sessionUserData?.userId ?? `Guest(${client.id})`;
       const nickname = sessionUserData?.nickname ?? `Guest(${client.id})`;
-      const role = !sessionUserData ? 0 : await this.dbAccessService.getOrCreateUserRoleAt(userId, workspaceId, 1); // 지금은 테스트 목적으로 초기권한 1로 잡음.
+      const role = !sessionUserData
+        ? WORKSPACE_ROLE.EDITOR
+        : await this.dbAccessService.getOrCreateUserRoleAt(userId, workspaceId, 1); // 지금은 테스트 목적으로 초기권한 1로 잡음.
       const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
 
       return new UserMapVO(userId, nickname, workspaceId, role, color, !!sessionUserData);
@@ -145,21 +147,21 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('select_object')
   async selectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
     const userData = this.userMap.get(socket.id);
-    if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('select_object', { objectId, userId: userData.userId });
   }
 
   @SubscribeMessage('unselect_object')
   async unselectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
     const userData = this.userMap.get(socket.id);
-    if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('unselect_object', { objectId, userId: userData.userId });
   }
 
   @SubscribeMessage('create_object')
   async createObject(@MessageBody(new ValidationPipe()) objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
     const userData = this.userMap.get(socket.id);
-    if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
     // Optional 값들 중 값을 채워줘야 하는 것은 값을 넣어준다.
     if (!objectData.text) objectData.text = '';
@@ -175,7 +177,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('update_object')
   async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
     const userData = this.userMap.get(socket.id);
-    if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
     // 변경되어서는 안되는 값들은 미리 제거하거나 덮어버린다.
     delete objectData.creator, objectData.objectId;
@@ -190,7 +192,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('delete_object')
   async deleteObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
     const userData = this.userMap.get(socket.id);
-    if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
     const ret = await this.objectHandlerService.deleteObject(userData.workspaceId, objectId);
     if (!ret) new WsException('삭제 실패');

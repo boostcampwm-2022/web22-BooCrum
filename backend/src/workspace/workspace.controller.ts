@@ -14,6 +14,7 @@ import {
   ForbiddenException,
 } from '@nestjs/common';
 import { AuthorizationGuard } from 'src/auth/guard/session.guard';
+import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 import { WorkspaceCreateRequestDto } from './dto/workspaceCreateRequest.dto';
 import { WorkspaceIdDto } from './dto/workspaceId.dto';
 import { WorkspaceMetadataDto } from './dto/workspaceMetadata.dto';
@@ -77,7 +78,7 @@ export class WorkspaceController {
   async addWorkspaceParticipant(
     @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
     @Body('userId') userId: string,
-    @Body('role') role = 0,
+    @Body('role') role = WORKSPACE_ROLE.VIEWER,
   ) {
     if (!userId) throw new BadRequestException('사용자를 지정해주시기 바랍니다.');
     return await this.workspaceService.addUserIntoWorkspace(userId, workspaceId, role);

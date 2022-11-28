@@ -1,11 +1,11 @@
 import { Team } from '../../team/entity/team.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../user/entity/user.entity';
-import { Role } from '../enum/role.enum';
+import { TEAM_ROLE } from 'src/util/constant/role.constant';
 
 @Entity({ name: 'team_member' })
 export class TeamMember {
-  constructor(user: User, team: Team, role: Role) {
+  constructor(user: User, team: Team, role: TEAM_ROLE) {
     this.user = user;
     this.team = team;
     this.role = role;
@@ -22,6 +22,6 @@ export class TeamMember {
   @JoinColumn({ name: 'team_id' })
   team: Team;
 
-  @Column({ type: 'int', default: Role.MEMBER })
+  @Column({ type: 'tinyint', default: TEAM_ROLE.MEMBER })
   role: number;
 }
