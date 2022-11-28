@@ -16,7 +16,7 @@ export class User {
     default: () => 'CURRENT_TIMESTAMP()',
     nullable: false,
   })
-  registerDate: number;
+  registerDate: Date;
 
   @OneToMany(() => TeamMember, (tm) => tm.user)
   teamMember: TeamMember[];

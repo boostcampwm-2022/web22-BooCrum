@@ -14,7 +14,7 @@ export class WorkspaceDto {
   name?: string;
 
   @IsDate()
-  registerDate: number;
+  registerDate: Date;
 
   @IsDate()
   updateDate: number;

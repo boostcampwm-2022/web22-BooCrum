@@ -24,5 +24,5 @@ export class WorkspaceMember {
     default: () => 'CURRENT_TIMESTAMP()',
     nullable: false,
   })
-  updateDate: number;
+  updateDate: Date;
 }
