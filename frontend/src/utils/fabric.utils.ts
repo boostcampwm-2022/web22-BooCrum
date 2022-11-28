@@ -132,17 +132,3 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 		document.removeEventListener('keydown', objectDeleteHandler);
 	});
 };
-
-export const createObjectFromServer = (canvas: fabric.Canvas, newObject: CanvasObject) => {
-	const rect = new fabric.Rect({
-		...newObject,
-	});
-
-	canvas.add(rect);
-};
-
-export const deleteObjectFromServer = (canvas: fabric.Canvas, objectId: string) => {
-	canvas.forEachObject((object) => {
-		if (object.objectId === objectId) canvas.remove(object);
-	});
-};
