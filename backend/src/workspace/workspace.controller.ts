@@ -122,7 +122,7 @@ export class WorkspaceController {
     @Session() session: Record<string, any>,
     @Param(new ValidationPipe()) { workspaceId }: WorkspaceIdDto,
     @Body('userId') targetUserId: string,
-    @Body('role') role = 0,
+    @Body('role') role = WORKSPACE_ROLE.VIEWER,
   ) {
     const userId = session.user.userId;
     if (!(await this.hasProperAuthority(workspaceId, userId, 2))) {

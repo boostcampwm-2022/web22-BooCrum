@@ -303,6 +303,6 @@ export class WorkspaceService {
       .andWhere('user_id = :userId', { userId })
       .getOne();
 
-    return !member ? -1 : member.role;
+    return !member ? WORKSPACE_ROLE.NOT_FOUND : member.role;
   }
 }

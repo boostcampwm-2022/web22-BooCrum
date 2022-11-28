@@ -5,7 +5,7 @@ import { Workspace } from '../workspace/entity/workspace.entity';
 import { WorkspaceMember } from '../workspace/entity/workspace-member.entity';
 import { WsException } from '@nestjs/websockets';
 import { User } from 'src/user/entity/user.entity';
-import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
+import { TEAM_ROLE, WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 
 @Injectable()
 export class DbAccessService {
@@ -74,7 +74,7 @@ export class DbAccessService {
     userId: string,
     workspaceId: string,
     usedQueryRunner?: QueryRunner,
-  ): Promise<WORKSPACE_ROLE | number> {
+  ): Promise<WORKSPACE_ROLE> {
     if (!(await this.isWorkspaceExist(workspaceId))) throw new Error('존재하지 않는 Workspace에 접근하였습니다.');
 
     const queryRunner = usedQueryRunner ? usedQueryRunner : this.dataSoruce.createQueryRunner();
@@ -86,15 +86,11 @@ export class DbAccessService {
       .andWhere('ws.workspace_id = :wid', { wid: workspaceId })
       .getOne();
     if (queryRunner !== usedQueryRunner) await queryRunner.release();
-    return ret?.role ?? -1;
+    return WORKSPACE_ROLE[ret?.role + 1] ?? WORKSPACE_ROLE.NOT_FOUND;
   }
 
-  async getOrCreateUserRoleAt(
-    userId: string,
-    workspaceId: string,
-    defaultRole: number,
-  ): Promise<WORKSPACE_ROLE | number> {
-    if (defaultRole < 0) throw new Error('부적절한 기본 부여 권한');
+  async getOrCreateUserRoleAt(userId: string, workspaceId: string, defaultRole: number): Promise<WORKSPACE_ROLE> {
+    if (defaultRole < WORKSPACE_ROLE.VIEWER) throw new Error('부적절한 기본 부여 권한');
 
     const queryRunner = this.dataSoruce.createQueryRunner();
     queryRunner.connect();
@@ -104,10 +100,10 @@ export class DbAccessService {
 
       const result = await this.addUserAsWorkspaceMember(userId, workspaceId, defaultRole, queryRunner);
       if (!result) throw new Error('유저 권한 부여 실패');
-      return defaultRole;
+      return WORKSPACE_ROLE[defaultRole + 1];
     } catch (e) {
       this.logger.error(e);
-      return -1;
+      return WORKSPACE_ROLE.NOT_FOUND;
     } finally {
       queryRunner.release();
     }
