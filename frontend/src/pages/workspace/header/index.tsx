@@ -1,14 +1,33 @@
+import useModal from '@hooks/useModal';
+import { useState } from 'react';
 import LeftSide from '../left-side';
 import RightSide from '../right-side';
-import { Container } from './index.style';
+import ShareModal from '../share-modal';
+import { Container, ModalWrapper } from './index.style';
 
-function Header({ name }: { name: string }) {
+interface HeaderProps {
+	name: string;
+	workspaceId: string;
+}
+
+function Header({ name, workspaceId }: HeaderProps) {
+	const { isOpenModal, openModal, modalRef, closeModal } = useModal();
+	const [modalContent, setModalContent] = useState(<></>);
+
+	const openShareModal = () => {
+		openModal();
+		setModalContent(<ShareModal modalRef={modalRef} id={workspaceId} closeModal={closeModal} />);
+	};
+
 	return (
-		<Container>
-			<LeftSide />
-			<p className="title">{name}</p>
-			<RightSide />
-		</Container>
+		<>
+			<Container>
+				<LeftSide />
+				<p className="title">{name}</p>
+				<RightSide openShareModal={openShareModal} />
+			</Container>
+			{isOpenModal && <ModalWrapper>{modalContent}</ModalWrapper>}
+		</>
 	);
 }
 
