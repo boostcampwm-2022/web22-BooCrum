@@ -17,7 +17,7 @@ function App() {
 				}
 			/>
 			<Route path="/login" element={<Login />} />
-			<Route path="/workspace/:id" element={<Workspace />} />
+			<Route path="/workspace/:workspaceId" element={<Workspace />} />
 			<Route path="/*" element={<Error />} />
 		</Routes>
 	);

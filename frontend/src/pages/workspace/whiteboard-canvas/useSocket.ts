@@ -1,22 +1,21 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import { ClientToServerEvents, MemberInCanvas, ServerToClientEvents } from './types';
+import { ClientToServerEvents, Member, MemberInCanvas, ServerToClientEvents } from './types';
 import { useRecoilState } from 'recoil';
 import { membersState } from '@context/workspace';
 import { fabric } from 'fabric';
 import { createCursorObject, moveCursorFromServer } from '@utils/object-from-server';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
+	const [myInfoInWorkspace, setMyInfoInWorkspace] = useState<Member>();
 	const [members, setMembers] = useRecoilState(membersState);
 
 	const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
 	const membersInCanvas = useRef<MemberInCanvas[]>([]);
 	const [isConnected, setIsConnected] = useState(false);
 
-	const {
-		state: { workspaceId },
-	} = useLocation();
+	const { workspaceId } = useParams();
 
 	useEffect(() => {
 		socket.current = io(`/workspace/${workspaceId}`);

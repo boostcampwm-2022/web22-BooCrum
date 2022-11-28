@@ -1,15 +1,16 @@
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import WhiteboardCanvas from './whiteboard-canvas';
 import Layout from './layout';
 
 function Workspace() {
-	const {
-		state: { name, workspaceId },
-	} = useLocation();
+	const { workspaceId } = useParams();
+
+	console.log(workspaceId);
+	//name은?
 
 	return (
 		<>
-			<Layout name={name} />
+			<Layout name={'unde'} />
 			<WhiteboardCanvas></WhiteboardCanvas>
 		</>
 	);
