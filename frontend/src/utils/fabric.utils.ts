@@ -113,6 +113,26 @@ export const addObject = (canvas: fabric.Canvas) => {
 	});
 };
 
+export const deleteObject = (canvas: fabric.Canvas) => {
+	const objectDeleteHandler = (e: KeyboardEvent) => {
+		console.log(e.key);
+		if (e.key === 'Backspace') {
+			canvas.getActiveObjects().forEach((obj) => {
+				canvas.remove(obj);
+			});
+		}
+	};
+
+	// object 선택시 이벤트 추가
+	canvas.on('selection:created', () => {
+		document.addEventListener('keydown', objectDeleteHandler);
+	});
+	// object 선택 해제시 이벤트 삭제
+	canvas.on('selection:cleared', () => {
+		document.removeEventListener('keydown', objectDeleteHandler);
+	});
+};
+
 export const createObjectFromServer = (canvas: fabric.Canvas, newObject: CanvasObject) => {
 	const rect = new fabric.Rect({
 		...newObject,
