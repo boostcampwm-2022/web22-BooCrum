@@ -135,7 +135,15 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('create_object')
-  async createObject(@MessageBody(new ValidationPipe()) objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
+  async createObject(
+    @MessageBody(
+      new ValidationPipe({
+        exceptionFactory: (errors) => new WsException(`잘못된 속성 전달: ${errors.map((e) => e.property).join(', ')}`),
+      }),
+    )
+    objectData: ObjectDTO,
+    @ConnectedSocket() socket: Socket,
+  ) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
