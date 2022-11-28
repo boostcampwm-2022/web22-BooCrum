@@ -6,6 +6,7 @@ export class UserMapVO {
     this.role = role;
     this.color = color;
     this.isGuest = isGuest;
+    this.count = 0;
   }
 
   userId: string; // 회원 ID
@@ -14,4 +15,5 @@ export class UserMapVO {
   role: number; // 권한
   color: string; // 커서 색상
   isGuest: boolean; // 게스트인지, 유저인지 확인.
+  count: number; // 이 UserMapVO와 연결된 소켓의 개수
 }
