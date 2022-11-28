@@ -48,7 +48,7 @@ BooCrum은 '화이트 보드', '실시간 공동 작업', '템플릿' 기능을 
 - [ERD(erdCloud)](https://www.erdcloud.com/d/6erYNHhg89b3Qr4kA)
 ### 컨벤션
 - [Git Branch 전략](https://github.com/boostcampwm-2022/web22-BooCrum/wiki/Git-%EB%B8%8C%EB%9E%9C%EC%B9%98-%EC%A0%84%EB%9E%B5)
-- [PR 전략](https://github.com/boostcampwm-2022/web22-BooCrum/wiki/Pull-Request)
+- [PR 전략](https://github.com/boostcampwm-2022/web22-BooCrum/wiki/Pull-Request-%EC%BB%A8%EB%B2%A4%EC%85%98)
 - [Commit 컨벤션](https://github.com/boostcampwm-2022/web22-BooCrum/wiki/Commit-%EC%BB%A8%EB%B2%A4%EC%85%98)
 - [코딩(네이밍) 컨벤션](https://github.com/boostcampwm-2022/web22-BooCrum/wiki/%EC%BD%94%EB%94%A9-%EC%BB%A8%EB%B2%A4%EC%85%98) 
 ### 기술 스택
