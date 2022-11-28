@@ -91,7 +91,7 @@ export class DataManagementService {
     userData.count++;
 
     this.socketUserDataMap.set(client.id, userData);
-    if (this.workspaceUserDataMap.has(workspaceId)) this.workspaceUserDataMap.set(workspaceId, [userData]);
+    if (!this.workspaceUserDataMap.has(workspaceId)) this.workspaceUserDataMap.set(workspaceId, [userData]);
     else this.workspaceUserDataMap.get(workspaceId).push(userData);
     return userData;
   }
