@@ -15,9 +15,9 @@ import { Server, Socket } from 'socket.io';
 import { createSessionMiddleware } from '../middlewares/session.middleware';
 import { Request, Response, NextFunction } from 'express';
 import { ObjectHandlerService } from 'src/object-database/object-handler.service';
-import { UserMapVO } from '../util/socket/user-map.vo';
-import { ObjectDTO } from '../util/socket/object.dto';
-import { UserDAO } from '../util/socket/user.dao';
+import { UserMapVO } from './dto/user-map.vo';
+import { ObjectDTO } from './dto/object.dto';
+import { UserDAO } from './dto/user.dao';
 import { DbAccessService } from './db-access.service';
 
 //============================================================================================//
