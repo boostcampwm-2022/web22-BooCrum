@@ -10,7 +10,6 @@ import {
   WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
-import { DataSource } from 'typeorm';
 import { Server, Socket } from 'socket.io';
 import { createSessionMiddleware } from '../middlewares/session.middleware';
 import { Request, Response, NextFunction } from 'express';
@@ -19,6 +18,8 @@ import { UserMapVO } from '../util/socket/user-map.vo';
 import { ObjectDTO } from '../util/socket/object.dto';
 import { UserDAO } from '../util/socket/user.dao';
 import { DbAccessService } from './db-access.service';
+import { DataManagementService } from './data-management.service';
+import { WorkspaceObject } from '../object-database/entity/workspace-object.entity';
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -28,31 +29,12 @@ import { DbAccessService } from './db-access.service';
 export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('SocketGateway');
-  private userMap = new Map<string, UserMapVO>();
 
-  constructor(private objectHandlerService: ObjectHandlerService, private dbAccessService: DbAccessService) {}
-
-  /**
-   * 소켓과 워크스페이스 ID를 이용하여 UserMapVO로 포맷팅한다.
-   * @param client 현재 연결된 Socket
-   * @param workspaceId 해당 소켓과 연관된 Workspace ID
-   * @returns UserMapVO로 포맷팅한 객체
-   */
-  private async formatDataToUserMapVO(client: Socket, workspaceId: string): Promise<UserMapVO> {
-    const sessionUserData = client.request.session.user;
-
-    try {
-      const userId = sessionUserData?.userId ?? `Guest(${client.id})`;
-      const nickname = sessionUserData?.nickname ?? `Guest(${client.id})`;
-      const role = !sessionUserData ? 0 : await this.dbAccessService.getOrCreateUserRoleAt(userId, workspaceId, 1); // 지금은 테스트 목적으로 초기권한 1로 잡음.
-      const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
-
-      return new UserMapVO(userId, nickname, workspaceId, role, color, !sessionUserData);
-    } catch (e) {
-      this.logger.error(e);
-      return null;
-    }
-  }
+  constructor(
+    private objectHandlerService: ObjectHandlerService,
+    private dbAccessService: DbAccessService,
+    private dataManagementService: DataManagementService,
+  ) {}
 
   /**
    * 소켓 서버 초기화 직후 실행할 처리를 정의한다.
@@ -89,9 +71,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     }
 
     // 2. 데이터 가공 수행
-    const userMapVO = await this.formatDataToUserMapVO(client, workspaceId);
+    const userMapVO: UserMapVO = await this.dataManagementService.findOrAddUserData(client, workspaceId);
     if (!userMapVO) {
-      client.emit('exception', { message: 'User Data 초기화 중 Role 획득 실패' });
+      client.emit('exception', { status: 'error', message: 'User Data 초기화 중 Role 획득 실패' });
       return client.disconnect();
     }
 
@@ -100,20 +82,14 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     //! 그러한 이유로 workspaceId에 대한 room 추가가 무의미해짐.
     if (!userMapVO.isGuest) client.join(userMapVO.userId);
 
-    // 4. userMap 추가: socket과 데이터를 1:1 매핑
-    this.userMap.set(client.id, userMapVO);
-
-    // 5. Init 목적 데이터 가공
-    // TODO: 전체 순환을 써도 되는가? 이건 workspaceId -> VO로 연결하는 것이 낫지 않나?
-    //? 중복 유저가 존재한다면 그건 어떻게 처리할 것인가? (소켓이 여러개 인거지, 사람이 여러 명인건 아님.)
-    //? workspaceId -> { idList: string[], userData: Map<string, UserData> } 형식으로?
-    const members = Array.from(this.userMap.values())
-      .filter((vo) => vo.workspaceId === workspaceId)
+    // 4. Init 목적 데이터 가공
+    const members: UserDAO[] = this.dataManagementService
+      .findUserDataListInWorkspace(workspaceId)
       .map((vo) => new UserDAO(vo.userId, vo.nickname, vo.color, vo.role));
-    const objects = await this.objectHandlerService.selectAllObjects(workspaceId);
+    const objects: WorkspaceObject[] = await this.objectHandlerService.selectAllObjects(workspaceId);
     const userData = new UserDAO(userMapVO.userId, userMapVO.nickname, userMapVO.color, userMapVO.role);
 
-    // 6. Socket 이벤트 Emit
+    // 5. Socket 이벤트 Emit
     client.emit('init', { members, objects, userData });
     client.nsp.emit('enter_user', userData);
   }
@@ -129,36 +105,38 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   handleDisconnect(client: Socket) {
     const clientId = client.id;
     this.logger.log(`Client disconnected: ${clientId}`);
-    if (this.userMap.get(clientId)) {
-      const userId = this.userMap.get(clientId).userId;
-      this.userMap.delete(clientId);
-      client.nsp.emit('leave_user', userId);
+    try {
+      const userData = this.dataManagementService.deleteUserData(client);
+      if (userData) client.nsp.emit('leave_user', { userId: userData.userId });
+    } catch (e) {
+      this.logger.error(e);
+      throw new WsException(e.message);
     }
   }
 
   @SubscribeMessage('move_pointer')
   async moveMousePointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
-    const userData = this.userMap.get(socket.id);
+    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     socket.nsp.emit('move_pointer', { x, y, userId: userData.userId });
   }
 
   @SubscribeMessage('select_object')
   async selectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
-    const userData = this.userMap.get(socket.id);
+    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('select_object', { objectId, userId: userData.userId });
   }
 
   @SubscribeMessage('unselect_object')
   async unselectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
-    const userData = this.userMap.get(socket.id);
+    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('unselect_object', { objectId, userId: userData.userId });
   }
 
   @SubscribeMessage('create_object')
   async createObject(@MessageBody(new ValidationPipe()) objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
-    const userData = this.userMap.get(socket.id);
+    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
     // Optional 값들 중 값을 채워줘야 하는 것은 값을 넣어준다.
@@ -166,7 +144,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       if (!objectData.text) objectData.text = '';
       if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) objectData.fontSize = 16;
       objectData.workspaceId = userData.workspaceId;
-      objectData.creator = socket.request.session.user.userId;
+      objectData.creator = userData.userId;
 
       // 생성을 시도하고, 성공하면 이를 전달한다.
       const ret = await this.objectHandlerService.createObject(userData.workspaceId, objectData);
@@ -181,7 +159,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('update_object')
   async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
     try {
-      const userData = this.userMap.get(socket.id);
+      const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
       if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
       // 변경되어서는 안되는 값들은 미리 제거하거나 덮어버린다.
@@ -202,7 +180,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('delete_object')
   async deleteObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
     try {
-      const userData = this.userMap.get(socket.id);
+      const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
       if (userData.role < 1) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
       const ret = await this.objectHandlerService.deleteObject(userData.workspaceId, objectId);

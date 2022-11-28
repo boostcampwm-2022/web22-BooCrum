@@ -54,7 +54,7 @@ export class DataManagementService {
    * @param socketId 탐색하길 원하는 Socket의 ID
    * @returns 연결된 데이터 혹은 비연결 시 null
    */
-  findUserDataInWorkspaceBySocketId(socketId: string): UserMapVO {
+  findUserDataBySocketId(socketId: string): UserMapVO {
     if (!socketId || !this.socketUserDataMap.has(socketId)) return null;
     return this.socketUserDataMap.get(socketId);
   }
@@ -103,23 +103,24 @@ export class DataManagementService {
    * @param client 유저 정보와의 연결을 제거할 소켓
    * @param workspaceId 유저 정보를 담고 있는 워크스페이스의 ID
    */
-  deleteUserData(client: Socket, workspaceId: string): void {
+  deleteUserData(client: Socket): UserMapVO {
     const socketId = client.id;
     const userData = this.socketUserDataMap.get(socketId);
-    if (!userData) throw new Error('존재하지 않는 유저입니다.');
+    if (!userData) return null;
     userData.count--;
     this.socketUserDataMap.delete(socketId);
 
     // 만약 해당 유저가 더이상 워크스페이스를 보지 않을 경우, Workspace 유저 목록에서 제외한다.
     // 만약 워크스페이스를 아무도 보지 않을 경우, 워크스페이스를 관리 목록에서 제거한다.
     if (userData.count < 1) {
-      let workspaceUserList = this.findUserDataListInWorkspace(workspaceId);
+      let workspaceUserList = this.findUserDataListInWorkspace(userData.workspaceId);
       workspaceUserList = workspaceUserList.filter((vo) => vo !== userData);
 
-      // 해당 워크스페이스에 더이상 온라인 사용자가 없을 경우 workspace 자체를 제거한다.
+      // 해당 워크스페이스에 더이상 온라인 사용자가 없을 경우 workspace 자체를 관리 목록에서 제거한다.
       // 아닐 경우 유저 VO만 제거한다.
-      if (workspaceUserList.length === 0) this.workspaceUserDataMap.delete(workspaceId);
-      else this.workspaceUserDataMap.set(workspaceId, workspaceUserList);
+      if (workspaceUserList.length === 0) this.workspaceUserDataMap.delete(userData.workspaceId);
+      else this.workspaceUserDataMap.set(userData.workspaceId, workspaceUserList);
     }
+    return userData;
   }
 }
