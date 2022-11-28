@@ -1,4 +1,3 @@
-import { CanvasObject, MemberInCanvas, UserMousePointer } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
@@ -115,9 +114,11 @@ export const addObject = (canvas: fabric.Canvas) => {
 
 export const deleteObject = (canvas: fabric.Canvas) => {
 	const objectDeleteHandler = (e: KeyboardEvent) => {
-		console.log(e.key);
 		if (e.key === 'Backspace') {
 			canvas.getActiveObjects().forEach((obj) => {
+				if (obj instanceof fabric.Textbox) {
+					return;
+				}
 				canvas.remove(obj);
 			});
 		}
