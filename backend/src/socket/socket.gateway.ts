@@ -111,10 +111,12 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       .filter((vo) => vo.workspaceId === workspaceId)
       .map((vo) => new UserDAO(vo.userId, vo.nickname, vo.color));
     const objects = await this.objectHandlerService.selectAllObjects(workspaceId);
+    const userData = { ...userMapVO };
+    delete userData.workspaceId, userData.isGuest;
 
     // 6. Socket 이벤트 Emit
     //? 자신 포함이야... 자신 제외하고 보내야 하는거야...?
-    client.emit('init', { members, objects });
+    client.emit('init', { members, objects, userData });
     client.nsp.emit('enter_user', new UserDAO(userMapVO.userId, userMapVO.nickname, userMapVO.color));
   }
 
