@@ -1,7 +1,7 @@
 import { Team } from '../../team/entity/team.entity';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../user/entity/user.entity';
-import { TEAM_ROLE } from 'src/util/constant/role.constant';
+import { TEAM_ROLE } from '../../util/constant/role.constant';
 
 @Entity({ name: 'team_member' })
 export class TeamMember {
@@ -22,6 +22,6 @@ export class TeamMember {
   @JoinColumn({ name: 'team_id' })
   team: Team;
 
-  @Column({ type: 'tinyint', default: TEAM_ROLE.MEMBER })
+  @Column({ type: 'tinyint', default: TEAM_ROLE.MEMBER, length: 1 })
   role: number;
 }

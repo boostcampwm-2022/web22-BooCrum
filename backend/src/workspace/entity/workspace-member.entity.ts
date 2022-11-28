@@ -1,4 +1,4 @@
-import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
+import { WORKSPACE_ROLE } from '../../util/constant/role.constant';
 import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../user/entity/user.entity';
 import { Workspace } from './workspace.entity';
@@ -16,7 +16,7 @@ export class WorkspaceMember {
   @JoinColumn({ name: 'workspace_id' })
   workspace: Workspace;
 
-  @Column({ type: 'int', default: WORKSPACE_ROLE.VIEWER })
+  @Column({ type: 'int', default: WORKSPACE_ROLE.VIEWER, length: 1 })
   role: number;
 
   @Column({
