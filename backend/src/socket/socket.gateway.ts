@@ -44,8 +44,8 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     try {
       const userId = sessionUserData?.userId ?? `Guest(${client.id})`;
       const nickname = sessionUserData?.nickname ?? `Guest(${client.id})`;
-      const role: WORKSPACE_ROLE | number = !sessionUserData
-        ? WORKSPACE_ROLE.EDITOR
+      const role = !sessionUserData
+        ? WORKSPACE_ROLE.VIEWER
         : await this.dbAccessService.getOrCreateUserRoleAt(userId, workspaceId, WORKSPACE_ROLE.EDITOR); // 지금은 테스트 목적으로 초기권한 1로 잡음.
       const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
 
@@ -182,8 +182,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   @SubscribeMessage('update_object')
   async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
-    const userData = this.userMap.get(socket.id);
-    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+    try {
+      const userData = this.userMap.get(socket.id);
+      if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
       // 변경되어서는 안되는 값들은 미리 제거하거나 덮어버린다.
       delete objectData.creator, delete objectData.type;
@@ -202,8 +203,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   @SubscribeMessage('delete_object')
   async deleteObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
-    const userData = this.userMap.get(socket.id);
-    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+    try {
+      const userData = this.userMap.get(socket.id);
+      if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
       const ret = await this.objectHandlerService.deleteObject(userData.workspaceId, objectId);
       if (!ret) new WsException('삭제 실패');
