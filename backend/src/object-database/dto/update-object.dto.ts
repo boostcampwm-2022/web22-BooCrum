@@ -6,11 +6,11 @@ export class UpdateObjectDTO {
 
   @IsNumber()
   @IsOptional()
-  xPos: number;
+  left: number;
 
   @IsNumber()
   @IsOptional()
-  yPos: number;
+  top: number;
 
   @IsNumber()
   @IsOptional()
@@ -27,4 +27,8 @@ export class UpdateObjectDTO {
   @IsString()
   @IsOptional()
   text: string;
+
+  @IsNumber()
+  @IsOptional()
+  fontsize: number;
 }

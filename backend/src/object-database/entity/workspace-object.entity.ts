@@ -20,18 +20,18 @@ export class WorkspaceObject {
   type: string;
 
   @Column({
-    name: 'x_pos',
+    name: 'left',
     type: 'int',
     nullable: false,
   })
-  xPos: number;
+  left: number;
 
   @Column({
-    name: 'y_pos',
+    name: 'top',
     type: 'int',
     nullable: false,
   })
-  yPos: number;
+  top: number;
 
   @Column({
     type: 'int',
@@ -56,6 +56,13 @@ export class WorkspaceObject {
     type: 'text',
   })
   text: string;
+
+  @Column({
+    name: 'font_size',
+    type: 'int',
+    nullable: false,
+  })
+  fontsize: number;
 
   // 어차피 여기에 저장되는 데이터들은 유저와 Join할 용도는 아님.
   // 굳이 제약 조건을 달자고 Foreign Key로 두는 건 좀...?
