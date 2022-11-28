@@ -22,7 +22,7 @@ function ShareModal({ id, modalRef, closeModal }: ShareModalProps) {
 	}, []);
 
 	const handleCopyLink = () => {
-		navigator.clipboard.writeText(`https://bc7m-j045.xyz/workspace/${id}`);
+		navigator.clipboard.writeText(`${process.env.REACT_APP_CLIENT_URL}/workspace/${id}`);
 		setOpenToast(true);
 
 		const timer = setTimeout(() => {
