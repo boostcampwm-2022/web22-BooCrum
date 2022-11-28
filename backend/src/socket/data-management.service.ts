@@ -41,23 +41,41 @@ export class DataManagementService {
    */
   findUserDataInWorkspaceByUserId(userId: string, workspaceId: string): UserMapVO {
     if (!userId || !this.workspaceUserDataMap.has(workspaceId)) return null;
-    return this.workspaceUserDataMap
-      .get(workspaceId)
-      .filter((vo) => vo.userId === userId)
-      .at(0);
+    return (
+      this.workspaceUserDataMap
+        .get(workspaceId)
+        .filter((vo) => vo.userId === userId)
+        .at(0) ?? null
+    );
   }
 
-  findUserDataInWorkspaceBySocketId(socketId: string) {
+  /**
+   * 특정 소켓과 연결된 유저 정보를 탐색한다.
+   * @param socketId 탐색하길 원하는 Socket의 ID
+   * @returns 연결된 데이터 혹은 비연결 시 null
+   */
+  findUserDataInWorkspaceBySocketId(socketId: string): UserMapVO {
     if (!socketId || !this.socketUserDataMap.has(socketId)) return null;
     return this.socketUserDataMap.get(socketId);
   }
 
+  /**
+   * 특정 워크스페이스에 연결 중인 모든 유저 정보를 탐색한다.
+   * @param workspaceId 탐색하길 원하는 워크스페이스의 ID
+   * @returns 해당 워크스페이스에 접속 중인 유저들의 정보, 없을 경우 null
+   */
   findUserDataListInWorkspace(workspaceId: string): UserMapVO[] {
     if (!workspaceId || !this.workspaceUserDataMap.has(workspaceId)) return null;
     return this.workspaceUserDataMap.get(workspaceId);
   }
 
-  async addUserData(client: Socket, workspaceId: string): Promise<UserMapVO> {
+  /**
+   * 특정 워크스페이스에 유저 정보를 등록하거나, 기존의 유저 정보를 새로운 소켓과 연결합니다.
+   * @param client 유저 정보를 연결할 소켓 객체
+   * @param workspaceId 유저 정보를 추가하거나 탐색할 워크스페이스의 ID
+   * @returns 탐색하였거나 추가한 유저 정보
+   */
+  async findOrAddUserData(client: Socket, workspaceId: string): Promise<UserMapVO> {
     const userId = client.request.session.user?.userId;
     // 이미 워크스페이스에 참여 중인 User인 경우 Socket만 갱신한다.
     let userData = this.findUserDataInWorkspaceByUserId(userId, workspaceId);
@@ -78,6 +96,13 @@ export class DataManagementService {
     return userData;
   }
 
+  /**
+   * 특정 워크스페이스에 있는 유저 정보를 제거하거나, 소켓과 유저 정보의 연결을 제거합니다.
+   *
+   * 만약 유저 정보가 존재하지 않을 경우 오류를 발생시킵니다.
+   * @param client 유저 정보와의 연결을 제거할 소켓
+   * @param workspaceId 유저 정보를 담고 있는 워크스페이스의 ID
+   */
   deleteUserData(client: Socket, workspaceId: string): void {
     const socketId = client.id;
     const userData = this.socketUserDataMap.get(socketId);
