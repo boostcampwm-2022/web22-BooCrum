@@ -191,6 +191,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) delete objectData.fontSize;
       objectData.workspaceId = userData.workspaceId;
 
+      // section의 제목의 최대 길이는 50자
+      if (objectData.type === 'section' && objectData.text.length > 50) throw new WsException('섹션 제목 길이 초과');
+
       // 수정을 시도하고, 성공하면 이를 전달한다.
       const ret = await this.objectHandlerService.updateObject(userData.workspaceId, objectData);
       if (!ret) throw new WsException('수정 실패');
