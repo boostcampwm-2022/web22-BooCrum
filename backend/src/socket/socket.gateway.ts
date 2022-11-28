@@ -117,7 +117,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     // 6. Socket 이벤트 Emit
     //? 자신 포함이야... 자신 제외하고 보내야 하는거야...?
     client.emit('init', { members, objects, userData });
-    client.nsp.emit('enter_user', new UserDAO(userMapVO.userId, userMapVO.nickname, userMapVO.color));
+    client.nsp.emit('enter_user', userData);
   }
 
   /**
