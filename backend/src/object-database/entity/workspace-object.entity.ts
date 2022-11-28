@@ -62,7 +62,7 @@ export class WorkspaceObject {
     type: 'int',
     nullable: false,
   })
-  fontsize: number;
+  fontSize: number;
 
   // 어차피 여기에 저장되는 데이터들은 유저와 Join할 용도는 아님.
   // 굳이 제약 조건을 달자고 Foreign Key로 두는 건 좀...?
