@@ -1,19 +1,28 @@
 import Modal from '@components/modal';
 import useModal from '@hooks/useModal';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import LeftSide from '../left-side';
 import RightSide from '../right-side';
 import ShareModal from '../share-modal';
 import { Container } from './index.style';
+import { Workspace } from '@api/workspace';
 
 interface HeaderProps {
-	name: string;
 	workspaceId: string;
 }
 
-function Header({ name, workspaceId }: HeaderProps) {
+function Header({ workspaceId }: HeaderProps) {
+	const [workspace, setWorkspaceName] = useState<string>('');
 	const { isOpenModal, openModal, modalRef, closeModal } = useModal();
 	const [modalContent, setModalContent] = useState(<></>);
+
+	useEffect(() => {
+		async function getMetaData() {
+			const { name } = await Workspace.getWorkspaceMetadata(workspaceId);
+			setWorkspaceName(name);
+		}
+		getMetaData();
+	}, []);
 
 	const openShareModal = () => {
 		openModal();
@@ -24,7 +33,7 @@ function Header({ name, workspaceId }: HeaderProps) {
 		<>
 			<Container>
 				<LeftSide />
-				<p className="title">{name}</p>
+				<p className="title">{workspace}</p>
 				<RightSide openShareModal={openShareModal} />
 			</Container>
 

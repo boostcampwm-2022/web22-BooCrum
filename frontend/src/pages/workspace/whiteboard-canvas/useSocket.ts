@@ -1,22 +1,22 @@
 import { useState, useEffect, useRef } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import { ClientToServerEvents, MemberInCanvas, ServerToClientEvents } from './types';
+import { ClientToServerEvents, Member, MemberInCanvas, ServerToClientEvents } from './types';
 import { useRecoilState } from 'recoil';
 import { membersState } from '@context/workspace';
 import { fabric } from 'fabric';
 import { createCursorObject, moveCursorFromServer } from '@utils/object-from-server';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
+	// 자신의 정보 role을 이용해 작업하기 위해 생성
+	const [myInfoInWorkspace, setMyInfoInWorkspace] = useState<Member>();
 	const [members, setMembers] = useRecoilState(membersState);
 
 	const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
 	const membersInCanvas = useRef<MemberInCanvas[]>([]);
 	const [isConnected, setIsConnected] = useState(false);
 
-	const {
-		state: { workspaceId },
-	} = useLocation();
+	const { workspaceId } = useParams();
 
 	useEffect(() => {
 		socket.current = io(`/workspace/${workspaceId}`);
@@ -30,14 +30,15 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			console.log('socket disconnected');
 		});
 
-		socket.current.on('init', ({ members, objects }) => {
-			console.log(members, objects);
+		socket.current.on('init', ({ members, objects, userData }) => {
+			setMyInfoInWorkspace(userData);
 			setMembers(members);
 			console.log('socket init');
 			//todo: objects 업데이트
 		});
 
 		socket.current.on('enter_user', (userData) => {
+			console.log(userData);
 			console.log('enter_user');
 			setMembers((prev) => [...prev, userData]);
 			const cursorObject = createCursorObject(userData.color);
@@ -96,6 +97,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		isConnected,
 		socket,
 		membersInCanvas,
+		myInfoInWorkspace,
 	};
 }
 
