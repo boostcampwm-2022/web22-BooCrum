@@ -28,7 +28,7 @@ export class ObjectDTO {
 
   @IsNumber()
   @IsOptional()
-  fontsize: number;
+  fontSize: number;
 
   @IsString()
   @IsOptional()

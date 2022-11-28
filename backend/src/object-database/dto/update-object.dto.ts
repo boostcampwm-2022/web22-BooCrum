@@ -30,5 +30,5 @@ export class UpdateObjectDTO {
 
   @IsNumber()
   @IsOptional()
-  fontsize: number;
+  fontSize: number;
 }

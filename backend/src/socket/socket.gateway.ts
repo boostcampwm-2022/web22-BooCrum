@@ -165,7 +165,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     // Optional 값들 중 값을 채워줘야 하는 것은 값을 넣어준다.
     if (!objectData.text) objectData.text = '';
-    if (isNaN(+objectData.fontsize) || +objectData.fontsize < 0) objectData.fontsize = 16;
+    if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) objectData.fontSize = 16;
     objectData.workspaceId = userData.workspaceId;
     objectData.creator = socket.request.session.user.userId;
 
@@ -182,7 +182,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     // 변경되어서는 안되는 값들은 미리 제거하거나 덮어버린다.
     delete objectData.creator, objectData.objectId;
-    if (isNaN(+objectData.fontsize) || +objectData.fontsize < 0) delete objectData.fontsize;
+    if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) delete objectData.fontSize;
     objectData.workspaceId = userData.workspaceId;
 
     // 수정을 시도하고, 성공하면 이를 전달한다.

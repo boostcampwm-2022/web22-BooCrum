@@ -28,7 +28,7 @@ export class CreateObjectDTO {
 
   @IsNumber()
   @IsOptional()
-  fontsize: number;
+  fontSize: number;
 
   @IsString()
   creator: string;
