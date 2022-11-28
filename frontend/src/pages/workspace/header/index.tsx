@@ -1,9 +1,10 @@
+import Modal from '@components/modal';
 import useModal from '@hooks/useModal';
 import { useState } from 'react';
 import LeftSide from '../left-side';
 import RightSide from '../right-side';
 import ShareModal from '../share-modal';
-import { Container, ModalWrapper } from './index.style';
+import { Container } from './index.style';
 
 interface HeaderProps {
 	name: string;
@@ -26,7 +27,10 @@ function Header({ name, workspaceId }: HeaderProps) {
 				<p className="title">{name}</p>
 				<RightSide openShareModal={openShareModal} />
 			</Container>
-			{isOpenModal && <ModalWrapper>{modalContent}</ModalWrapper>}
+
+			<Modal isOpen={isOpenModal} modalRef={modalRef} width={600} height={400}>
+				{modalContent}
+			</Modal>
 		</>
 	);
 }

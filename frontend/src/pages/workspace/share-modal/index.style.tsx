@@ -2,17 +2,8 @@ import styled from 'styled-components';
 
 export const Container = styled.div`
 	position: absolute;
-	z-index: 10;
-	width: 600px;
-	height: 400px;
-
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-
-	background: ${({ theme }) => theme.white};
-	box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
-	border-radius: 8px;
+	width: 100%;
+	height: 100%;
 
 	.header {
 		display: flex;

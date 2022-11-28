@@ -20,18 +20,3 @@ export const Container = styled.div`
 		flex: 1;
 	}
 `;
-
-export const ModalWrapper = styled.div`
-	position: fixed;
-	z-index: 10;
-	width: 100vw;
-	height: 100vh;
-
-	top: 50%;
-	left: 50%;
-	transform: translate(-50%, -50%);
-
-	background: rgba(16, 16, 16, 0.3);
-	box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
-	border-radius: 8px;
-`;
