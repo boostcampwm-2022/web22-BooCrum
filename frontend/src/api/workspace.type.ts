@@ -24,3 +24,25 @@ export interface PostWorkspaceBody {
 export interface PatchWorkspaceBody {
 	name?: string;
 }
+
+export interface WorkspaceMetaData {
+	workspaceId: string;
+	description?: string;
+	name: string;
+	registerData: string;
+	updateData: string;
+	thumbnailUrl?: string;
+}
+
+interface UserInfo {
+	userId: string;
+	nickname: string;
+	registerDate: string;
+}
+
+export interface ParticipantInfo {
+	id: number;
+	role: number;
+	updateDate: string;
+	user: UserInfo;
+}

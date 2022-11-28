@@ -8,7 +8,7 @@ function WorkspaceTemplate({ template }: { template: TemplateType }) {
 
 	const handleWorkspaceRouting = async () => {
 		const workspace = await Workspace.postWorkspace({});
-		navigate('/workspace', { state: workspace });
+		navigate(`/workspace/${workspace.workspaceId}`);
 	};
 
 	return (

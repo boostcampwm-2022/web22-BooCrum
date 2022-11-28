@@ -8,10 +8,10 @@ export class CreateObjectDTO {
   type: string;
 
   @IsNumber()
-  xPos: number;
+  left: number;
 
   @IsNumber()
-  yPos: number;
+  top: number;
 
   @IsNumber()
   width: number;
@@ -25,6 +25,10 @@ export class CreateObjectDTO {
   @IsString()
   @IsOptional()
   text: string;
+
+  @IsNumber()
+  @IsOptional()
+  fontSize: number;
 
   @IsString()
   creator: string;

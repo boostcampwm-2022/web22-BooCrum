@@ -96,7 +96,9 @@ export class ObjectHandlerService {
   async updateObject(workspaceId: string, updateObjectDTO: UpdateObjectDTO): Promise<boolean> {
     // selectObjectById에서 워크스페이스 및 오브젝트 존재 여부를 검증하므로, 여기서 검증은 생략한다.
     const object = await this.selectObjectById(workspaceId, updateObjectDTO.objectId);
-    const res = await this.objectRepository.update(object.objectId, updateObjectDTO);
+    const newData: WorkspaceObject = { ...object, ...updateObjectDTO };
+    delete (newData as any).workspaceId;
+    const res = await this.objectRepository.update(object.objectId, newData);
     return res.affected > 0;
   }
 

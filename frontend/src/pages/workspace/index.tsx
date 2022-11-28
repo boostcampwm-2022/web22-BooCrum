@@ -1,15 +1,31 @@
-import { useLocation } from 'react-router-dom';
+import { useParams, Navigate } from 'react-router-dom';
 import WhiteboardCanvas from './whiteboard-canvas';
-import Layout from './layout';
+import Header from './header';
+import Toolkit from './toolkit';
+import { useEffect } from 'react';
+import Loading from '@components/loading';
+import useAuth from '@hooks/useAuth';
 
 function Workspace() {
-	const {
-		state: { name, workspaceId },
-	} = useLocation();
+	const { isLoading, authenticate } = useAuth();
+	const { workspaceId } = useParams();
+
+	useEffect(() => {
+		authenticate();
+	}, []);
+
+	if (isLoading) {
+		return <Loading />;
+	}
+
+	if (workspaceId === undefined) {
+		return <Navigate to="/" />;
+	}
 
 	return (
 		<>
-			<Layout name={name} />
+			<Header workspaceId={workspaceId} />
+			<Toolkit />
 			<WhiteboardCanvas></WhiteboardCanvas>
 		</>
 	);

@@ -4,4 +4,5 @@ import { CanvasObject } from './workspace-object.types';
 export interface AllWorkspaceData {
 	members: Member[];
 	objects: CanvasObject[];
+	userData: Member;
 }

@@ -4,18 +4,14 @@ export class ObjectDTO {
   @IsString()
   objectId: string;
 
-  @IsUUID()
-  @IsOptional()
-  workspaceId: string;
-
   @IsString()
   type: string;
 
   @IsNumber()
-  xPos: number;
+  left: number;
 
   @IsNumber()
-  yPos: number;
+  top: number;
 
   @IsNumber()
   width: number;
@@ -30,7 +26,15 @@ export class ObjectDTO {
   @IsOptional()
   text: string;
 
+  @IsNumber()
+  @IsOptional()
+  fontSize: number;
+
   @IsString()
   @IsOptional()
   creator: string;
+
+  @IsUUID()
+  @IsOptional()
+  workspaceId: string;
 }
