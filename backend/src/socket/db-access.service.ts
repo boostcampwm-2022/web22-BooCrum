@@ -4,7 +4,7 @@ import { isUUID } from 'class-validator';
 import { Workspace } from '../workspace/entity/workspace.entity';
 import { WorkspaceMember } from '../workspace/entity/workspace-member.entity';
 import { WsException } from '@nestjs/websockets';
-import { User } from 'src/user/entity/user.entity';
+import { User } from '../user/entity/user.entity';
 
 @Injectable()
 export class DbAccessService {
