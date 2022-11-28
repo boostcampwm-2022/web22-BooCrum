@@ -49,7 +49,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         : await this.dbAccessService.getOrCreateUserRoleAt(userId, workspaceId, WORKSPACE_ROLE.EDITOR); // 지금은 테스트 목적으로 초기권한 1로 잡음.
       const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
 
-      return new UserMapVO(userId, nickname, workspaceId, role, color, !!sessionUserData);
+      return new UserMapVO(userId, nickname, workspaceId, role, color, !sessionUserData);
     } catch (e) {
       this.logger.error(e);
       return null;
@@ -113,11 +113,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       .filter((vo) => vo.workspaceId === workspaceId)
       .map((vo) => new UserDAO(vo.userId, vo.nickname, vo.color, vo.role));
     const objects = await this.objectHandlerService.selectAllObjects(workspaceId);
-    const userData = { ...userMapVO };
-    delete userData.workspaceId, userData.isGuest;
+    const userData = new UserDAO(userMapVO.userId, userMapVO.nickname, userMapVO.color, userMapVO.role);
 
     // 6. Socket 이벤트 Emit
-    //? 자신 포함이야... 자신 제외하고 보내야 하는거야...?
     client.emit('init', { members, objects, userData });
     client.nsp.emit('enter_user', userData);
   }
@@ -166,15 +164,20 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
     // Optional 값들 중 값을 채워줘야 하는 것은 값을 넣어준다.
-    if (!objectData.text) objectData.text = '';
-    if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) objectData.fontSize = 16;
-    objectData.workspaceId = userData.workspaceId;
-    objectData.creator = socket.request.session.user.userId;
+    try {
+      if (!objectData.text) objectData.text = '';
+      if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) objectData.fontSize = 16;
+      objectData.workspaceId = userData.workspaceId;
+      objectData.creator = socket.request.session.user.userId;
 
-    // 생성을 시도하고, 성공하면 이를 전달한다.
-    const ret = await this.objectHandlerService.createObject(userData.workspaceId, objectData);
-    if (!ret) throw new WsException('생성 실패');
-    socket.nsp.emit('create_object', objectData);
+      // 생성을 시도하고, 성공하면 이를 전달한다.
+      const ret = await this.objectHandlerService.createObject(userData.workspaceId, objectData);
+      if (!ret) throw new WsException('생성 실패');
+      socket.nsp.emit('create_object', objectData);
+    } catch (e) {
+      this.logger.error(e);
+      throw new WsException(e.message);
+    }
   }
 
   @SubscribeMessage('update_object')
@@ -182,15 +185,19 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const userData = this.userMap.get(socket.id);
     if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
-    // 변경되어서는 안되는 값들은 미리 제거하거나 덮어버린다.
-    delete objectData.creator, objectData.objectId;
-    if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) delete objectData.fontSize;
-    objectData.workspaceId = userData.workspaceId;
+      // 변경되어서는 안되는 값들은 미리 제거하거나 덮어버린다.
+      delete objectData.creator, delete objectData.type;
+      if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) delete objectData.fontSize;
+      objectData.workspaceId = userData.workspaceId;
 
-    // 수정을 시도하고, 성공하면 이를 전달한다.
-    const ret = await this.objectHandlerService.updateObject(userData.workspaceId, objectData);
-    if (!ret) throw new WsException('수정 실패');
-    socket.nsp.emit('update_object', objectData);
+      // 수정을 시도하고, 성공하면 이를 전달한다.
+      const ret = await this.objectHandlerService.updateObject(userData.workspaceId, objectData);
+      if (!ret) throw new WsException('수정 실패');
+      socket.nsp.emit('update_object', objectData);
+    } catch (e) {
+      this.logger.error(e);
+      throw new WsException(e.message);
+    }
   }
 
   @SubscribeMessage('delete_object')
@@ -198,8 +205,12 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const userData = this.userMap.get(socket.id);
     if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
-    const ret = await this.objectHandlerService.deleteObject(userData.workspaceId, objectId);
-    if (!ret) new WsException('삭제 실패');
-    socket.nsp.emit('delete_object', { objectId });
+      const ret = await this.objectHandlerService.deleteObject(userData.workspaceId, objectId);
+      if (!ret) new WsException('삭제 실패');
+      socket.nsp.emit('delete_object', { objectId });
+    } catch (e) {
+      this.logger.error(e);
+      throw new WsException(e.message);
+    }
   }
 }

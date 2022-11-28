@@ -74,7 +74,7 @@ export class UserService {
     }
 
     // 존재하면 Update를 진행한다.
-    delete newData.userId, newData.registerDate;
+    delete newData.userId, delete newData.registerDate;
     const res = await this.userRepository.update({ userId }, newData);
 
     if (res.affected !== 0)
