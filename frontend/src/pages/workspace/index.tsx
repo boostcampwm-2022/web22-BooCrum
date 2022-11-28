@@ -12,7 +12,7 @@ function Workspace() {
 
 	return (
 		<>
-			<Header name={'name'} workspaceId={workspaceId} />
+			<Header workspaceId={workspaceId} />
 			<Toolkit />
 			<WhiteboardCanvas></WhiteboardCanvas>
 		</>
