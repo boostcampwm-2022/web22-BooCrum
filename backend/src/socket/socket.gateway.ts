@@ -44,9 +44,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     try {
       const userId = sessionUserData?.userId ?? `Guest(${client.id})`;
       const nickname = sessionUserData?.nickname ?? `Guest(${client.id})`;
-      const role = !sessionUserData
+      const role: WORKSPACE_ROLE | number = !sessionUserData
         ? WORKSPACE_ROLE.EDITOR
-        : await this.dbAccessService.getOrCreateUserRoleAt(userId, workspaceId, 1); // 지금은 테스트 목적으로 초기권한 1로 잡음.
+        : await this.dbAccessService.getOrCreateUserRoleAt(userId, workspaceId, WORKSPACE_ROLE.EDITOR); // 지금은 테스트 목적으로 초기권한 1로 잡음.
       const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
 
       return new UserMapVO(userId, nickname, workspaceId, role, color, !!sessionUserData);
@@ -111,13 +111,13 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     //? workspaceId -> { idList: string[], userData: Map<string, UserData> } 형식으로?
     const members = Array.from(this.userMap.values())
       .filter((vo) => vo.workspaceId === workspaceId)
-      .map((vo) => new UserDAO(vo.userId, vo.nickname, vo.color));
+      .map((vo) => new UserDAO(vo.userId, vo.nickname, vo.color, vo.role));
     const objects = await this.objectHandlerService.selectAllObjects(workspaceId);
 
     // 6. Socket 이벤트 Emit
     //? 자신 포함이야... 자신 제외하고 보내야 하는거야...?
-    client.emit('init', { members, objects });
-    client.nsp.emit('enter_user', new UserDAO(userMapVO.userId, userMapVO.nickname, userMapVO.color));
+    client.emit('init', { members, objects, role: userMapVO.role });
+    client.nsp.emit('enter_user', new UserDAO(userMapVO.userId, userMapVO.nickname, userMapVO.color, userMapVO.role));
   }
 
   /**

@@ -5,6 +5,7 @@ import { Workspace } from '../workspace/entity/workspace.entity';
 import { WorkspaceMember } from '../workspace/entity/workspace-member.entity';
 import { WsException } from '@nestjs/websockets';
 import { User } from 'src/user/entity/user.entity';
+import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 
 @Injectable()
 export class DbAccessService {
@@ -69,7 +70,11 @@ export class DbAccessService {
    * @param usedQueryRunner (Optional) 기존에 사용하던 QueryRunner
    * @returns 탐색 실패 시 -1, 탐색 성공 시 0 이상의 정수
    */
-  private async getUserRoleAt(userId: string, workspaceId: string, usedQueryRunner?: QueryRunner): Promise<number> {
+  private async getUserRoleAt(
+    userId: string,
+    workspaceId: string,
+    usedQueryRunner?: QueryRunner,
+  ): Promise<WORKSPACE_ROLE | number> {
     if (!(await this.isWorkspaceExist(workspaceId))) throw new Error('존재하지 않는 Workspace에 접근하였습니다.');
 
     const queryRunner = usedQueryRunner ? usedQueryRunner : this.dataSoruce.createQueryRunner();
@@ -84,7 +89,11 @@ export class DbAccessService {
     return ret?.role ?? -1;
   }
 
-  async getOrCreateUserRoleAt(userId: string, workspaceId: string, defaultRole: number): Promise<number> {
+  async getOrCreateUserRoleAt(
+    userId: string,
+    workspaceId: string,
+    defaultRole: number,
+  ): Promise<WORKSPACE_ROLE | number> {
     if (defaultRole < 0) throw new Error('부적절한 기본 부여 권한');
 
     const queryRunner = this.dataSoruce.createQueryRunner();
