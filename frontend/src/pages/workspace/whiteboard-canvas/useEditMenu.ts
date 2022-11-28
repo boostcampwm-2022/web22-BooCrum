@@ -12,11 +12,13 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		canvas.current.on('mouse:down', handleOutsideClick);
 		canvas.current.on('object:modified', handleMenuPosition);
 		canvas.current.on('mouse:wheel', handleMenuPosition);
+		canvas.current.on('object:removed', handleRemoveObject);
 
 		return () => {
 			canvas.current?.off('mouse:down', handleOutsideClick);
 			canvas.current?.off('object:modified', handleMenuPosition);
 			canvas.current?.off('mouse:wheel', handleMenuPosition);
+			canvas.current?.off('object:removed', handleRemoveObject);
 		};
 	}, [isOpen]);
 
@@ -27,7 +29,6 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		const left = coord ? (coord[0].x + coord[1].x) / 2 - 30 : 0;
 
 		setIsOpen(true);
-		console.log(top, left);
 		setMenuPosition({ x: left, y: top });
 	};
 
@@ -50,6 +51,10 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		const top = coord ? coord[0].y - 40 : 0;
 		const left = coord ? (coord[0].x + coord[1].x) / 2 - 30 : 0;
 		setMenuPosition({ x: left, y: top });
+	};
+	const handleRemoveObject = (opt: fabric.IEvent) => {
+		if (!isOpen) return;
+		setIsOpen(false);
 	};
 
 	return { isOpen, menuRef, openMenu, menuPosition };
