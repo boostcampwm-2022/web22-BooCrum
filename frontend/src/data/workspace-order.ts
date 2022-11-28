@@ -4,8 +4,7 @@ interface WorkspaceOrderType {
 }
 
 export const orderItems: WorkspaceOrderType[] = [
-	{ id: 0, description: 'Last opened' },
-	{ id: 1, description: 'Last updated' },
-	{ id: 2, description: 'Last created' },
-	{ id: 3, description: 'Alphabetically' },
+	{ id: 0, description: 'Last updated' },
+	{ id: 1, description: 'Last created' },
+	{ id: 2, description: 'Alphabetically' },
 ];
