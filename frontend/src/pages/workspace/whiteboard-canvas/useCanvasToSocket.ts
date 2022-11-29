@@ -17,6 +17,8 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 		canvas.current.on('object:added', (e) => {
 			if (!e.target || !canvas.current) return;
+			if (e.target.isSocketObject) return;
+
 			const fabricObject = e.target;
 			if (fabricObject.type === ObjectType.postit) {
 				const message = formatPostitToSocket(canvas.current, fabricObject as fabric.Group);

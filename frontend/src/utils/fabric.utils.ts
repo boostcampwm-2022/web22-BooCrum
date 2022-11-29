@@ -10,6 +10,7 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 			type: 'line',
 			stroke: '#ccc',
 			selectable: false,
+			isSocketObject: false,
 		});
 
 		canvas.sendToBack(lineY);
@@ -20,6 +21,7 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 			type: 'line',
 			stroke: '#ccc',
 			selectable: false,
+			isSocketObject: false,
 		});
 
 		canvas.sendToBack(lineX);
