@@ -95,11 +95,11 @@ export class DbAccessService {
     await queryRunner.connect();
     try {
       const userRole = await this.getUserRoleAt(userId, workspaceId, queryRunner);
-      if (userRole >= 0) return userRole;
+      if (userRole >= WORKSPACE_ROLE.VIEWER) return userRole;
 
       const result = await this.addUserAsWorkspaceMember(userId, workspaceId, defaultRole, queryRunner);
       if (!result) throw new Error('유저 권한 부여 실패');
-      return WORKSPACE_ROLE[defaultRole + 1];
+      return defaultRole as WORKSPACE_ROLE;
     } catch (e) {
       this.logger.error(e);
       return WORKSPACE_ROLE.NOT_FOUND;
