@@ -3,7 +3,7 @@ import { ServerToClientEvents, ClientToServerEvents, MousePointer } from './type
 import { useEffect } from 'react';
 import useEditMenu from './useEditMenu';
 import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
-import { formatPostitToSocket } from '@utils/socket.utils';
+import { formatCreatePostitEventToSocket, formatMoveObjectEventToSocket } from '@utils/socket.utils';
 
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
@@ -12,6 +12,7 @@ interface UseCanvasToSocketProps {
 
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 	const { isOpen, menuRef, openMenu, menuPosition } = useEditMenu(canvas);
+
 	useEffect(() => {
 		if (!canvas.current) return;
 
@@ -20,8 +21,10 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (e.target.isSocketObject) return;
 
 			const fabricObject = e.target;
+			console.log(fabricObject);
 			if (fabricObject.type === ObjectType.postit) {
-				const message = formatPostitToSocket(canvas.current, fabricObject as fabric.Group);
+				const message = formatCreatePostitEventToSocket(fabricObject as fabric.Group);
+				console.log('emit', message);
 				socket.current?.emit('create_object', message);
 			}
 		});
@@ -33,7 +36,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('selection:created', (e) => {
 			// todo select 로직
 			// console.log(e);
-
 			openMenu();
 		});
 
@@ -42,9 +44,12 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			// console.log(e);
 		});
 
-		canvas.current.on('object:moving', (e) => {
+		canvas.current.on('object:moving', ({ target }) => {
 			// todo object update 로직
-			// console.log(e);
+			if (!target) return;
+			const message = formatMoveObjectEventToSocket(target);
+			console.log(message);
+			socket.current?.emit('update_object', message);
 		});
 
 		canvas.current.on('mouse:move', (e) => {

@@ -23,11 +23,11 @@ export const formatMessageToSocket = (canvas: fabric.Canvas, object: fabric.Obje
 	return message;
 };
 
-export const formatPostitToSocket = (objectGroup: fabric.Group): ObjectDataToServer => {
+export const formatCreatePostitEventToSocket = (objectGroup: fabric.Group): ObjectDataToServer => {
 	// todo fabric.Object -> text 포함된 타입으로 변경 필요
 	const message: ObjectDataToServer = {
 		type: ObjectType.postit,
-		objectId: v4(),
+		objectId: objectGroup.objectId,
 		left: objectGroup.left,
 		top: objectGroup.top,
 		width: objectGroup.width,
@@ -47,6 +47,30 @@ export const formatPostitToSocket = (objectGroup: fabric.Group): ObjectDataToSer
 
 	return message;
 };
+
+export const formatMoveObjectEventToSocket = (object: fabric.Object): ObjectDataToServer => {
+	// todo fabric.Object -> text 포함된 타입으로 변경 필요
+	const message: ObjectDataToServer = {
+		type: object.type,
+		objectId: object.objectId,
+		left: object.left,
+		top: object.top,
+	};
+
+	return message;
+};
+
+// export const formatMoveObjectEventToSocket = (object: fabric.Object): ObjectDataToServer => {
+// 	// todo fabric.Object -> text 포함된 타입으로 변경 필요
+// 	const message: ObjectDataToServer = {
+// 		type: object.type,
+// 		objectId: object.objectId,
+// 		left: object.left,
+// 		top: object.top,
+// 	};
+
+// 	return message;
+// };
 
 export const formatMessageFromSocket = (objectDataFromServer: ObjectDataFromServer): CanvasObject => {
 	// todo type을 명성님이 만든 객체 class에 맞춰서 사용할지 말지 결정
