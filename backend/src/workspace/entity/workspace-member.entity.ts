@@ -16,7 +16,7 @@ export class WorkspaceMember {
   @JoinColumn({ name: 'workspace_id' })
   workspace: Workspace;
 
-  @Column({ type: 'int', default: WORKSPACE_ROLE.VIEWER, length: 1 })
+  @Column({ type: 'tinyint', default: WORKSPACE_ROLE.VIEWER })
   role: number;
 
   @Column({
