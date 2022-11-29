@@ -86,7 +86,7 @@ export class DbAccessService {
       .andWhere('ws.workspace_id = :wid', { wid: workspaceId })
       .getOne();
     if (queryRunner !== usedQueryRunner) await queryRunner.release();
-    return WORKSPACE_ROLE[ret?.role + 1] ?? WORKSPACE_ROLE.NOT_FOUND;
+    return (ret?.role as WORKSPACE_ROLE) ?? WORKSPACE_ROLE.NOT_FOUND;
   }
 
   async getOrCreateUserRoleAt(userId: string, workspaceId: string, defaultRole: number): Promise<WORKSPACE_ROLE> {
