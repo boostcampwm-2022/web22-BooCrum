@@ -1,5 +1,5 @@
 diff --git a/node_modules/@types/fabric/fabric-impl.d.ts b/node_modules/@types/fabric/fabric-impl.d.ts
-index 107db96..5289f3e 100755
+index 107db96..62d9d27 100755
 --- a/node_modules/@types/fabric/fabric-impl.d.ts
 +++ b/node_modules/@types/fabric/fabric-impl.d.ts
 @@ -1693,6 +1693,10 @@ export class StaticCanvas {
@@ -28,3 +28,11 @@ index 107db96..5289f3e 100755
  
      /**
       * Horizontal origin of transformation of an object (one of "left", "right", "center")
+@@ -4163,7 +4168,6 @@ export class Rect extends Object {
+ }
+ 
+ interface TextOptions extends IObjectOptions {
+-    type?: string | undefined;
+     /**
+      * Font size (in pixels)
+      * @type Number

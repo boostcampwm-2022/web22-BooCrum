@@ -24,6 +24,7 @@ const createNameLabel = (id: string, text: string, x: number, y: number) => {
 	const defaultFontSize = 15;
 
 	const nameLabelText = new fabric.Text(text, {
+		type: ObjectType.nameText,
 		objectId: id,
 		top: defaultTop,
 		left: defaultLeft,
@@ -58,6 +59,7 @@ const createTextBox = (id: string, x: number, y: number, fontSize: number) => {
 	const defaultWidth = 280;
 
 	const textbox = new fabric.Textbox('Text...', {
+		type: ObjectType.text,
 		top: defaultTop,
 		left: defaultLeft,
 		objectId: id,
