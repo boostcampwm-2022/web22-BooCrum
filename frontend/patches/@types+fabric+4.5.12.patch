@@ -1,5 +1,5 @@
 diff --git a/node_modules/@types/fabric/fabric-impl.d.ts b/node_modules/@types/fabric/fabric-impl.d.ts
-index 107db96..676c07d 100755
+index 107db96..5289f3e 100755
 --- a/node_modules/@types/fabric/fabric-impl.d.ts
 +++ b/node_modules/@types/fabric/fabric-impl.d.ts
 @@ -1693,6 +1693,10 @@ export class StaticCanvas {
@@ -13,7 +13,7 @@ index 107db96..676c07d 100755
      /**
       * When true, objects can be transformed by one side (unproportionally)
       * when dragged on the corners that normally would not do that.
-@@ -2695,6 +2699,7 @@ export class Line {
+@@ -2695,12 +2699,13 @@ export class Line {
  }
  
  interface IObjectOptions {
@@ -21,3 +21,10 @@ index 107db96..676c07d 100755
      /**
       * Type of an object (rect, circle, path, etc.).
       * Note that this property is meant to be read-only and not meant to be modified.
+      * If you modify, certain parts of Fabric (such as JSON loading) won't work correctly.
+      */
+-    type?: string | undefined;
++    type: "postit" | "section" | "draw" | "text" | "title" | "nameText" | "cursor" | "rect" | "line";
+ 
+     /**
+      * Horizontal origin of transformation of an object (one of "left", "right", "center")
