@@ -1,4 +1,4 @@
-import { Container, UserDetail, UserProfile } from './index.style';
+import { Container, UserDetail, UserInfo } from './index.style';
 import { useRecoilValue, useRecoilValueLoadable } from 'recoil';
 import { membersState } from '@context/workspace';
 import { Member } from './index.type';
@@ -34,20 +34,21 @@ function UserList() {
 	return (
 		<>
 			<Container>
-				<UserProfile color="#d9d9d9" onClick={() => handleDetailUser(user)}>
-					<img alt="user profile" className="user-icon" src={userIcon} />
-				</UserProfile>
-				<UserProfile color="#d9d9d9" onClick={() => handleDetailUser(user)}>
-					<img alt="user profile" className="user-icon" src={userIcon} />
-				</UserProfile>
-				{members.slice(0, 5).map((member) => (
-					<UserProfile color={member.color} key={member.userId} onClick={() => handleDetailUser(member)}>
+				<UserInfo color="#d9d9d9">
+					<div className="user-profile" onClick={() => handleDetailUser(user)}>
 						<img alt="user profile" className="user-icon" src={userIcon} />
-					</UserProfile>
+					</div>
+					<UserDetail>{selectedMember.nickname}</UserDetail>
+				</UserInfo>
+				{members.slice(0, 5).map((member) => (
+					<UserInfo key={member.userId} color={member.color}>
+						<div className="user-profile" onClick={() => handleDetailUser(member)}>
+							<img alt="user profile" className="user-icon" src={userIcon} />
+						</div>
+						<UserDetail>{selectedMember.nickname}</UserDetail>
+					</UserInfo>
 				))}
 			</Container>
-
-			{selectedMember.userId && <UserDetail>{selectedMember.nickname}</UserDetail>}
 		</>
 	);
 }

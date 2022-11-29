@@ -14,7 +14,23 @@ export const Container = styled.div`
 	}
 `;
 
-export const UserProfile = styled.div<{ color: string }>`
+export const UserDetail = styled.div`
+	position: absolute;
+	top: 40px;
+
+	background: ${({ theme }) => theme.white};
+	padding: 10px 16px;
+	border-radius: 12px;
+
+	font-size: 14px;
+	font-weight: 500;
+
+	display: none;
+
+	box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
+`;
+
+export const UserInfo = styled.div<{ color: string }>`
 	display: flex;
 	justify-content: center;
 	align-items: center;
@@ -31,16 +47,10 @@ export const UserProfile = styled.div<{ color: string }>`
 	& + & {
 		margin-left: 8px;
 	}
-`;
 
-export const UserDetail = styled.div`
-	position: absolute;
-	top: 60px;
-
-	background: ${({ theme }) => theme.white};
-	padding: 10px 16px;
-	border-radius: 12px;
-
-	font-size: 14px;
-	font-weight: 500;
+	:hover {
+		${UserDetail} {
+			display: block;
+		}
+	}
 `;

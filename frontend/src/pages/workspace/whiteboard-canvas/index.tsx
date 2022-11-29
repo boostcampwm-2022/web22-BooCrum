@@ -31,7 +31,6 @@ function WhiteboardCanvas() {
 			fabricCanvas.defaultCursor = 'default';
 			fabricCanvas.selection = true;
 		}
-		// grab 상태에서 화면 움직이는 경우 grabbing으로 수정하는 부분 추가 필요
 	}, [cursor]);
 
 	// object color 수정 초안
