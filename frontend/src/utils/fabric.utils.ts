@@ -107,16 +107,19 @@ export const addObject = (canvas: fabric.Canvas) => {
 		if (canvas.mode === 'section' && !canvas.getActiveObject()) {
 			addSection(canvas, x, y);
 		} else if (canvas.mode === 'postit' && !canvas.getActiveObject()) {
-			addPostIt(canvas, x, y);
+			//todo 색 정보 받아와야함
+			addPostIt(canvas, x, y, 40, 'pink');
 		}
 	});
 };
 
 export const deleteObject = (canvas: fabric.Canvas) => {
 	const objectDeleteHandler = (e: KeyboardEvent) => {
-		console.log(e.key);
 		if (e.key === 'Backspace') {
 			canvas.getActiveObjects().forEach((obj) => {
+				if (obj instanceof fabric.Textbox) {
+					return;
+				}
 				canvas.remove(obj);
 			});
 		}
