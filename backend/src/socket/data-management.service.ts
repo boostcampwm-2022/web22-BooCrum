@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { UserMapVO } from '../util/socket/user-map.vo';
+import { UserMapVO } from './dto/user-map.vo';
 import { Socket } from 'socket.io';
 import { DbAccessService } from './db-access.service';
 
