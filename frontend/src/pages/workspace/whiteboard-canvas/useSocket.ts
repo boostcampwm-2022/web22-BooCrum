@@ -109,8 +109,13 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			createObjectFromServer(canvas.current, arg);
 		});
 
-		socket.current.on('delete_object', ({ objectId }) => {
-			// todo object 삭제
+		socket.current.on('delete_object', ({ userId, objectId }) => {
+			if (!canvas.current) return;
+			const objects = canvas.current.getObjects().filter((object) => {
+				return object.objectId === objectId;
+			});
+			if (!objects || objects.length === 0) return;
+			canvas.current.remove(...objects);
 		});
 
 		socket.current.on('update_object', ({ userId, objectData }) => {

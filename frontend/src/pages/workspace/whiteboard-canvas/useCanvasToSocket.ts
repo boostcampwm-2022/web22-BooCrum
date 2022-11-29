@@ -30,17 +30,18 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				editedObjectId.current = '';
 				return;
 			}
-			console.log(fabricObject);
 
 			if (fabricObject.type === ObjectType.postit) {
 				const message = formatCreatePostitEventToSocket(fabricObject as fabric.Group);
-				console.log('emit', message);
 				socket.current?.emit('create_object', message);
 			}
 		});
 
-		canvas.current.on('object:removed', (e) => {
-			// console.log(e);
+		canvas.current.on('object:removed', ({ target }) => {
+			if (!target) return;
+			socket.current?.emit('delete_object', {
+				objectId: target.objectId,
+			});
 		});
 
 		canvas.current.on('text:changed', ({ target }) => {

@@ -12,7 +12,7 @@ export interface ServerToClientEvents {
 	select_object: (arg: { userId: string; objectId: string }) => void;
 	unselect_object: (arg: { userId: string; objectId: string }) => void;
 	create_object: (arg: ObjectDataFromServer) => void;
-	delete_object: (arg: { objectId: string }) => void;
+	delete_object: (arg: { userId: string; objectId: string }) => void;
 	update_object: (arg: { userId: string; objectData: ObjectDataFromServer }) => void;
 	exception: (arg: any) => void;
 }
