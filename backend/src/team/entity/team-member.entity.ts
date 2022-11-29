@@ -22,6 +22,6 @@ export class TeamMember {
   @JoinColumn({ name: 'team_id' })
   team: Team;
 
-  @Column({ type: 'tinyint', default: TEAM_ROLE.MEMBER, length: 1 })
+  @Column({ type: 'tinyint', default: TEAM_ROLE.MEMBER })
   role: number;
 }
