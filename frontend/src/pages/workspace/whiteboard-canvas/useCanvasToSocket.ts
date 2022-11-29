@@ -39,9 +39,9 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 		canvas.current.on('object:removed', ({ target }) => {
 			if (!target) return;
-			socket.current?.emit('delete_object', {
-				objectId: target.objectId,
-			});
+			// socket.current?.emit('delete_object', {
+			// 	objectId: target.objectId,
+			// });
 		});
 
 		canvas.current.on('text:changed', ({ target }) => {
@@ -55,15 +55,42 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			editedObjectId.current = target.objectId;
 		});
 
-		canvas.current.on('selection:created', (e) => {
-			// todo select 로직
-			// console.log(e);
+		canvas.current.on('selection:created', ({ selected }) => {
+			if (!selected) return;
+
+			selected.forEach((object) => {
+				socket.current?.emit('select_object', {
+					objectId: object.objectId,
+				});
+			});
+
 			openMenu();
 		});
 
-		canvas.current.on('selection:cleared', (e) => {
-			// todo unselect 로직
-			// console.log(e);
+		canvas.current.on('selection:updated', ({ selected, deselected }) => {
+			if (!selected || !deselected) return;
+
+			selected.forEach((object) => {
+				socket.current?.emit('select_object', {
+					objectId: object.objectId,
+				});
+			});
+
+			deselected.forEach((object) => {
+				socket.current?.emit('unselect_object', {
+					objectId: object.objectId,
+				});
+			});
+			openMenu();
+		});
+
+		canvas.current.on('selection:cleared', ({ deselected }) => {
+			if (!deselected) return;
+			deselected.forEach((object) => {
+				socket.current?.emit('unselect_object', {
+					objectId: object.objectId,
+				});
+			});
 		});
 
 		canvas.current.on('object:moving', ({ target }) => {
@@ -89,7 +116,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		});
 
 		canvas.current.on('object:scaling', ({ target }) => {
-			console.log(target);
 			if (!target) return;
 			const message = formatScalingObjectEventToSocket(target);
 			socket.current?.emit('update_object', message);

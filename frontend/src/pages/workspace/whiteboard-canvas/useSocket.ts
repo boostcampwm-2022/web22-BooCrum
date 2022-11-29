@@ -9,6 +9,8 @@ import {
 	createCursorObject,
 	createObjectFromServer,
 	moveCursorFromServer,
+	selectObjectFromServer,
+	unselectObjectFromServer,
 	updateObjectFromServer,
 } from '@utils/object-from-server';
 
@@ -96,11 +98,17 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('select_object', ({ userId, objectId }) => {
-			//todo select 업데아트
+			if (!canvas.current) return;
+			if (isMessageByMe(userId)) return;
+			const member = membersInCanvas.current.filter((memberInCanvas) => memberInCanvas.userId === userId);
+			if (member.length === 0) return;
+			selectObjectFromServer(canvas.current, objectId, member[0].color);
 		});
 
 		socket.current.on('unselect_object', ({ userId, objectId }) => {
-			//todo unselect 업데아트
+			if (!canvas.current) return;
+			if (isMessageByMe(userId)) return;
+			unselectObjectFromServer(canvas.current, objectId);
 		});
 
 		socket.current.on('create_object', (arg) => {
@@ -109,7 +117,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			createObjectFromServer(canvas.current, arg);
 		});
 
-		socket.current.on('delete_object', ({ userId, objectId }) => {
+		socket.current.on('delete_object', ({ objectId }) => {
 			if (!canvas.current) return;
 			const objects = canvas.current.getObjects().filter((object) => {
 				return object.objectId === objectId;

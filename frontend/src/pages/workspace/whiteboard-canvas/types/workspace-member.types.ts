@@ -20,6 +20,5 @@ export interface UserMousePointer extends MousePointer {
 export interface MemberInCanvas {
 	userId: string;
 	color: string;
-	selectedObjectId?: string;
 	cursorObject: fabric.Path;
 }

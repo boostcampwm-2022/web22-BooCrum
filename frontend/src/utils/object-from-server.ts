@@ -17,7 +17,6 @@ import {
 
 export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
 	if (newObject.type === ObjectType.postit) {
-		console.log('asd');
 		createPostitFromServer(canvas, newObject);
 	}
 };
@@ -61,7 +60,7 @@ export const deleteObjectFromServer = (canvas: fabric.Canvas, objectId: string) 
 export const moveCursorFromServer = (membersInCanvas: MemberInCanvas[], userMousePointer: UserMousePointer) => {
 	const { userId, x, y } = userMousePointer;
 	const memberInCanvasById = membersInCanvas.filter((memberInCanvas) => memberInCanvas.userId === userId);
-	if (memberInCanvasById.length === 0) return;
+	if (memberInCanvasById.length === 0 || !memberInCanvasById[0].cursorObject) return;
 	memberInCanvasById[0].cursorObject.set({ top: y, left: x });
 	memberInCanvasById[0].cursorObject.bringToFront();
 };
@@ -88,6 +87,40 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 			}
 		});
 	}
+};
+
+export const selectObjectFromServer = (canvas: fabric.Canvas, objectId: string, color: string) => {
+	const object: fabric.Object[] = canvas.getObjects().filter((object) => {
+		return object.objectId === objectId;
+	});
+
+	if (object.length === 0) return;
+	const groupObject = object[0] as fabric.Group;
+	groupObject._objects.forEach((object) => {
+		if (object.type === ObjectType.rect) {
+			object.set({
+				stroke: color,
+				strokeWidth: 3,
+			});
+		}
+	});
+};
+
+export const unselectObjectFromServer = (canvas: fabric.Canvas, objectId: string) => {
+	const object: fabric.Object[] = canvas.getObjects().filter((object) => {
+		return object.objectId === objectId;
+	});
+
+	if (object.length === 0) return;
+	const groupObject = object[0] as fabric.Group;
+	groupObject._objects.forEach((object) => {
+		if (object.type === ObjectType.rect) {
+			object.set({
+				stroke: '',
+				strokeWidth: 0,
+			});
+		}
+	});
 };
 
 export const createCursorObject = (color: string) => {
