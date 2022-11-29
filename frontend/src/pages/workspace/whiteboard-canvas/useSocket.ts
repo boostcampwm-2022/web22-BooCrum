@@ -54,6 +54,11 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 					membersInCanvas.current.push(newMemberInCanvas);
 				}
 			});
+
+			objects.forEach((object) => {
+				if (!canvas.current) return;
+				createObjectFromServer(canvas.current, object);
+			});
 		});
 
 		socket.current.on('enter_user', (userData) => {
@@ -99,7 +104,6 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('create_object', (arg) => {
-			console.log(arg);
 			if (!canvas.current) return;
 			if (isMessageByMe(arg.creator)) return;
 			createObjectFromServer(canvas.current, arg);
@@ -112,7 +116,6 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('update_object', ({ userId, objectData }) => {
 			if (!canvas.current) return;
 			if (isMessageByMe(userId)) return;
-			console.log(objectData);
 			updateObjectFromServer(canvas.current, objectData);
 		});
 
