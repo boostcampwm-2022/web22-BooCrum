@@ -118,7 +118,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     try {
       const userData = this.dataManagementService.deleteUserData(client);
       if (userData) client.nsp.emit('leave_user', { userId: userData.userId });
-      if (!userData.isGuest) {
+      if (userData && !userData.isGuest) {
         const res = await this.dbAccessService.renewUpdateDateOfMember(userData.userId, userData.workspaceId);
         if (!res)
           this.logger.error(
@@ -138,14 +138,14 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('select_object')
-  async selectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
+  async selectObject(@MessageBody('objectId') objectId: string[], @ConnectedSocket() socket: Socket) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('select_object', { objectId, userId: userData.userId });
   }
 
   @SubscribeMessage('unselect_object')
-  async unselectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
+  async unselectObject(@MessageBody('objectId') objectId: string[], @ConnectedSocket() socket: Socket) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('unselect_object', { objectId, userId: userData.userId });
@@ -201,7 +201,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       // 수정을 시도하고, 성공하면 이를 전달한다.
       const ret = await this.objectHandlerService.updateObject(userData.workspaceId, objectData);
       if (!ret) throw new WsException('수정 실패');
-      socket.nsp.emit('update_object', objectData);
+      socket.nsp.emit('update_object', { userId: userData.userId, objectData });
     } catch (e) {
       this.logger.error(e);
       throw new WsException(e.message);

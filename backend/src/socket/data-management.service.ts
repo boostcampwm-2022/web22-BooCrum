@@ -2,6 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { UserMapVO } from './dto/user-map.vo';
 import { Socket } from 'socket.io';
 import { DbAccessService } from './db-access.service';
+import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 
 @Injectable()
 export class DataManagementService {
@@ -23,7 +24,9 @@ export class DataManagementService {
     try {
       const userId = sessionUserData?.userId ?? `Guest(${client.id})`;
       const nickname = sessionUserData?.nickname ?? `Guest(${client.id})`;
-      const role = !sessionUserData ? 0 : await this.dbAccessService.getOrCreateUserRoleAt(userId, workspaceId, 1); // 지금은 테스트 목적으로 초기권한 1로 잡음.
+      const role = !sessionUserData
+        ? WORKSPACE_ROLE.EDITOR
+        : await this.dbAccessService.getOrCreateUserRoleAt(userId, workspaceId, WORKSPACE_ROLE.EDITOR); // 지금은 테스트 목적으로 초기권한 1로 잡음.
       const color = `#${Math.round(Math.random() * 0xffffff).toString(16)}`;
 
       return new UserMapVO(userId, nickname, workspaceId, role, color, !sessionUserData);
