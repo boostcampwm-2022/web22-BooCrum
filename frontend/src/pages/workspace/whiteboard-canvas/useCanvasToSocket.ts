@@ -2,6 +2,8 @@ import { Socket } from 'socket.io-client';
 import { ServerToClientEvents, ClientToServerEvents, MousePointer } from './types';
 import { useEffect } from 'react';
 import useEditMenu from './useEditMenu';
+import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
+import { formatPostitToSocket } from '@utils/socket.utils';
 
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
@@ -14,30 +16,35 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		if (!canvas.current) return;
 
 		canvas.current.on('object:added', (e) => {
-			// todo object 추가 로직
-			// socket.emit('create_object', { e });
-			console.log(e.target);
+			if (!e.target || !canvas.current) return;
+			if (e.target.isSocketObject) return;
+
+			const fabricObject = e.target;
+			if (fabricObject.type === ObjectType.postit) {
+				const message = formatPostitToSocket(canvas.current, fabricObject as fabric.Group);
+				socket.current?.emit('create_object', message);
+			}
 		});
 
 		canvas.current.on('object:removed', (e) => {
-			console.log(e);
+			// console.log(e);
 		});
 
 		canvas.current.on('selection:created', (e) => {
 			// todo select 로직
-			console.log(e);
+			// console.log(e);
 
 			openMenu();
 		});
 
 		canvas.current.on('selection:cleared', (e) => {
 			// todo unselect 로직
-			console.log(e);
+			// console.log(e);
 		});
 
 		canvas.current.on('object:moving', (e) => {
 			// todo object update 로직
-			console.log(e);
+			// console.log(e);
 		});
 
 		canvas.current.on('mouse:move', (e) => {
@@ -58,7 +65,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 		canvas.current.on('object:scaling', (e) => {
 			// todo object update 로직
-			console.log(e);
+			// console.log(e);
 		});
 	}, []);
 

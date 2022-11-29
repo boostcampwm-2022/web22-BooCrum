@@ -1,10 +1,12 @@
 import { colorChips } from '@data/workspace-object-color';
+import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 import { v4 } from 'uuid';
 
 export const addSection = (canvas: fabric.Canvas, x: number, y: number) => {
 	canvas.add(
 		new fabric.Rect({
+			type: ObjectType.section,
 			objectId: v4(),
 			left: x,
 			top: y,
@@ -12,49 +14,55 @@ export const addSection = (canvas: fabric.Canvas, x: number, y: number) => {
 			width: 400,
 			height: 500,
 			objectCaching: false,
+			isSocketObject: false,
 		})
 	);
 };
 
-const createNameLabel = (id: string, text: string, x: number, y: number) => {
+export const createNameLabel = (id: string, text: string, x: number, y: number) => {
 	const defaultLeft = x + 10;
 	const defaultTop = y + 275;
 	const defaultFontSize = 15;
 
 	const nameLabelText = new fabric.Text(text, {
+		type: ObjectType.nameText,
 		objectId: id,
 		top: defaultTop,
 		left: defaultLeft,
 		fontSize: defaultFontSize,
 		objectCaching: false,
+		isSocketObject: false,
 	});
 
 	return nameLabelText;
 };
 
-const createRect = (id: string, x: number, y: number, fill: string) => {
+export const createRect = (id: string, x: number, y: number, fill: string) => {
 	const defaultWidth = 300;
 	const defaultHeight = 300;
 
 	const rect = new fabric.Rect({
 		objectId: id,
+		type: ObjectType.rect,
 		left: x,
 		top: y,
 		fill: fill,
 		width: defaultWidth,
 		height: defaultHeight,
 		objectCaching: false,
+		isSocketObject: false,
 	});
 
 	return rect;
 };
 
-const createTextBox = (id: string, x: number, y: number, fontSize: number) => {
+export const createTextBox = (id: string, x: number, y: number, fontSize: number, defaultText = 'Text...') => {
 	const defaultTop = y + 10;
 	const defaultLeft = x + 10;
 	const defaultWidth = 280;
 
-	const textbox = new fabric.Textbox('Text...', {
+	const textbox = new fabric.Textbox(defaultText, {
+		type: ObjectType.text,
 		top: defaultTop,
 		left: defaultLeft,
 		objectId: id,
@@ -62,12 +70,13 @@ const createTextBox = (id: string, x: number, y: number, fontSize: number) => {
 		objectCaching: false,
 		splitByGrapheme: true,
 		fontSize: fontSize,
+		isSocketObject: false,
 	});
 
 	return textbox;
 };
 
-const createPostIt = (
+export const createPostIt = (
 	id: string,
 	x: number,
 	y: number,
@@ -77,15 +86,17 @@ const createPostIt = (
 ) => {
 	const postit = new fabric.Group([backgroundRect, textBox, nameLabel], {
 		objectId: id,
+		type: ObjectType.postit,
 		left: x,
 		top: y,
 		objectCaching: false,
+		isSocketObject: false,
 	});
 
 	return postit;
 };
 
-const setLimitHeightEvent = (canvas: fabric.Canvas, textBox: fabric.Textbox, backgroundRect: fabric.Rect) => {
+export const setLimitHeightEvent = (canvas: fabric.Canvas, textBox: fabric.Textbox, backgroundRect: fabric.Rect) => {
 	const handler = (e: fabric.IEvent<Event>) => {
 		if (!textBox.height || !textBox.fontSize || !backgroundRect.height) return;
 		while (textBox.getScaledHeight() > backgroundRect.getScaledHeight() - 50 && textBox.fontSize > 12) {
@@ -97,7 +108,7 @@ const setLimitHeightEvent = (canvas: fabric.Canvas, textBox: fabric.Textbox, bac
 	textBox.on('changed', handler);
 };
 
-const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, textBox: fabric.Textbox) => {
+export const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, textBox: fabric.Textbox) => {
 	const id = postit.objectId;
 
 	const ungrouping = (items: fabric.Object[], activeObject: fabric.Group) => {
@@ -124,7 +135,7 @@ const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, textBox
 				canvas.remove(obj);
 			}
 		});
-		const grp = new fabric.Group(items, { objectId: id });
+		const grp = new fabric.Group(items, { objectId: id, type: ObjectType.postit, isSocketObject: false });
 		canvas.add(grp);
 
 		grp.on('mousedblclick', () => {
@@ -138,7 +149,7 @@ const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, textBox
 	});
 };
 
-const setPreventResizeEvent = (canvas: fabric.Canvas) => {
+export const setPreventResizeEvent = (canvas: fabric.Canvas) => {
 	canvas.on('object:scaling', (e) => {
 		if (!(e.target instanceof fabric.Group)) return;
 		const objs = e.target._objects;

@@ -1,12 +1,55 @@
-import { ObjectDataFromServer, MemberInCanvas, UserMousePointer } from '@pages/workspace/whiteboard-canvas/types';
+import {
+	ObjectDataFromServer,
+	MemberInCanvas,
+	UserMousePointer,
+	ObjectType,
+} from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
+import {
+	createNameLabel,
+	createPostIt,
+	createRect,
+	createTextBox,
+	setLimitHeightEvent,
+	setPostItEditEvent,
+	setPreventResizeEvent,
+} from './object.utils';
 
 export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
-	const rect = new fabric.Rect({
-		...newObject,
+	if (newObject.type === ObjectType.postit) {
+		console.log('asd');
+		createPostitFromServer(canvas, newObject);
+	}
+};
+
+export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
+	const { objectId, left, top, fontSize, color, text, width, height } = newObject;
+	if (!left || !top || !fontSize || !color || !text || !width || !height) return;
+	const nameLabel = createNameLabel(objectId, 'NAME', left, top);
+	const textBox = createTextBox(objectId, left, top, fontSize, text);
+	const backgroundRect = createRect(objectId, left, top, color);
+	backgroundRect.set({
+		width,
+		height,
+		isSocketObject: true,
+	});
+	textBox.set({
+		width,
+		height,
+		isSocketObject: true,
+	});
+	nameLabel.set({
+		isSocketObject: true,
 	});
 
-	canvas.add(rect);
+	const postit = createPostIt(objectId, left, top, textBox, nameLabel, backgroundRect);
+	postit.set({
+		isSocketObject: true,
+	});
+	setLimitHeightEvent(canvas, textBox, backgroundRect);
+	setPostItEditEvent(canvas, postit, textBox);
+	setPreventResizeEvent(canvas);
+	canvas.add(postit);
 };
 
 export const deleteObjectFromServer = (canvas: fabric.Canvas, objectId: string) => {
