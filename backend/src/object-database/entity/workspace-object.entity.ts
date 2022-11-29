@@ -34,18 +34,16 @@ export class WorkspaceObject {
   top: number;
 
   @Column({
-    name: 'scale_x',
-    type: 'double',
+    type: 'int',
     nullable: false,
   })
-  scaleX: number;
+  width: number;
 
   @Column({
-    name: 'scale_y',
-    type: 'double',
+    type: 'int',
     nullable: false,
   })
-  scaleY: number;
+  height: number;
 
   @Column({
     type: 'varchar',
