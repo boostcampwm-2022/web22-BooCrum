@@ -75,6 +75,19 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	object[0].set({
 		...updatedObject,
 	});
+
+	if (object[0].type === ObjectType.postit) {
+		const groupObject = object[0] as fabric.Group;
+		groupObject._objects.forEach((object) => {
+			if (object.type === ObjectType.text && updatedObject.text && updatedObject.fontSize) {
+				const textObject = object as fabric.Text;
+				textObject.set({
+					text: updatedObject.text,
+					fontSize: updatedObject.fontSize,
+				});
+			}
+		});
+	}
 };
 
 export const createCursorObject = (color: string) => {

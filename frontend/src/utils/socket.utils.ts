@@ -74,6 +74,17 @@ export const formatScalingObjectEventToSocket = (object: fabric.Object): ObjectD
 	return message;
 };
 
+export const formatEditTextEventToSocket = (object: fabric.Text): ObjectDataToServer => {
+	// scaling 추가
+	const message: ObjectDataToServer = {
+		objectId: object.objectId,
+		text: object.text,
+		fontSize: object.fontSize,
+	};
+
+	return message;
+};
+
 export const formatMessageFromSocket = (objectDataFromServer: ObjectDataFromServer): CanvasObject => {
 	// todo type을 명성님이 만든 객체 class에 맞춰서 사용할지 말지 결정
 	const canvasObject: CanvasObject = {

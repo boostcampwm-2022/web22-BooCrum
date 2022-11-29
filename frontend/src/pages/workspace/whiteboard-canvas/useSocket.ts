@@ -90,7 +90,6 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			if (!canvas.current) return;
 			if (isMessageByMe(arg.creator)) return;
 			createObjectFromServer(canvas.current, arg);
-			//todo object 추가
 		});
 
 		socket.current.on('delete_object', ({ objectId }) => {
@@ -100,6 +99,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('update_object', ({ userId, objectData }) => {
 			if (!canvas.current) return;
 			if (isMessageByMe(userId)) return;
+			console.log(objectData);
 			updateObjectFromServer(canvas.current, objectData);
 		});
 

@@ -6,6 +6,7 @@ import useEditMenu from './useEditMenu';
 import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import {
 	formatCreatePostitEventToSocket,
+	formatEditTextEventToSocket,
 	formatMoveObjectEventToSocket,
 	formatScalingObjectEventToSocket,
 } from '@utils/socket.utils';
@@ -29,6 +30,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				editedObjectId.current = '';
 				return;
 			}
+			console.log(fabricObject);
 
 			if (fabricObject.type === ObjectType.postit) {
 				const message = formatCreatePostitEventToSocket(fabricObject as fabric.Group);
@@ -39,6 +41,12 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 		canvas.current.on('object:removed', (e) => {
 			// console.log(e);
+		});
+
+		canvas.current.on('text:changed', ({ target }) => {
+			if (!target || target.type !== ObjectType.text) return;
+			const message = formatEditTextEventToSocket(target as fabric.Text);
+			socket.current?.emit('update_object', message);
 		});
 
 		canvas.current.on('text:editing:entered', ({ target }) => {
