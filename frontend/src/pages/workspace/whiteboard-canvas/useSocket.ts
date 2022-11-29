@@ -80,8 +80,11 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('leave_user', ({ userId }) => {
 			setMembers((prev) => prev.filter((user) => user.userId !== userId));
 			membersInCanvas.current = membersInCanvas.current.filter((memberInCanvas) => {
-				canvas.current?.remove(memberInCanvas.cursorObject);
-				return memberInCanvas.userId !== userId;
+				if (memberInCanvas.userId === userId) {
+					canvas.current?.remove(memberInCanvas.cursorObject);
+					return false;
+				}
+				return true;
 			});
 		});
 
