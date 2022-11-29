@@ -13,6 +13,12 @@ export class UpdateObjectDTO {
   top: number;
 
   @IsNumber()
+  width: number;
+
+  @IsNumber()
+  height: number;
+
+  @IsNumber()
   @IsOptional()
   scaleX: number;
 

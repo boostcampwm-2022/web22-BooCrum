@@ -14,6 +14,12 @@ export class CreateObjectDTO {
   top: number;
 
   @IsNumber()
+  width: number;
+
+  @IsNumber()
+  height: number;
+
+  @IsNumber()
   scaleX: number;
 
   @IsNumber()
