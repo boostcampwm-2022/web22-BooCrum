@@ -16,6 +16,7 @@ function UserList() {
 	const handleDetailUser = (member: Member) => {
 		setSelectedMember(member);
 	};
+	console.log(members);
 
 	return (
 		<>
