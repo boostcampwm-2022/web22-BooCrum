@@ -23,18 +23,15 @@ export const formatMessageToSocket = (canvas: fabric.Canvas, object: fabric.Obje
 	return message;
 };
 
-export const formatPostitToSocket = (canvas: fabric.Canvas, objectGroup: fabric.Group): ObjectDataToServer => {
+export const formatPostitToSocket = (objectGroup: fabric.Group): ObjectDataToServer => {
 	// todo fabric.Object -> text 포함된 타입으로 변경 필요
 	const message: ObjectDataToServer = {
-		type: canvas.mode as ObjectType,
+		type: ObjectType.postit,
 		objectId: v4(),
 		left: objectGroup.left,
 		top: objectGroup.top,
 		width: objectGroup.width,
 		height: objectGroup.height,
-		// color: object.fill as string,
-		// text: '',
-		// fontSize: 12,
 	};
 
 	objectGroup._objects.forEach((object) => {
