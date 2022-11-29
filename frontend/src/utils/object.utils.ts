@@ -88,7 +88,7 @@ const createPostIt = (
 const setLimitHeightEvent = (canvas: fabric.Canvas, textBox: fabric.Textbox, backgroundRect: fabric.Rect) => {
 	const handler = (e: fabric.IEvent<Event>) => {
 		if (!textBox.height || !textBox.fontSize || !backgroundRect.height) return;
-		while (textBox.height > backgroundRect.height - 50 && textBox.fontSize > 12) {
+		while (textBox.getScaledHeight() > backgroundRect.getScaledHeight() - 50 && textBox.fontSize > 12) {
 			textBox.fontSize--;
 			canvas.renderAll();
 		}
@@ -146,10 +146,11 @@ const setPreventResizeEvent = (canvas: fabric.Canvas) => {
 		objs.forEach((obj) => {
 			if (obj instanceof fabric.Textbox || obj instanceof fabric.Text) {
 				const group = e.target;
-				const tmp = (group?.getScaledWidth() || 1) - 20 * (group?.scaleX || 1);
+				const width = (group?.getScaledWidth() || 1) - 20 * (group?.scaleX || 1);
 				const scaleX = 1 / (group?.scaleX || 1);
 				const scaleY = 1 / (group?.scaleY || 1);
-				obj.set({ scaleX: scaleX, scaleY: scaleY, width: tmp });
+				obj.set({ scaleX: scaleX, scaleY: scaleY, width: width });
+				obj.fire('changed');
 			}
 		});
 	});
