@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Socket } from 'socket.io-client';
 import { ServerToClientEvents, ClientToServerEvents, MousePointer } from './types';
 import { useEffect } from 'react';
@@ -16,16 +17,19 @@ interface UseCanvasToSocketProps {
 
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 	const { isOpen, menuRef, openMenu, menuPosition } = useEditMenu(canvas);
-
+	const editedObjectId = useRef<string>('');
 	useEffect(() => {
 		if (!canvas.current) return;
 
 		canvas.current.on('object:added', (e) => {
 			if (!e.target || !canvas.current) return;
-			if (e.target.isSocketObject) return;
-
 			const fabricObject = e.target;
-			console.log(fabricObject);
+			if (fabricObject.isSocketObject) return;
+			if (fabricObject.objectId === editedObjectId.current) {
+				editedObjectId.current = '';
+				return;
+			}
+
 			if (fabricObject.type === ObjectType.postit) {
 				const message = formatCreatePostitEventToSocket(fabricObject as fabric.Group);
 				console.log('emit', message);
@@ -35,6 +39,11 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 		canvas.current.on('object:removed', (e) => {
 			// console.log(e);
+		});
+
+		canvas.current.on('text:editing:entered', ({ target }) => {
+			if (!target) return;
+			editedObjectId.current = target.objectId;
 		});
 
 		canvas.current.on('selection:created', (e) => {
