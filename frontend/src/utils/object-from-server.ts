@@ -1,7 +1,7 @@
-import { CanvasObject, MemberInCanvas, UserMousePointer } from '@pages/workspace/whiteboard-canvas/types';
+import { ObjectDataFromServer, MemberInCanvas, UserMousePointer } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 
-export const createObjectFromServer = (canvas: fabric.Canvas, newObject: CanvasObject) => {
+export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
 	const rect = new fabric.Rect({
 		...newObject,
 	});

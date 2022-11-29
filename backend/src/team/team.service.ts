@@ -4,10 +4,10 @@ import { DataSource, DeleteResult, InsertResult, Repository, UpdateResult } from
 import { Team } from './entity/team.entity';
 import { TeamMember } from './entity/team-member.entity';
 import { IsTeam } from './enum/is-team.enum';
-import { Role } from './enum/role.enum';
 import { TeamDTO } from './dto/team.dto';
 import { User } from '../user/entity/user.entity';
 import { UserService } from 'src/user/user.service';
+import { TEAM_ROLE } from 'src/util/constant/role.constant';
 
 @Injectable()
 export class TeamService {
@@ -24,7 +24,7 @@ export class TeamService {
   async createUser({ userId }: User): Promise<any> {
     const team = await this.teamRepository.save(new Team(`${userId}`, IsTeam.USER));
     const user = await this.userService.findUser(userId);
-    const teamMember = new TeamMember(user, team, Role.ADMIN);
+    const teamMember = new TeamMember(user, team, TEAM_ROLE.ADMIN);
     this.insertTeamMember(team.teamId, teamMember);
     return team;
   }
@@ -33,7 +33,7 @@ export class TeamService {
   async createTeam(teamDTO: TeamDTO): Promise<any> {
     const team = await this.teamRepository.save(new Team(teamDTO.name, IsTeam.TEAM, teamDTO.description));
     const user = await this.userService.findUser(teamDTO.userId);
-    const teamMember = new TeamMember(user, team, Role.ADMIN);
+    const teamMember = new TeamMember(user, team, TEAM_ROLE.ADMIN);
     this.insertTeamMember(team.teamId, teamMember);
     return team;
   }

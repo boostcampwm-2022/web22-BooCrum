@@ -4,11 +4,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { TeamMember } from '../team/entity/team-member.entity';
 import { Team } from '../team/entity/team.entity';
 import { IsTeam } from 'src/team/enum/is-team.enum';
-import { Role } from 'src/team/enum/role.enum';
 import { WorkspaceMember } from '../workspace/entity/workspace-member.entity';
 import { Repository, DataSource } from 'typeorm';
 import { UserDto } from './dto/user.dto';
 import { User } from './entity/user.entity';
+import { TEAM_ROLE } from 'src/util/constant/role.constant';
 
 @Injectable()
 export class UserService {
@@ -40,7 +40,7 @@ export class UserService {
     newUser.nickname = newUserDto.nickname;
 
     const userTeam = new Team(newUserDto.userId, IsTeam.USER);
-    const userTeamMember = new TeamMember(newUser, userTeam, Role.ADMIN);
+    const userTeamMember = new TeamMember(newUser, userTeam, TEAM_ROLE.ADMIN);
 
     // 오류 상황으로 일부만 완료되는 상황이 생길 경우를 고려하여, Transaction으로 처리한다.
     const queryRunner = this.dataSource.createQueryRunner();
@@ -74,7 +74,7 @@ export class UserService {
     }
 
     // 존재하면 Update를 진행한다.
-    delete newData.userId, newData.registerDate;
+    delete newData.userId, delete newData.registerDate;
     const res = await this.userRepository.update({ userId }, newData);
 
     if (res.affected !== 0)

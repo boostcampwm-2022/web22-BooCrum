@@ -1,5 +1,5 @@
 import { Member, UserMousePointer, MousePointer } from './workspace-member.types';
-import { CanvasObject, UpdatedObject } from './workspace-object.types';
+import { ObjectDataFromServer, ObjectDataToServer } from './workspace-object.types';
 import { AllWorkspaceData } from './workspace.types';
 
 export interface ServerToClientEvents {
@@ -11,16 +11,16 @@ export interface ServerToClientEvents {
 	move_pointer: (arg: UserMousePointer) => void;
 	select_object: (arg: { userId: string; objectId: string }) => void;
 	unselect_object: (arg: { userId: string; objectId: string }) => void;
-	create_object: (arg: { objectData: CanvasObject }) => void;
+	create_object: (arg: { objectData: ObjectDataFromServer }) => void;
 	delete_object: (arg: { objectId: string }) => void;
-	update_object: (arg: { objectData: CanvasObject }) => void;
+	update_object: (arg: { objectData: ObjectDataFromServer }) => void;
 }
 
 export interface ClientToServerEvents {
 	move_pointer: (arg: MousePointer) => void;
 	select_object: (arg: { objectId: string }) => void;
 	unselect_object: (arg: { objectId: string }) => void;
-	create_object: (arg: { objectData: CanvasObject }) => void;
+	create_object: (arg: { objectData: ObjectDataToServer }) => void;
 	delete_object: (arg: { objectId: string }) => void;
-	update_object: (arg: UpdatedObject) => void;
+	update_object: (arg: ObjectDataToServer) => void;
 }

@@ -1,25 +1,33 @@
-export interface UpdatedObject {
+export interface CanvasObject {
 	objectId: string;
-	x?: number;
-	y?: number;
+	type?: ObjectType;
+	left?: number;
+	top?: number;
 	width?: number;
 	height?: number;
-	backgroundColor?: string;
-	createdBy?: string;
+	fill?: string;
 	text?: string;
+	fontSize?: number;
 }
 
-export interface CanvasObject {
-	type: CanvasType;
+export interface ObjectDataToServer {
+	type: ObjectType;
 	objectId: string;
-	xPos?: number;
-	yPos?: number;
+	left?: number;
+	top?: number;
 	width?: number;
 	height?: number;
 	color?: string;
-	creator?: string;
 	text?: string;
+	fontSize?: number;
 }
+
+export interface ObjectDataFromServer extends ObjectDataToServer {
+	creator: string;
+	workspaceId: string;
+}
+
+export type ObjectType = 'postit' | 'section' | 'draw';
 
 export const CanvasType = {
 	postit: 'postit',

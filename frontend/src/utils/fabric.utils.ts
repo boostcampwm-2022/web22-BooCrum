@@ -1,4 +1,3 @@
-import { CanvasObject, MemberInCanvas, UserMousePointer } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
