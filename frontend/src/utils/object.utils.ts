@@ -1,10 +1,12 @@
 import { colorChips } from '@data/workspace-object-color';
+import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 import { v4 } from 'uuid';
 
 export const addSection = (canvas: fabric.Canvas, x: number, y: number) => {
 	canvas.add(
 		new fabric.Rect({
+			type: ObjectType.section,
 			objectId: v4(),
 			left: x,
 			top: y,
@@ -38,6 +40,7 @@ const createRect = (id: string, x: number, y: number, fill: string) => {
 
 	const rect = new fabric.Rect({
 		objectId: id,
+		type: ObjectType.rect,
 		left: x,
 		top: y,
 		fill: fill,
@@ -77,6 +80,7 @@ const createPostIt = (
 ) => {
 	const postit = new fabric.Group([backgroundRect, textBox, nameLabel], {
 		objectId: id,
+		type: ObjectType.postit,
 		left: x,
 		top: y,
 		objectCaching: false,
@@ -124,7 +128,7 @@ const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, textBox
 				canvas.remove(obj);
 			}
 		});
-		const grp = new fabric.Group(items, { objectId: id });
+		const grp = new fabric.Group(items, { objectId: id, type: ObjectType.postit });
 		canvas.add(grp);
 
 		grp.on('mousedblclick', () => {
