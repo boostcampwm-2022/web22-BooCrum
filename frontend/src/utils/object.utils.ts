@@ -2,18 +2,12 @@ import { colorChips } from '@data/workspace-object-color';
 import { fabric } from 'fabric';
 import { v4 } from 'uuid';
 
-export const addSection = (canvas: fabric.Canvas, x: number, y: number) => {
-	canvas.add(
-		new fabric.Rect({
-			objectId: v4(),
-			left: x,
-			top: y,
-			fill: colorChips[0],
-			width: 400,
-			height: 500,
-			objectCaching: false,
-		})
-	);
+export const setEditMenu = (object: fabric.Object) => {
+	const width = object?.width || 0;
+	const top = object?.top ? object.top - 50 : 0;
+	const left = object?.left ? object.left + width / 2 : 0;
+
+	return [left, top];
 };
 
 const createNameLabel = (id: string, text: string, x: number, y: number) => {
@@ -138,18 +132,25 @@ const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, textBox
 	});
 };
 
-const setPreventResizeEvent = (canvas: fabric.Canvas) => {
+const setPreventResizeEvent = (canvas: fabric.Canvas, backgroundRect: fabric.Rect) => {
 	canvas.on('object:scaling', (e) => {
 		if (!(e.target instanceof fabric.Group)) return;
 		const objs = e.target._objects;
+		const rect = backgroundRect;
 
 		objs.forEach((obj) => {
 			if (obj instanceof fabric.Textbox || obj instanceof fabric.Text) {
 				const group = e.target;
-				const width = (group?.getScaledWidth() || 1) - 20 * (group?.scaleX || 1);
+				const width = (group?.getScaledWidth() || 0) - 20 * (group?.scaleX || 1);
+
 				const scaleX = 1 / (group?.scaleX || 1);
 				const scaleY = 1 / (group?.scaleY || 1);
-				obj.set({ scaleX: scaleX, scaleY: scaleY, width: width });
+				obj.set({
+					scaleX: scaleX,
+					scaleY: scaleY,
+					width: width,
+					left: (rect?.get('left') || 0) + 10,
+				});
 				obj.fire('changed');
 			}
 		});
@@ -165,15 +166,23 @@ export const addPostIt = (canvas: fabric.Canvas, x: number, y: number, fontSize:
 
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
 	setPostItEditEvent(canvas, postit, textBox);
-	setPreventResizeEvent(canvas);
+	setPreventResizeEvent(canvas, backgroundRect);
 
 	canvas.add(postit);
 };
 
-export const setEditMenu = (object: fabric.Object) => {
-	const width = object?.width || 0;
-	const top = object?.top ? object.top - 50 : 0;
-	const left = object?.left ? object.left + width / 2 : 0;
+// Section
 
-	return [left, top];
+export const addSection = (canvas: fabric.Canvas, x: number, y: number) => {
+	canvas.add(
+		new fabric.Rect({
+			objectId: v4(),
+			left: x,
+			top: y,
+			fill: colorChips[0],
+			width: 400,
+			height: 500,
+			objectCaching: false,
+		})
+	);
 };
