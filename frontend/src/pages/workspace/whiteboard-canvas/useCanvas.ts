@@ -73,7 +73,7 @@ function useCanvas() {
 		initZoom(fabricCanvas, setZoom);
 		initDragPanning(fabricCanvas);
 		initWheelPanning(fabricCanvas);
-		addObject(fabricCanvas);
+		addObject(fabricCanvas, 'NAME');
 		deleteObject(fabricCanvas);
 		setObjectIndexLeveling(fabricCanvas);
 

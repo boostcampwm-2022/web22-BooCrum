@@ -101,7 +101,7 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 	});
 };
 
-export const addObject = (canvas: fabric.Canvas) => {
+export const addObject = (canvas: fabric.Canvas, creator: string) => {
 	//todo 색 정보 받아와야함
 	canvas.on('mouse:down', function (opt) {
 		const evt = opt.e;
@@ -112,7 +112,7 @@ export const addObject = (canvas: fabric.Canvas) => {
 		if (canvas.mode === 'section' && !canvas.getActiveObject()) {
 			addSection(canvas, x, y, colorChips[8]);
 		} else if (canvas.mode === 'postit' && !canvas.getActiveObject()) {
-			addPostIt(canvas, x, y, 40, colorChips[0]);
+			addPostIt(canvas, x, y, 40, colorChips[0], creator);
 		}
 	});
 };

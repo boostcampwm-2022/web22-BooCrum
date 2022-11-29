@@ -10,14 +10,14 @@ export const setEditMenu = (object: fabric.Object) => {
 	return [left, top];
 };
 
-export const createNameLabel = (id: string, text: string, x: number, y: number) => {
-	const defaultLeft = x + 10;
-	const defaultTop = y + 275;
+export const createNameLabel = (options: NameLabelOptions) => {
+	const defaultLeft = options.left + 10;
+	const defaultTop = options.top + 275;
 	const defaultFontSize = 15;
 
-	const nameLabelText = new fabric.Text(text, {
+	const nameLabelText = new fabric.Text(options.text || '', {
 		type: ObjectType.nameText,
-		objectId: id,
+		objectId: options.objectId,
 		top: defaultTop,
 		left: defaultLeft,
 		fontSize: defaultFontSize,
@@ -28,16 +28,16 @@ export const createNameLabel = (id: string, text: string, x: number, y: number) 
 	return nameLabelText;
 };
 
-export const createRect = (id: string, x: number, y: number, fill: string) => {
+export const createRect = (options: RectOptions) => {
 	const defaultWidth = 300;
 	const defaultHeight = 300;
 
 	const rect = new fabric.Rect({
-		objectId: id,
+		objectId: options.objectId,
 		type: ObjectType.rect,
-		left: x,
-		top: y,
-		fill: fill,
+		left: options.left,
+		top: options.top,
+		fill: options.color,
 		width: defaultWidth,
 		height: defaultHeight,
 		objectCaching: false,
@@ -47,39 +47,33 @@ export const createRect = (id: string, x: number, y: number, fill: string) => {
 	return rect;
 };
 
-export const createTextBox = (id: string, x: number, y: number, fontSize: number, defaultText = 'Text...') => {
-	const defaultTop = y + 10;
-	const defaultLeft = x + 10;
+export const createTextBox = (options: TextBoxOptions) => {
+	const defaultTop = options.top + 10;
+	const defaultLeft = options.left + 10;
 	const defaultWidth = 280;
+	const defaultText = 'Text...';
 
-	const textbox = new fabric.Textbox(defaultText, {
+	const textbox = new fabric.Textbox(options.text || defaultText, {
 		type: ObjectType.text,
 		top: defaultTop,
 		left: defaultLeft,
-		objectId: id,
+		objectId: options.objectId,
 		width: defaultWidth,
 		objectCaching: false,
 		splitByGrapheme: true,
-		fontSize: fontSize,
+		fontSize: options.fontSize,
 		isSocketObject: false,
 	});
 
 	return textbox;
 };
 
-export const createPostIt = (
-	id: string,
-	x: number,
-	y: number,
-	textBox: fabric.Textbox,
-	nameLabel: fabric.Text,
-	backgroundRect: fabric.Rect
-) => {
-	const postit = new fabric.Group([backgroundRect, textBox, nameLabel], {
-		objectId: id,
+export const createPostIt = (options: PostItOptions) => {
+	const postit = new fabric.Group([options.backgroundRect, options.textBox, options.nameLabel], {
+		objectId: options.objectId,
 		type: ObjectType.postit,
-		left: x,
-		top: y,
+		left: options.left,
+		top: options.top,
 		objectCaching: false,
 		isSocketObject: false,
 	});
@@ -170,12 +164,26 @@ export const setPreventResizeEvent = (id: string, canvas: fabric.Canvas, backgro
 	});
 };
 
-export const addPostIt = (canvas: fabric.Canvas, x: number, y: number, fontSize: number, fill: string) => {
+export const addPostIt = (
+	canvas: fabric.Canvas,
+	x: number,
+	y: number,
+	fontSize: number,
+	fill: string,
+	creator: string
+) => {
 	const id = v4();
-	const nameLabel = createNameLabel(id, 'NAME', x, y);
-	const textBox = createTextBox(id, x, y, fontSize);
-	const backgroundRect = createRect(id, x, y, fill);
-	const postit = createPostIt(id, x, y, textBox, nameLabel, backgroundRect);
+	const nameLabel = createNameLabel({ objectId: id, text: creator, left: x, top: y });
+	const textBox = createTextBox({ objectId: id, left: x, top: y, fontSize: 40 });
+	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
+	const postit = createPostIt({
+		objectId: id,
+		left: x,
+		top: y,
+		textBox: textBox,
+		nameLabel: nameLabel,
+		backgroundRect: backgroundRect,
+	});
 
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
 	setObjectEditEvent(canvas, postit, textBox);
@@ -186,14 +194,14 @@ export const addPostIt = (canvas: fabric.Canvas, x: number, y: number, fontSize:
 
 // Section
 
-export const createSectionTitle = (id: string, text: string, x: number, y: number) => {
-	const defaultLeft = x + 10;
-	const defaultTop = y - 25;
+export const createSectionTitle = (options: SectionTitleOptions) => {
+	const defaultLeft = options.left + 10;
+	const defaultTop = options.top - 25;
 	const defaultFontSize = 15;
 
-	const title = new fabric.IText(text, {
+	const title = new fabric.IText(options.text || 'SECTION', {
 		type: ObjectType.title,
-		objectId: id,
+		objectId: options.objectId,
 		top: defaultTop,
 		left: defaultLeft,
 		fontSize: defaultFontSize,
@@ -204,37 +212,30 @@ export const createSectionTitle = (id: string, text: string, x: number, y: numbe
 	return title;
 };
 
-export const createSection = (
-	id: string,
-	x: number,
-	y: number,
-	sectionTitle: fabric.IText,
-	titleBackground: fabric.Rect,
-	backgroundRect: fabric.Rect
-) => {
-	const section = new fabric.Group([backgroundRect, titleBackground, sectionTitle], {
+export const createSection = (options: SectionOption) => {
+	const section = new fabric.Group([options.backgroundRect, options.titleBackground, options.sectionTitle], {
 		type: ObjectType.section,
 		isSocketObject: false,
-		objectId: id,
-		left: x,
-		top: y,
+		objectId: options.objectId,
+		left: options.left,
+		top: options.top,
 		objectCaching: false,
 	});
 	return section;
 };
 
-export const createTitleBackground = (id: string, x: number, y: number, fill: string) => {
+export const createTitleBackground = (options: TitleBackgroundOptions) => {
 	const defaultWidth = 70;
 	const defaultHeight = 20;
-	const defaultLeft = x + 7;
-	const defaultTop = y - 25;
+	const defaultLeft = options.left + 7;
+	const defaultTop = options.top - 25;
 
 	const rect = new fabric.Rect({
 		type: ObjectType.rect,
-		objectId: id,
+		objectId: options.objectId,
 		left: defaultLeft,
 		top: defaultTop,
-		fill: fill,
+		fill: options.color,
 		width: defaultWidth,
 		height: defaultHeight,
 		objectCaching: false,
@@ -261,10 +262,17 @@ export const setLimitChar = (canvas: fabric.Canvas, title: fabric.IText, backgro
 
 export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: string) => {
 	const id = v4();
-	const sectionTitle = createSectionTitle(id, 'SECTION', x, y);
-	const sectionBackground = createTitleBackground(id, x, y, fill);
-	const backgroundRect = createRect(id, x, y, fill);
-	const section = createSection(id, x, y, sectionTitle, sectionBackground, backgroundRect);
+	const sectionTitle = createSectionTitle({ objectId: id, text: 'SECTION', left: x, top: y });
+	const sectionBackground = createTitleBackground({ objectId: id, left: x, top: y, color: fill });
+	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
+	const section = createSection({
+		objectId: id,
+		left: x,
+		top: y,
+		sectionTitle,
+		titleBackground: sectionBackground,
+		backgroundRect,
+	});
 
 	setObjectEditEvent(canvas, section, sectionTitle);
 	setLimitChar(canvas, sectionTitle, sectionBackground);
