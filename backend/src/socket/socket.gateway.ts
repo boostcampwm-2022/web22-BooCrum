@@ -118,6 +118,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     try {
       const userData = this.dataManagementService.deleteUserData(client);
       if (userData) client.nsp.emit('leave_user', { userId: userData.userId });
+      if (!userData) return;
       if (!userData.isGuest) {
         const res = await this.dbAccessService.renewUpdateDateOfMember(userData.userId, userData.workspaceId);
         if (!res)
@@ -138,14 +139,14 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('select_object')
-  async selectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
+  async selectObject(@MessageBody('objectId') objectId: string | string[], @ConnectedSocket() socket: Socket) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('select_object', { objectId, userId: userData.userId });
   }
 
   @SubscribeMessage('unselect_object')
-  async unselectObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
+  async unselectObject(@MessageBody('objectId') objectId: string | string[], @ConnectedSocket() socket: Socket) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('unselect_object', { objectId, userId: userData.userId });
