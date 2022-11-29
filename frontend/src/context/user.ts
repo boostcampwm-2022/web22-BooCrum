@@ -16,3 +16,8 @@ export const userProfileState = selector({
 		return await User.getProfile();
 	},
 });
+
+export const myInfoInWorkspaceState = atom({
+	key: 'infoInWorkspace',
+	default: { userId: '', nickname: '', color: '', role: 0 },
+});
