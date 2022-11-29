@@ -201,7 +201,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       // 수정을 시도하고, 성공하면 이를 전달한다.
       const ret = await this.objectHandlerService.updateObject(userData.workspaceId, objectData);
       if (!ret) throw new WsException('수정 실패');
-      socket.nsp.emit('update_object', objectData);
+      socket.nsp.emit('update_object', { userId: userData.userId, objectData });
     } catch (e) {
       this.logger.error(e);
       throw new WsException(e.message);
