@@ -92,6 +92,15 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     // 5. Socket 이벤트 Emit
     client.emit('init', { members, objects, userData });
     client.nsp.emit('enter_user', userData);
+
+    // 6. 접속 시 updateDate 갱신
+    if (!userMapVO.isGuest) {
+      const res = await this.dbAccessService.renewUpdateDateOfMember(userMapVO.userId, userMapVO.workspaceId);
+      if (!res)
+        this.logger.error(
+          `멤버 최종 updateDate 갱신 실패 (워크스페이스 ID: ${userMapVO.workspaceId}, 유저 ID: ${userMapVO.userId})`,
+        );
+    }
   }
 
   /**
