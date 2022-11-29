@@ -16,54 +16,113 @@ export const addSection = (canvas: fabric.Canvas, x: number, y: number) => {
 	);
 };
 
-export const addPostIt = (canvas: fabric.Canvas, x: number, y: number) => {
-	const id = v4();
+const createNameLabel = (id: string, text: string, x: number, y: number) => {
+	const defaultLeft = x + 10;
+	const defaultTop = y + 275;
+	const defaultFontSize = 15;
 
-	const nameLabel = new fabric.Text('name', {
-		top: y + 275,
-		left: x + 10,
+	const nameLabelText = new fabric.Text(text, {
 		objectId: id,
-		width: 280,
+		top: defaultTop,
+		left: defaultLeft,
+		fontSize: defaultFontSize,
 		objectCaching: false,
-		fontSize: 15,
 	});
-	const textbox = new fabric.Textbox('Text...', {
-		top: y + 10,
-		left: x + 10,
+
+	return nameLabelText;
+};
+
+const createRect = (id: string, x: number, y: number, fill: string) => {
+	const defaultWidth = 300;
+	const defaultHeight = 300;
+
+	const rect = new fabric.Rect({
 		objectId: id,
-		width: 280,
+		left: x,
+		top: y,
+		fill: fill,
+		width: defaultWidth,
+		height: defaultHeight,
+		objectCaching: false,
+	});
+
+	return rect;
+};
+
+const createTextBox = (id: string, x: number, y: number, fontSize: number) => {
+	const defaultTop = y + 10;
+	const defaultLeft = x + 10;
+	const defaultWidth = 280;
+
+	const textbox = new fabric.Textbox('Text...', {
+		top: defaultTop,
+		left: defaultLeft,
+		objectId: id,
+		width: defaultWidth,
 		objectCaching: false,
 		splitByGrapheme: true,
-		fontSize: 40,
+		fontSize: fontSize,
 	});
 
-	const backgroundRect = new fabric.Rect({
+	return textbox;
+};
+
+interface PostItArg {
+	textBox: fabric.Textbox;
+	nameLabel: fabric.Text;
+	backgroundRect: fabric.Rect;
+}
+
+const createPostIt = (
+	id: string,
+	x: number,
+	y: number,
+	textBox: fabric.Textbox,
+	nameLabel: fabric.Text,
+	backgroundRect: fabric.Rect
+) => {
+	const postit = new fabric.Group([backgroundRect, textBox, nameLabel], {
 		objectId: id,
 		left: x,
 		top: y,
-		fill: colorChips[0],
-		width: 300,
-		height: 300,
 		objectCaching: false,
 	});
 
-	const postit = new fabric.Group([backgroundRect, textbox, nameLabel], {
-		objectId: id,
-		left: x,
-		top: y,
-		objectCaching: false,
-	});
+	return postit;
+};
 
-	textbox.on('changed', (e) => {
-		if (!textbox.height || !textbox.fontSize || !backgroundRect.height) return;
-		while (textbox.height > backgroundRect.height - 50 && textbox.fontSize > 12) {
-			textbox.fontSize--;
+const setLimitHeightEvent = (canvas: fabric.Canvas, textBox: fabric.Textbox, backgroundRect: fabric.Rect) => {
+	const handler = (e: fabric.IEvent<Event>) => {
+		if (!textBox.height || !textBox.fontSize || !backgroundRect.height) return;
+		while (textBox.height > backgroundRect.height - 50 && textBox.fontSize > 12) {
+			textBox.fontSize--;
 			canvas.renderAll();
 		}
-	});
+	};
 
-	textbox.on('editing:exited', () => {
-		console.log('editing:exited');
+	textBox.on('changed', handler);
+};
+
+const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, textBox: fabric.Textbox) => {
+	const id = postit.objectId;
+
+	const ungrouping = (items: fabric.Object[], activeObject: fabric.Group) => {
+		activeObject._restoreObjectsState();
+		canvas.remove(activeObject);
+		for (let i = 0; i < items.length; i++) {
+			canvas.add(items[i]);
+			items[i].lockMovementX = true;
+			items[i].lockMovementY = true;
+		}
+
+		if (items[1] instanceof fabric.Textbox) {
+			canvas.setActiveObject(items[1]);
+			items[1].enterEditing();
+			items[1].selectAll();
+		}
+	};
+
+	textBox.on('editing:exited', () => {
 		const items: fabric.Object[] = [];
 		canvas.forEachObject(function (obj) {
 			if (obj.objectId == id) {
@@ -74,46 +133,26 @@ export const addPostIt = (canvas: fabric.Canvas, x: number, y: number) => {
 		const grp = new fabric.Group(items, { objectId: id });
 		canvas.add(grp);
 
-		grp.on('mousedblclick', (e) => {
-			console.log(grp.objectId);
-			const activeObject = grp;
-			if (activeObject instanceof fabric.Group) {
-				const items = activeObject._objects;
-				activeObject._restoreObjectsState();
-				canvas.remove(activeObject);
-				console.log(items);
-				for (let i = 0; i < items.length; i++) {
-					canvas.add(items[i]);
-					items[i].lockMovementX = true;
-					items[i].lockMovementY = true;
-				}
-			}
-			if (items[1] instanceof fabric.Textbox) {
-				canvas.setActiveObject(items[1]);
-				items[1].enterEditing();
-				items[1].selectAll();
-			}
+		grp.on('mousedblclick', () => {
+			ungrouping(items, grp);
 		});
 	});
 
-	postit.on('mousedblclick', (e) => {
-		const activeObject = postit;
-		if (activeObject instanceof fabric.Group) {
-			const items = activeObject._objects;
-			activeObject._restoreObjectsState();
-			canvas.remove(activeObject);
-			for (let i = 0; i < items.length; i++) {
-				canvas.add(items[i]);
-				items[i].lockMovementX = true;
-				items[i].lockMovementY = true;
-			}
-			if (items[1] instanceof fabric.Textbox) {
-				canvas.setActiveObject(items[1]);
-				items[1].enterEditing();
-				items[1].selectAll();
-			}
-		}
+	postit.on('mousedblclick', () => {
+		const items = postit._objects;
+		ungrouping(items, postit);
 	});
+};
+
+export const addPostIt = (canvas: fabric.Canvas, x: number, y: number, fontSize: number, fill: string) => {
+	const id = v4();
+	const nameLabel = createNameLabel(id, 'NAME', x, y);
+	const textBox = createTextBox(id, x, y, fontSize);
+	const backgroundRect = createRect(id, x, y, fill);
+	const postit = createPostIt(id, x, y, textBox, nameLabel, backgroundRect);
+
+	setLimitHeightEvent(canvas, textBox, backgroundRect);
+	setPostItEditEvent(canvas, postit, textBox);
 
 	canvas.add(postit);
 };

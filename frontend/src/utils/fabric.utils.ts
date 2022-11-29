@@ -107,7 +107,8 @@ export const addObject = (canvas: fabric.Canvas) => {
 		if (canvas.mode === 'section' && !canvas.getActiveObject()) {
 			addSection(canvas, x, y);
 		} else if (canvas.mode === 'postit' && !canvas.getActiveObject()) {
-			addPostIt(canvas, x, y);
+			//todo 색 정보 받아와야함
+			addPostIt(canvas, x, y, 40, 'pink');
 		}
 	});
 };
