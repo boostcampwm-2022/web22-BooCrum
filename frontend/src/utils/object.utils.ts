@@ -1,5 +1,6 @@
 import { colorChips } from '@data/workspace-object-color';
 import { fabric } from 'fabric';
+import { title } from 'process';
 import { v4 } from 'uuid';
 
 export const setEditMenu = (object: fabric.Object) => {
@@ -91,8 +92,12 @@ const setLimitHeightEvent = (canvas: fabric.Canvas, textBox: fabric.Textbox, bac
 	textBox.on('changed', handler);
 };
 
-const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, textBox: fabric.Textbox) => {
-	const id = postit.objectId;
+const setObjectEditEvent = (
+	canvas: fabric.Canvas,
+	groupObject: fabric.Group,
+	textBox: fabric.Textbox | fabric.IText
+) => {
+	const id = groupObject.objectId;
 
 	const ungrouping = (items: fabric.Object[], activeObject: fabric.Group) => {
 		activeObject._restoreObjectsState();
@@ -101,12 +106,12 @@ const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, textBox
 			canvas.add(items[i]);
 			items[i].lockMovementX = true;
 			items[i].lockMovementY = true;
-		}
-
-		if (items[1] instanceof fabric.Textbox) {
-			canvas.setActiveObject(items[1]);
-			items[1].enterEditing();
-			items[1].selectAll();
+			const obj = items[i];
+			if (obj instanceof fabric.Textbox || obj instanceof fabric.IText) {
+				canvas.setActiveObject(items[i]);
+				obj.enterEditing();
+				obj.selectAll();
+			}
 		}
 	};
 
@@ -126,20 +131,21 @@ const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, textBox
 		});
 	});
 
-	postit.on('mousedblclick', () => {
-		const items = postit._objects;
-		ungrouping(items, postit);
+	groupObject.on('mousedblclick', () => {
+		const items = groupObject._objects;
+		ungrouping(items, groupObject);
 	});
 };
 
-const setPreventResizeEvent = (canvas: fabric.Canvas, backgroundRect: fabric.Rect) => {
+const setPreventResizeEvent = (id: string, canvas: fabric.Canvas, backgroundRect: fabric.Rect) => {
 	canvas.on('object:scaling', (e) => {
+		if (e.target?.objectId !== id) return;
 		if (!(e.target instanceof fabric.Group)) return;
 		const objs = e.target._objects;
 		const rect = backgroundRect;
 
 		objs.forEach((obj) => {
-			if (obj instanceof fabric.Textbox || obj instanceof fabric.Text) {
+			if (obj instanceof fabric.Textbox || obj instanceof fabric.IText) {
 				const group = e.target;
 				const width = (group?.getScaledWidth() || 0) - 20 * (group?.scaleX || 1);
 
@@ -165,24 +171,91 @@ export const addPostIt = (canvas: fabric.Canvas, x: number, y: number, fontSize:
 	const postit = createPostIt(id, x, y, textBox, nameLabel, backgroundRect);
 
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
-	setPostItEditEvent(canvas, postit, textBox);
-	setPreventResizeEvent(canvas, backgroundRect);
+	setObjectEditEvent(canvas, postit, textBox);
+	setPreventResizeEvent(id, canvas, backgroundRect);
 
 	canvas.add(postit);
 };
 
 // Section
 
+const createSectionTitle = (id: string, text: string, x: number, y: number) => {
+	const defaultLeft = x + 10;
+	const defaultTop = y - 25;
+	const defaultFontSize = 15;
+
+	const title = new fabric.IText(text, {
+		objectId: id,
+		top: defaultTop,
+		left: defaultLeft,
+		fontSize: defaultFontSize,
+		objectCaching: false,
+	});
+
+	return title;
+};
+
+const createSection = (
+	id: string,
+	x: number,
+	y: number,
+	sectionTitle: fabric.IText,
+	titleBackground: fabric.Rect,
+	backgroundRect: fabric.Rect
+) => {
+	const section = new fabric.Group([backgroundRect, titleBackground, sectionTitle], {
+		objectId: id,
+		left: x,
+		top: y,
+		objectCaching: false,
+	});
+	return section;
+};
+
+const createTitleBackground = (id: string, x: number, y: number, fill: string) => {
+	const defaultWidth = 70;
+	const defaultHeight = 20;
+	const defaultLeft = x + 7;
+	const defaultTop = y - 25;
+
+	const rect = new fabric.Rect({
+		objectId: id,
+		left: defaultLeft,
+		top: defaultTop,
+		fill: fill,
+		width: defaultWidth,
+		height: defaultHeight,
+		objectCaching: false,
+		rx: 10,
+		ry: 10,
+	});
+
+	return rect;
+};
+
+const setLimitChar = (canvas: fabric.Canvas, title: fabric.IText, background: fabric.Rect) => {
+	title.on('editing:entered', () => {
+		title.hiddenTextarea?.setAttribute('maxlength', '15');
+	});
+	const group = title.group;
+	if (!group) return;
+	title.on('changed', (e) => {
+		console.log(group);
+		background.set({ width: (title.get('width') || 0) + 10 });
+		canvas.renderAll();
+	});
+};
+
 export const addSection = (canvas: fabric.Canvas, x: number, y: number) => {
-	canvas.add(
-		new fabric.Rect({
-			objectId: v4(),
-			left: x,
-			top: y,
-			fill: colorChips[0],
-			width: 400,
-			height: 500,
-			objectCaching: false,
-		})
-	);
+	const id = v4();
+	const sectionTitle = createSectionTitle(id, 'SECTION', x, y);
+	const sectionBackground = createTitleBackground(id, x, y, 'pink');
+	const backgroundRect = createRect(id, x, y, 'MediumSlateBlue');
+	const section = createSection(id, x, y, sectionTitle, sectionBackground, backgroundRect);
+
+	setObjectEditEvent(canvas, section, sectionTitle);
+	setLimitChar(canvas, sectionTitle, sectionBackground);
+	section.sendBackwards(true);
+
+	canvas.add(section);
 };

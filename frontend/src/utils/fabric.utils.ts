@@ -117,7 +117,7 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 	const objectDeleteHandler = (e: KeyboardEvent) => {
 		if (e.key === 'Backspace') {
 			canvas.getActiveObjects().forEach((obj) => {
-				if (obj instanceof fabric.Textbox) {
+				if (obj instanceof fabric.Textbox || obj instanceof fabric.IText) {
 					return;
 				}
 				canvas.remove(obj);
