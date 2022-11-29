@@ -9,13 +9,13 @@ import ToastMessage from '@components/toast-message';
 
 function ShareModal({ id, modalRef, closeModal }: ShareModalProps) {
 	const [email, setEmail] = useState('');
-	const [participant, setParticipant] = useState<ParticipantInfo[]>([]);
+	const [currentParticipant, setCurrentParticipant] = useState<ParticipantInfo[]>([]);
 	const [openToast, setOpenToast] = useState(false);
 
 	useEffect(() => {
 		async function getParticipant() {
 			const participant = await Workspace.getWorkspaceParticipant(id);
-			setParticipant(participant);
+			setCurrentParticipant(participant);
 		}
 
 		getParticipant();
@@ -44,7 +44,7 @@ function ShareModal({ id, modalRef, closeModal }: ShareModalProps) {
 			</Invite>
 
 			<ParticipantList>
-				{participant.map((part) => (
+				{currentParticipant.map((part) => (
 					<div key={part.id} className="participant-box">
 						<img alt="participant profile" src={userProfile} className="participant-profile" />
 						<p className="participant-name">{part.user.nickname}</p>

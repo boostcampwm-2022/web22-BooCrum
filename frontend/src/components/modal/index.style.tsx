@@ -20,5 +20,5 @@ export const ModalBackground = styled.div`
 	top: 0;
 	left: 0;
 	background-color: rgba(16, 16, 16, 0.3);
-	z-index: 2;
+	z-index: 5;
 `;
