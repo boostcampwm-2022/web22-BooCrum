@@ -11,7 +11,7 @@ import {
 	createRect,
 	createTextBox,
 	setLimitHeightEvent,
-	setPostItEditEvent,
+	setObjectEditEvent,
 	setPreventResizeEvent,
 } from './object.utils';
 
@@ -47,8 +47,8 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 		isSocketObject: true,
 	});
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
-	setPostItEditEvent(canvas, postit, textBox);
-	setPreventResizeEvent(canvas);
+	setObjectEditEvent(canvas, postit, textBox);
+	setPreventResizeEvent(postit.objectId, canvas, backgroundRect);
 	canvas.add(postit);
 };
 

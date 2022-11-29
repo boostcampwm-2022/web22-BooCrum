@@ -1,4 +1,5 @@
 import { colorChips } from '@data/workspace-object-color';
+import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
@@ -140,8 +141,7 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 
 export const setObjectIndexLeveling = (canvas: fabric.Canvas) => {
 	canvas.on('object:added', (e) => {
-		const postits = canvas._objects.filter((obj) => obj.type === 'postit');
-		console.log(postits);
+		const postits = canvas._objects.filter((obj) => obj.type === ObjectType.postit);
 
 		postits.forEach((obj) => {
 			obj.bringToFront();

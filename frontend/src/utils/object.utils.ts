@@ -76,7 +76,6 @@ export const createPostIt = (
 	backgroundRect: fabric.Rect
 ) => {
 	const postit = new fabric.Group([backgroundRect, textBox, nameLabel], {
-		type: 'postit',
 		objectId: id,
 		type: ObjectType.postit,
 		left: x,
@@ -100,7 +99,7 @@ export const setLimitHeightEvent = (canvas: fabric.Canvas, textBox: fabric.Textb
 	textBox.on('changed', handler);
 };
 
-const setObjectEditEvent = (
+export const setObjectEditEvent = (
 	canvas: fabric.Canvas,
 	groupObject: fabric.Group,
 	textBox: fabric.Textbox | fabric.IText
@@ -187,23 +186,25 @@ export const addPostIt = (canvas: fabric.Canvas, x: number, y: number, fontSize:
 
 // Section
 
-const createSectionTitle = (id: string, text: string, x: number, y: number) => {
+export const createSectionTitle = (id: string, text: string, x: number, y: number) => {
 	const defaultLeft = x + 10;
 	const defaultTop = y - 25;
 	const defaultFontSize = 15;
 
 	const title = new fabric.IText(text, {
+		type: ObjectType.title,
 		objectId: id,
 		top: defaultTop,
 		left: defaultLeft,
 		fontSize: defaultFontSize,
+		isSocketObject: false,
 		objectCaching: false,
 	});
 
 	return title;
 };
 
-const createSection = (
+export const createSection = (
 	id: string,
 	x: number,
 	y: number,
@@ -212,7 +213,8 @@ const createSection = (
 	backgroundRect: fabric.Rect
 ) => {
 	const section = new fabric.Group([backgroundRect, titleBackground, sectionTitle], {
-		type: 'section',
+		type: ObjectType.section,
+		isSocketObject: false,
 		objectId: id,
 		left: x,
 		top: y,
@@ -221,13 +223,14 @@ const createSection = (
 	return section;
 };
 
-const createTitleBackground = (id: string, x: number, y: number, fill: string) => {
+export const createTitleBackground = (id: string, x: number, y: number, fill: string) => {
 	const defaultWidth = 70;
 	const defaultHeight = 20;
 	const defaultLeft = x + 7;
 	const defaultTop = y - 25;
 
 	const rect = new fabric.Rect({
+		type: ObjectType.rect,
 		objectId: id,
 		left: defaultLeft,
 		top: defaultTop,
@@ -235,6 +238,7 @@ const createTitleBackground = (id: string, x: number, y: number, fill: string) =
 		width: defaultWidth,
 		height: defaultHeight,
 		objectCaching: false,
+		isSocketObject: false,
 		rx: 10,
 		ry: 10,
 	});
@@ -242,7 +246,7 @@ const createTitleBackground = (id: string, x: number, y: number, fill: string) =
 	return rect;
 };
 
-const setLimitChar = (canvas: fabric.Canvas, title: fabric.IText, background: fabric.Rect) => {
+export const setLimitChar = (canvas: fabric.Canvas, title: fabric.IText, background: fabric.Rect) => {
 	title.on('editing:entered', () => {
 		title.hiddenTextarea?.setAttribute('maxlength', '15');
 	});
