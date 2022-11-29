@@ -81,6 +81,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		socket.current.on('create_object', (arg) => {
 			if (!canvas.current) return;
+			if (isMessageByMe(arg.creator)) return;
 			createObjectFromServer(canvas.current, arg);
 			//todo object 추가
 		});
