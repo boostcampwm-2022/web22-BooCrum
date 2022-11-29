@@ -5,6 +5,7 @@ import Toolkit from './toolkit';
 import { useEffect } from 'react';
 import Loading from '@components/loading';
 import useAuth from '@hooks/useAuth';
+import Layout from './layout';
 
 function Workspace() {
 	const { isLoading, authenticate } = useAuth();
@@ -24,8 +25,7 @@ function Workspace() {
 
 	return (
 		<>
-			<Header workspaceId={workspaceId} />
-			<Toolkit />
+			<Layout workspaceId={workspaceId} />
 			<WhiteboardCanvas></WhiteboardCanvas>
 		</>
 	);
