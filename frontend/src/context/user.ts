@@ -1,6 +1,7 @@
 import { ProfileData } from '@api/user.types';
 import { atom, selector } from 'recoil';
 import { User } from '@api/user';
+import { workspaceRole } from '@data/workspace-role';
 
 export const authState = atom({
 	key: 'auth',
@@ -19,5 +20,5 @@ export const userProfileState = selector({
 
 export const myInfoInWorkspaceState = atom({
 	key: 'infoInWorkspace',
-	default: { userId: '', nickname: '', color: '', role: 2 },
+	default: { userId: '', nickname: '', color: '', role: workspaceRole.GUEST },
 });

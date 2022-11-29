@@ -1,13 +1,11 @@
 import { WhiteboardCanvasLayout } from './index.style';
 import useCanvas from './useCanvas';
 import useSocket from './useSocket';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
 import ContextMenu from '@components/context-menu';
 import ObjectEditMenu from '../object-edit-menu';
 import { colorChips } from '@data/workspace-object-color';
-import { toolItems } from '@data/workspace-tool';
-import { useRecoilState, useRecoilValue } from 'recoil';
-import { cursorState } from '@context/workspace';
+import { useRecoilValue } from 'recoil';
 import useCanvasToSocket from './useCanvasToSocket';
 import { myInfoInWorkspaceState } from '@context/user';
 import { workspaceRole } from '@data/workspace-role';
@@ -17,30 +15,7 @@ function WhiteboardCanvas() {
 	const { socket } = useSocket(canvas);
 
 	const { isOpen, menuRef, menuPosition } = useCanvasToSocket({ canvas, socket });
-	const [cursor, setCursor] = useRecoilState(cursorState);
 	const myInfoInWorkspace = useRecoilValue(myInfoInWorkspaceState);
-
-	useEffect(() => {
-		if (!canvas.current) return;
-
-		const fabricCanvas = canvas.current as fabric.Canvas;
-		if (myInfoInWorkspace.role === workspaceRole.GUEST) {
-			if (cursor.type !== toolItems.MOVE) setCursor({ ...cursor, type: toolItems.MOVE });
-			fabricCanvas.defaultCursor = 'grab';
-			fabricCanvas.selection = false;
-		} else {
-			if (cursor.type === toolItems.MOVE) {
-				fabricCanvas.defaultCursor = 'grab';
-				fabricCanvas.selection = false;
-			} else if (cursor.type === toolItems.SECTION || cursor.type === toolItems.POST_IT) {
-				fabricCanvas.defaultCursor = 'context-menu';
-				fabricCanvas.selection = true;
-			} else {
-				fabricCanvas.defaultCursor = 'default';
-				fabricCanvas.selection = true;
-			}
-		}
-	}, [cursor, myInfoInWorkspace]);
 
 	// object color 수정 초안
 	const [color, setColor] = useState(colorChips[0]); // 나중에 선택된 object의 color로 대체 예정

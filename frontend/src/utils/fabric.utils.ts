@@ -1,5 +1,5 @@
 import { colorChips } from '@data/workspace-object-color';
-import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
+import { ObjectType, CanvasType } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
@@ -54,7 +54,7 @@ export const initZoom = (
 export const initDragPanning = (canvas: fabric.Canvas) => {
 	canvas.on('mouse:down', function (opt) {
 		const evt = opt.e;
-		if (canvas.mode === 'move') {
+		if (canvas.mode === CanvasType.move) {
 			canvas.defaultCursor = 'grabbing';
 			canvas.isDragging = true;
 			canvas.lastPosX = evt.clientX;
@@ -78,7 +78,7 @@ export const initDragPanning = (canvas: fabric.Canvas) => {
 	canvas.on('mouse:up', function (opt) {
 		if (canvas.viewportTransform) canvas.setViewportTransform(canvas.viewportTransform);
 
-		if (canvas.mode === 'move') {
+		if (canvas.mode === CanvasType.move) {
 			canvas.defaultCursor = 'grab';
 			canvas.isDragging = false;
 		}
@@ -109,10 +109,11 @@ export const addObject = (canvas: fabric.Canvas, creator: string) => {
 		if (!vpt) return;
 		const x = (evt.clientX - vpt[4]) / vpt[3];
 		const y = (evt.clientY - vpt[5]) / vpt[3];
-		if (canvas.mode === 'section' && !canvas.getActiveObject()) {
-			addSection(canvas, x, y, colorChips[8]);
-		} else if (canvas.mode === 'postit' && !canvas.getActiveObject()) {
-			addPostIt(canvas, x, y, 40, colorChips[0], creator);
+		if (canvas.mode === CanvasType.section && !canvas.getActiveObject()) {
+			addSection(canvas, x, y);
+		} else if (canvas.mode === CanvasType.postit && !canvas.getActiveObject()) {
+			//todo 색 정보 받아와야함
+			addPostIt(canvas, x, y, 40, 'pink');
 		}
 	});
 };
@@ -147,4 +148,10 @@ export const setObjectIndexLeveling = (canvas: fabric.Canvas) => {
 			obj.bringToFront();
 		});
 	});
+};
+
+export const setCursorMode = (canvas: fabric.Canvas, cursor: string, mode: CanvasType, selectable: boolean) => {
+	canvas.defaultCursor = cursor;
+	canvas.mode = mode;
+	canvas.forEachObject((obj) => (obj.selectable = selectable));
 };
