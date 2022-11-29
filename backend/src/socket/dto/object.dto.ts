@@ -14,10 +14,10 @@ export class ObjectDTO {
   top: number;
 
   @IsNumber()
-  width: number;
+  scaleX: number;
 
   @IsNumber()
-  height: number;
+  scaleY: number;
 
   @IsString()
   color: string;
