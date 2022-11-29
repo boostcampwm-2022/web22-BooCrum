@@ -20,6 +20,8 @@ export interface ObjectDataToServer {
 	color?: string;
 	text?: string;
 	fontSize?: number;
+	scaleX?: number;
+	scaleY?: number;
 }
 
 export interface ObjectDataFromServer extends ObjectDataToServer {

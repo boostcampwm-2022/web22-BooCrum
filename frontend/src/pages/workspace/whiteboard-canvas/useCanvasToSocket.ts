@@ -3,7 +3,11 @@ import { ServerToClientEvents, ClientToServerEvents, MousePointer } from './type
 import { useEffect } from 'react';
 import useEditMenu from './useEditMenu';
 import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
-import { formatCreatePostitEventToSocket, formatMoveObjectEventToSocket } from '@utils/socket.utils';
+import {
+	formatCreatePostitEventToSocket,
+	formatMoveObjectEventToSocket,
+	formatScalingObjectEventToSocket,
+} from '@utils/socket.utils';
 
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
@@ -45,7 +49,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		});
 
 		canvas.current.on('object:moving', ({ target }) => {
-			// todo object update 로직
 			if (!target) return;
 			const message = formatMoveObjectEventToSocket(target);
 			socket.current?.emit('update_object', message);
@@ -67,9 +70,11 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			socket.current?.emit('move_pointer', message);
 		});
 
-		canvas.current.on('object:scaling', (e) => {
-			// todo object update 로직
-			// console.log(e);
+		canvas.current.on('object:scaling', ({ target }) => {
+			console.log(target);
+			if (!target) return;
+			const message = formatScalingObjectEventToSocket(target);
+			socket.current?.emit('update_object', message);
 		});
 	}, []);
 

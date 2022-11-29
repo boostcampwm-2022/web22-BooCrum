@@ -60,17 +60,19 @@ export const formatMoveObjectEventToSocket = (object: fabric.Object): ObjectData
 	return message;
 };
 
-// export const formatMoveObjectEventToSocket = (object: fabric.Object): ObjectDataToServer => {
-// 	// todo fabric.Object -> text 포함된 타입으로 변경 필요
-// 	const message: ObjectDataToServer = {
-// 		type: object.type,
-// 		objectId: object.objectId,
-// 		left: object.left,
-// 		top: object.top,
-// 	};
+export const formatScalingObjectEventToSocket = (object: fabric.Object): ObjectDataToServer => {
+	// scaling 추가
+	const message: ObjectDataToServer = {
+		type: object.type,
+		objectId: object.objectId,
+		width: object.width,
+		height: object.height,
+		// scaleX: object.scaleX,
+		// scaleY: object.scaleY,
+	};
 
-// 	return message;
-// };
+	return message;
+};
 
 export const formatMessageFromSocket = (objectDataFromServer: ObjectDataFromServer): CanvasObject => {
 	// todo type을 명성님이 만든 객체 class에 맞춰서 사용할지 말지 결정
