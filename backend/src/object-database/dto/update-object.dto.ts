@@ -14,11 +14,11 @@ export class UpdateObjectDTO {
 
   @IsNumber()
   @IsOptional()
-  width: number;
+  scaleX: number;
 
   @IsNumber()
   @IsOptional()
-  height: number;
+  scaleY: number;
 
   @IsString()
   @IsOptional()
