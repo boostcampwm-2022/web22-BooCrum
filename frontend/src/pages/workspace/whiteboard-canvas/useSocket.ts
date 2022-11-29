@@ -5,7 +5,12 @@ import { ClientToServerEvents, Member, MemberInCanvas, ServerToClientEvents } fr
 import { useRecoilState } from 'recoil';
 import { membersState } from '@context/workspace';
 import { fabric } from 'fabric';
-import { createCursorObject, createObjectFromServer, moveCursorFromServer } from '@utils/object-from-server';
+import {
+	createCursorObject,
+	createObjectFromServer,
+	moveCursorFromServer,
+	updateObjectFromServer,
+} from '@utils/object-from-server';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	// 자신의 정보 role을 이용해 작업하기 위해 생성
@@ -66,6 +71,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		socket.current.on('move_pointer', (userMousePointer) => {
 			if (!canvas.current) return;
+			if (isMessageByMe(userMousePointer.userId)) return;
 			moveCursorFromServer(membersInCanvas.current, userMousePointer);
 
 			canvas.current.renderAll();
@@ -80,6 +86,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('create_object', (arg) => {
+			console.log(arg);
 			if (!canvas.current) return;
 			if (isMessageByMe(arg.creator)) return;
 			createObjectFromServer(canvas.current, arg);
@@ -90,8 +97,10 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			// todo object 삭제
 		});
 
-		socket.current.on('update_object', ({ objectData }) => {
-			//todo object 업데이트
+		socket.current.on('update_object', ({ userId, objectData }) => {
+			if (!canvas.current) return;
+			if (isMessageByMe(userId)) return;
+			updateObjectFromServer(canvas.current, objectData);
 		});
 
 		return () => {

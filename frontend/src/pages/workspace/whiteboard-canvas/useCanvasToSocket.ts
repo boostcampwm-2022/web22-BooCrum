@@ -48,7 +48,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			// todo object update 로직
 			if (!target) return;
 			const message = formatMoveObjectEventToSocket(target);
-			console.log(message);
 			socket.current?.emit('update_object', message);
 		});
 
