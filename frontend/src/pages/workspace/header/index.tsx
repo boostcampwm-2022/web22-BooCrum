@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import LeftSide from '../left-side';
 import RightSide from '../right-side';
 import { Container } from './index.style';
@@ -25,4 +25,4 @@ function Header({ workspaceId, openShareModal }: HeaderProps) {
 	);
 }
 
-export default Header;
+export default React.memo(Header);
