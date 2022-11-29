@@ -5,7 +5,7 @@ import { ClientToServerEvents, Member, MemberInCanvas, ServerToClientEvents } fr
 import { useRecoilState } from 'recoil';
 import { membersState } from '@context/workspace';
 import { fabric } from 'fabric';
-import { createCursorObject, moveCursorFromServer } from '@utils/object-from-server';
+import { createCursorObject, createObjectFromServer, moveCursorFromServer } from '@utils/object-from-server';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	// 자신의 정보 role을 이용해 작업하기 위해 생성
@@ -59,6 +59,10 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			console.log('leave_user');
 		});
 
+		socket.current.on('exception', (arg) => {
+			console.log(arg);
+		});
+
 		socket.current.on('move_pointer', (userMousePointer) => {
 			if (!canvas.current) return;
 			moveCursorFromServer(membersInCanvas.current, userMousePointer);
@@ -74,7 +78,10 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			//todo unselect 업데아트
 		});
 
-		socket.current.on('create_object', ({ objectData }) => {
+		socket.current.on('create_object', (arg) => {
+			console.log('event');
+			if (!canvas.current) return;
+			createObjectFromServer(canvas.current, arg);
 			//todo object 추가
 		});
 
