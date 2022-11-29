@@ -67,12 +67,6 @@ const createTextBox = (id: string, x: number, y: number, fontSize: number) => {
 	return textbox;
 };
 
-interface PostItArg {
-	textBox: fabric.Textbox;
-	nameLabel: fabric.Text;
-	backgroundRect: fabric.Rect;
-}
-
 const createPostIt = (
 	id: string,
 	x: number,
@@ -144,6 +138,23 @@ const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, textBox
 	});
 };
 
+const setPreventResizeEvent = (canvas: fabric.Canvas) => {
+	canvas.on('object:scaling', (e) => {
+		if (!(e.target instanceof fabric.Group)) return;
+		const objs = e.target._objects;
+
+		objs.forEach((obj) => {
+			if (obj instanceof fabric.Textbox || obj instanceof fabric.Text) {
+				const group = e.target;
+				const tmp = (group?.getScaledWidth() || 1) - 20 * (group?.scaleX || 1);
+				const scaleX = 1 / (group?.scaleX || 1);
+				const scaleY = 1 / (group?.scaleY || 1);
+				obj.set({ scaleX: scaleX, scaleY: scaleY, width: tmp });
+			}
+		});
+	});
+};
+
 export const addPostIt = (canvas: fabric.Canvas, x: number, y: number, fontSize: number, fill: string) => {
 	const id = v4();
 	const nameLabel = createNameLabel(id, 'NAME', x, y);
@@ -153,6 +164,7 @@ export const addPostIt = (canvas: fabric.Canvas, x: number, y: number, fontSize:
 
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
 	setPostItEditEvent(canvas, postit, textBox);
+	setPreventResizeEvent(canvas);
 
 	canvas.add(postit);
 };
