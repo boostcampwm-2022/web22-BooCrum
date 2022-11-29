@@ -12,5 +12,5 @@ export class UserDto {
     allowNaN: false,
     allowInfinity: false,
   })
-  registerDate?: number;
+  registerDate?: Date;
 }
