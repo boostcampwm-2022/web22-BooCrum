@@ -33,8 +33,8 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 			});
 		}
 		return workspaceList.sort((a, b) => {
-			if (orderType === 1) return compareStringByMillisecond(a.workspace.updateDate, b.workspace.updateDate);
-			else if (orderType === 2) return compareStringByMillisecond(a.workspace.registerDate, b.workspace.registerDate);
+			if (orderType === 0) return compareStringByMillisecond(a.workspace.updateDate, b.workspace.updateDate);
+			else if (orderType === 1) return compareStringByMillisecond(a.workspace.registerDate, b.workspace.registerDate);
 			else return a.workspace.name < b.workspace.name ? -1 : 1;
 		});
 	}

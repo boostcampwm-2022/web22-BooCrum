@@ -1,34 +1,20 @@
-import { Container } from './index.style';
-import userProfileImage from '@assets/icon/user-profile.svg';
-
-const users = [
-	{
-		id: 13,
-		role: 2,
-		updateDate: '2022-11-21T05:52:22.000Z',
-		user: {
-			userId: '52180188',
-			nickname: 'tori209',
-			registerDate: '2022-11-16T07:38:44.000Z',
-		},
-	},
-	{
-		id: 12,
-		role: 2,
-		updateDate: '2022-11-21T05:52:22.000Z',
-		user: {
-			userId: '52180188',
-			nickname: 'tori2',
-			registerDate: '2022-11-16T07:38:44.000Z',
-		},
-	},
-];
+import { Container, UserDetail, UserInfo } from './index.style';
+import { useRecoilValue } from 'recoil';
+import { membersState } from '@context/workspace';
+import userIcon from '@assets/icon/user-icon.svg';
 
 function UserList() {
+	const members = useRecoilValue(membersState);
+
 	return (
 		<Container>
-			{users.slice(0, 5).map((user) => (
-				<img key={user.id} alt="user profile" className="user-profile" src={userProfileImage} />
+			{members.slice(0, 5).map((member) => (
+				<UserInfo key={member.userId} color={member.color}>
+					<div className="user-profile">
+						<img alt="user profile" className="user-icon" src={userIcon} />
+					</div>
+					<UserDetail>{member.nickname}</UserDetail>
+				</UserInfo>
 			))}
 		</Container>
 	);

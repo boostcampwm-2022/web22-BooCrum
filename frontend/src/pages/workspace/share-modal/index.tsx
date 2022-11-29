@@ -14,8 +14,8 @@ function ShareModal({ id, modalRef, closeModal }: ShareModalProps) {
 
 	useEffect(() => {
 		async function getParticipant() {
-			const participant = await Workspace.getWorkspaceParticipant(id);
-			setParticipant(participant);
+			const result = await Workspace.getWorkspaceParticipant(id);
+			setParticipant(result);
 		}
 
 		getParticipant();
