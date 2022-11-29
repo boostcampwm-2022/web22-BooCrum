@@ -12,6 +12,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { AuthorizationGuard } from 'src/auth/guard/session.guard';
+import { TEAM_ROLE } from 'src/util/constant/role.constant';
 import { TeamDTO } from './dto/team.dto';
 import { TeamMember } from './entity/team-member.entity';
 import { Team } from './entity/team.entity';
@@ -75,7 +76,7 @@ export class TeamController {
   ): Promise<boolean> {
     const user = await this.teamService.findTeamMember(teamId, session.user.userId);
     if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
-    if (user.role < 1) new BadRequestException(`해당 권한이 없습니다.`);
+    if (user.role < TEAM_ROLE.ADMIN) new BadRequestException(`해당 권한이 없습니다.`);
     team.teamId = teamId;
     return await this.teamService.updateTeam(team);
   }
@@ -90,7 +91,7 @@ export class TeamController {
   ): Promise<boolean> {
     const user = await this.teamService.findTeamMember(teamId, session.user.userId);
     if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
-    if (user.role < 2) new BadRequestException(`해당 권한이 없습니다.`);
+    if (user.role < TEAM_ROLE.ADMIN) new BadRequestException(`해당 권한이 없습니다.`);
     teamMember.team = await this.teamService.findTeam(teamId);
     return await this.teamService.updateTeamMember(teamId, teamMember);
   }
@@ -105,7 +106,7 @@ export class TeamController {
   ): Promise<boolean> {
     const user = await this.teamService.findTeamMember(teamId, session.user.userId);
     if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
-    if (user.role < 2) new BadRequestException(`해당 권한이 없습니다.`);
+    if (user.role < TEAM_ROLE.ADMIN) new BadRequestException(`해당 권한이 없습니다.`);
     return await this.teamService.deleteTeamMember(teamId, userId);
   }
 
@@ -115,7 +116,7 @@ export class TeamController {
   async delteTeam(@Session() session: Record<string, any>, @Param('teamId') teamId: number): Promise<boolean> {
     const user = await this.teamService.findTeamMember(teamId, session.user.userId);
     if (!user) throw new BadRequestException(`해당 팀에 대한 권한이 없습니다.`);
-    if (user.role < 2) new BadRequestException(`해당 권한이 없습니다.`);
+    if (user.role < TEAM_ROLE.ADMIN) new BadRequestException(`해당 권한이 없습니다.`);
     return await this.teamService.deleteTeam(teamId);
   }
 }
