@@ -42,7 +42,18 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('init', ({ members, objects, userData }) => {
 			myInfoInWorkspace.current = userData;
 			setMembers(members);
-			//todo: objects 업데이트
+			members.forEach((member) => {
+				if (isMessageByMe(member.userId) === false) {
+					const cursorObject = createCursorObject(member.color);
+					const newMemberInCanvas: MemberInCanvas = {
+						userId: member.userId,
+						color: member.color,
+						cursorObject,
+					};
+					canvas.current?.add(cursorObject);
+					membersInCanvas.current.push(newMemberInCanvas);
+				}
+			});
 		});
 
 		socket.current.on('enter_user', (userData) => {
@@ -61,8 +72,10 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		socket.current.on('leave_user', ({ userId }) => {
 			setMembers((prev) => prev.filter((user) => user.userId !== userId));
-			membersInCanvas.current = membersInCanvas.current.filter((memberInCanvas) => memberInCanvas.userId !== userId);
-			console.log('leave_user');
+			membersInCanvas.current = membersInCanvas.current.filter((memberInCanvas) => {
+				canvas.current?.remove(memberInCanvas.cursorObject);
+				return memberInCanvas.userId !== userId;
+			});
 		});
 
 		socket.current.on('exception', (arg) => {
