@@ -1,3 +1,4 @@
+import { colorChips } from '@data/workspace-object-color';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
@@ -98,6 +99,7 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 };
 
 export const addObject = (canvas: fabric.Canvas) => {
+	//todo 색 정보 받아와야함
 	canvas.on('mouse:down', function (opt) {
 		const evt = opt.e;
 		const vpt = canvas.viewportTransform;
@@ -105,10 +107,9 @@ export const addObject = (canvas: fabric.Canvas) => {
 		const x = (evt.clientX - vpt[4]) / vpt[3];
 		const y = (evt.clientY - vpt[5]) / vpt[3];
 		if (canvas.mode === 'section' && !canvas.getActiveObject()) {
-			addSection(canvas, x, y);
+			addSection(canvas, x, y, colorChips[8]);
 		} else if (canvas.mode === 'postit' && !canvas.getActiveObject()) {
-			//todo 색 정보 받아와야함
-			addPostIt(canvas, x, y, 40, 'pink');
+			addPostIt(canvas, x, y, 40, colorChips[0]);
 		}
 	});
 };
@@ -132,5 +133,16 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 	// object 선택 해제시 이벤트 삭제
 	canvas.on('selection:cleared', () => {
 		document.removeEventListener('keydown', objectDeleteHandler);
+	});
+};
+
+export const setObjectIndexLeveling = (canvas: fabric.Canvas) => {
+	canvas.on('object:added', (e) => {
+		const postits = canvas._objects.filter((obj) => obj.type === 'postit');
+		console.log(postits);
+
+		postits.forEach((obj) => {
+			obj.bringToFront();
+		});
 	});
 };

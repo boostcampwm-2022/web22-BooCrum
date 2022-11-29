@@ -1,6 +1,4 @@
-import { colorChips } from '@data/workspace-object-color';
 import { fabric } from 'fabric';
-import { title } from 'process';
 import { v4 } from 'uuid';
 
 export const setEditMenu = (object: fabric.Object) => {
@@ -71,6 +69,7 @@ const createPostIt = (
 	backgroundRect: fabric.Rect
 ) => {
 	const postit = new fabric.Group([backgroundRect, textBox, nameLabel], {
+		type: 'postit',
 		objectId: id,
 		left: x,
 		top: y,
@@ -204,6 +203,7 @@ const createSection = (
 	backgroundRect: fabric.Rect
 ) => {
 	const section = new fabric.Group([backgroundRect, titleBackground, sectionTitle], {
+		type: 'section',
 		objectId: id,
 		left: x,
 		top: y,
@@ -246,11 +246,11 @@ const setLimitChar = (canvas: fabric.Canvas, title: fabric.IText, background: fa
 	});
 };
 
-export const addSection = (canvas: fabric.Canvas, x: number, y: number) => {
+export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: string) => {
 	const id = v4();
 	const sectionTitle = createSectionTitle(id, 'SECTION', x, y);
-	const sectionBackground = createTitleBackground(id, x, y, 'pink');
-	const backgroundRect = createRect(id, x, y, 'MediumSlateBlue');
+	const sectionBackground = createTitleBackground(id, x, y, fill);
+	const backgroundRect = createRect(id, x, y, fill);
 	const section = createSection(id, x, y, sectionTitle, sectionBackground, backgroundRect);
 
 	setObjectEditEvent(canvas, section, sectionTitle);
