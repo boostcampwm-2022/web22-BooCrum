@@ -34,7 +34,7 @@ export class Team {
     default: () => 'CURRENT_TIMESTAMP()',
     nullable: false,
   })
-  registerDate: number;
+  registerDate: Date;
 
   @OneToMany(() => Workspace, (workspace) => workspace.team)
   workspace: Workspace[];

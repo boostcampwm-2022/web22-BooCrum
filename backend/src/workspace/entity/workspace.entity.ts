@@ -24,7 +24,7 @@ export class Workspace {
     default: () => 'CURRENT_TIMESTAMP()',
     nullable: false,
   })
-  registerDate: number;
+  registerDate: Date;
 
   @Column({
     name: 'update_date',
@@ -32,7 +32,7 @@ export class Workspace {
     default: () => 'CURRENT_TIMESTAMP()',
     nullable: false,
   })
-  updateDate: number;
+  updateDate: Date;
 
   @Column({
     name: 'thumbnail',

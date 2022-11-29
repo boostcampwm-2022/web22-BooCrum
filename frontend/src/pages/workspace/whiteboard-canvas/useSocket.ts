@@ -5,11 +5,11 @@ import { ClientToServerEvents, Member, MemberInCanvas, ServerToClientEvents } fr
 import { useRecoilState } from 'recoil';
 import { membersState } from '@context/workspace';
 import { fabric } from 'fabric';
-import { createCursorObject, moveCursorFromServer } from '@utils/object-from-server';
+import { createCursorObject, createObjectFromServer, moveCursorFromServer } from '@utils/object-from-server';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	// 자신의 정보 role을 이용해 작업하기 위해 생성
-	const [myInfoInWorkspace, setMyInfoInWorkspace] = useState<Member>();
+	const myInfoInWorkspace = useRef<Member>();
 	const [members, setMembers] = useRecoilState(membersState);
 
 	const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
@@ -17,6 +17,10 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [isConnected, setIsConnected] = useState(false);
 
 	const { workspaceId } = useParams();
+
+	const isMessageByMe = (userId: string) => {
+		return myInfoInWorkspace.current?.userId === userId;
+	};
 
 	useEffect(() => {
 		socket.current = io(`/workspace/${workspaceId}`);
@@ -31,20 +35,17 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('init', ({ members, objects, userData }) => {
-			setMyInfoInWorkspace(userData);
+			myInfoInWorkspace.current = userData;
 			setMembers(members);
-			console.log('socket init');
 			//todo: objects 업데이트
 		});
 
 		socket.current.on('enter_user', (userData) => {
-			console.log(userData);
-			console.log('enter_user');
+			if (isMessageByMe(userData.userId)) return;
 			setMembers((prev) => [...prev, userData]);
 			const cursorObject = createCursorObject(userData.color);
 
 			const newMemberInCanvas: MemberInCanvas = {
-				// 임시 color 추후 서버에서 보내 줌
 				userId: userData.userId,
 				color: userData.color,
 				cursorObject,
@@ -57,6 +58,10 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			setMembers((prev) => prev.filter((user) => user.userId !== userId));
 			membersInCanvas.current = membersInCanvas.current.filter((memberInCanvas) => memberInCanvas.userId !== userId);
 			console.log('leave_user');
+		});
+
+		socket.current.on('exception', (arg) => {
+			console.log(arg);
 		});
 
 		socket.current.on('move_pointer', (userMousePointer) => {
@@ -74,7 +79,10 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			//todo unselect 업데아트
 		});
 
-		socket.current.on('create_object', ({ objectData }) => {
+		socket.current.on('create_object', (arg) => {
+			if (!canvas.current) return;
+			if (isMessageByMe(arg.creator)) return;
+			createObjectFromServer(canvas.current, arg);
 			//todo object 추가
 		});
 

@@ -1,4 +1,5 @@
 import { fabric } from 'fabric';
+import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import { v4 } from 'uuid';
 
 export const setEditMenu = (object: fabric.Object) => {
@@ -9,45 +10,50 @@ export const setEditMenu = (object: fabric.Object) => {
 	return [left, top];
 };
 
-const createNameLabel = (id: string, text: string, x: number, y: number) => {
+export const createNameLabel = (id: string, text: string, x: number, y: number) => {
 	const defaultLeft = x + 10;
 	const defaultTop = y + 275;
 	const defaultFontSize = 15;
 
 	const nameLabelText = new fabric.Text(text, {
+		type: ObjectType.nameText,
 		objectId: id,
 		top: defaultTop,
 		left: defaultLeft,
 		fontSize: defaultFontSize,
 		objectCaching: false,
+		isSocketObject: false,
 	});
 
 	return nameLabelText;
 };
 
-const createRect = (id: string, x: number, y: number, fill: string) => {
+export const createRect = (id: string, x: number, y: number, fill: string) => {
 	const defaultWidth = 300;
 	const defaultHeight = 300;
 
 	const rect = new fabric.Rect({
 		objectId: id,
+		type: ObjectType.rect,
 		left: x,
 		top: y,
 		fill: fill,
 		width: defaultWidth,
 		height: defaultHeight,
 		objectCaching: false,
+		isSocketObject: false,
 	});
 
 	return rect;
 };
 
-const createTextBox = (id: string, x: number, y: number, fontSize: number) => {
+export const createTextBox = (id: string, x: number, y: number, fontSize: number, defaultText = 'Text...') => {
 	const defaultTop = y + 10;
 	const defaultLeft = x + 10;
 	const defaultWidth = 280;
 
-	const textbox = new fabric.Textbox('Text...', {
+	const textbox = new fabric.Textbox(defaultText, {
+		type: ObjectType.text,
 		top: defaultTop,
 		left: defaultLeft,
 		objectId: id,
@@ -55,12 +61,13 @@ const createTextBox = (id: string, x: number, y: number, fontSize: number) => {
 		objectCaching: false,
 		splitByGrapheme: true,
 		fontSize: fontSize,
+		isSocketObject: false,
 	});
 
 	return textbox;
 };
 
-const createPostIt = (
+export const createPostIt = (
 	id: string,
 	x: number,
 	y: number,
@@ -71,15 +78,17 @@ const createPostIt = (
 	const postit = new fabric.Group([backgroundRect, textBox, nameLabel], {
 		type: 'postit',
 		objectId: id,
+		type: ObjectType.postit,
 		left: x,
 		top: y,
 		objectCaching: false,
+		isSocketObject: false,
 	});
 
 	return postit;
 };
 
-const setLimitHeightEvent = (canvas: fabric.Canvas, textBox: fabric.Textbox, backgroundRect: fabric.Rect) => {
+export const setLimitHeightEvent = (canvas: fabric.Canvas, textBox: fabric.Textbox, backgroundRect: fabric.Rect) => {
 	const handler = (e: fabric.IEvent<Event>) => {
 		if (!textBox.height || !textBox.fontSize || !backgroundRect.height) return;
 		while (textBox.getScaledHeight() > backgroundRect.getScaledHeight() - 50 && textBox.fontSize > 12) {
@@ -122,7 +131,7 @@ const setObjectEditEvent = (
 				canvas.remove(obj);
 			}
 		});
-		const grp = new fabric.Group(items, { objectId: id });
+		const grp = new fabric.Group(items, { objectId: id, type: ObjectType.postit, isSocketObject: false });
 		canvas.add(grp);
 
 		grp.on('mousedblclick', () => {
@@ -136,7 +145,7 @@ const setObjectEditEvent = (
 	});
 };
 
-const setPreventResizeEvent = (id: string, canvas: fabric.Canvas, backgroundRect: fabric.Rect) => {
+export const setPreventResizeEvent = (id: string, canvas: fabric.Canvas, backgroundRect: fabric.Rect) => {
 	canvas.on('object:scaling', (e) => {
 		if (e.target?.objectId !== id) return;
 		if (!(e.target instanceof fabric.Group)) return;
