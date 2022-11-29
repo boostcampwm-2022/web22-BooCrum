@@ -6,6 +6,7 @@ export class UserDAO {
     this.userId = userId;
     this.nickname = nickname;
     this.color = color;
+    this.role = role;
   }
 
   @IsString()
