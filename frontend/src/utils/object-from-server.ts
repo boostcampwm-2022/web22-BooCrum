@@ -11,7 +11,7 @@ import {
 	createRect,
 	createTextBox,
 	setLimitHeightEvent,
-	setObjectEditEvent,
+	setPostItEditEvent,
 	setPreventResizeEvent,
 } from './object.utils';
 
@@ -27,6 +27,8 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 	if (!left || !top || !fontSize || !color || !text || !width || !height) return;
 	const nameLabel = createNameLabel({ objectId, text: 'NAME', left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text });
+	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text });
+
 	const backgroundRect = createRect({ objectId, left, top, color });
 	backgroundRect.set({
 		width,
@@ -47,8 +49,9 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 		isSocketObject: true,
 	});
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
-	setObjectEditEvent(canvas, postit, textBox);
-	setPreventResizeEvent(postit.objectId, canvas, backgroundRect);
+	setLimitHeightEvent(canvas, editableTextBox, postit);
+	setPostItEditEvent(canvas, postit, editableTextBox, textBox);
+	setPreventResizeEvent(objectId, canvas, textBox, postit);
 	canvas.add(postit);
 };
 

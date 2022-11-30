@@ -54,7 +54,7 @@ export const createTextBox = (options: TextBoxOptions) => {
 	const defaultText = 'Text...';
 
 	const textbox = new fabric.Textbox(options.text || defaultText, {
-		type: ObjectType.text,
+		type: options.editable ? ObjectType.editable : ObjectType.text,
 		top: defaultTop,
 		left: defaultLeft,
 		objectId: options.objectId,
@@ -78,13 +78,19 @@ export const createPostIt = (options: PostItOptions) => {
 		isSocketObject: false,
 	});
 
+	postit.set({ left: options.left, top: options.top });
+
 	return postit;
 };
 
-export const setLimitHeightEvent = (canvas: fabric.Canvas, textBox: fabric.Textbox, backgroundRect: fabric.Rect) => {
+export const setLimitHeightEvent = (
+	canvas: fabric.Canvas,
+	textBox: fabric.Textbox,
+	background: fabric.Group | fabric.Rect
+) => {
 	const handler = (e: fabric.IEvent<Event>) => {
-		if (!textBox.height || !textBox.fontSize || !backgroundRect.height) return;
-		while (textBox.getScaledHeight() > backgroundRect.getScaledHeight() - 50 && textBox.fontSize > 12) {
+		if (!textBox.height || !textBox.fontSize || !background.height) return;
+		while (textBox.getScaledHeight() > background.getScaledHeight() * 0.9 && textBox.fontSize > 12) {
 			textBox.fontSize--;
 			canvas.renderAll();
 		}
@@ -93,74 +99,59 @@ export const setLimitHeightEvent = (canvas: fabric.Canvas, textBox: fabric.Textb
 	textBox.on('changed', handler);
 };
 
-export const setObjectEditEvent = (
+export const setPostItEditEvent = (
 	canvas: fabric.Canvas,
 	groupObject: fabric.Group,
+	editableTextBox: fabric.Textbox | fabric.IText,
 	textBox: fabric.Textbox | fabric.IText
 ) => {
-	const id = groupObject.objectId;
+	groupObject.on('mousedblclick', (e) => {
+		textBox.set({ visible: false });
 
-	const ungrouping = (items: fabric.Object[], activeObject: fabric.Group) => {
-		activeObject._restoreObjectsState();
-		canvas.remove(activeObject);
-		for (let i = 0; i < items.length; i++) {
-			canvas.add(items[i]);
-			items[i].lockMovementX = true;
-			items[i].lockMovementY = true;
-			const obj = items[i];
-			if (obj instanceof fabric.Textbox || obj instanceof fabric.IText) {
-				canvas.setActiveObject(items[i]);
-				obj.enterEditing();
-				obj.selectAll();
-			}
-		}
-	};
-
-	textBox.on('editing:exited', () => {
-		const items: fabric.Object[] = [];
-		canvas.forEachObject(function (obj) {
-			if (obj.objectId == id) {
-				items.push(obj);
-				canvas.remove(obj);
-			}
+		canvas.add(editableTextBox);
+		canvas.setActiveObject(editableTextBox);
+		editableTextBox.enterEditing();
+		editableTextBox.set({
+			left: (groupObject?.left || 0) + groupObject.getScaledWidth() * 0.033,
+			top: (groupObject?.top || 0) + groupObject.getScaledHeight() * 0.033,
+			width: groupObject.getScaledWidth() * 0.93,
+			fontSize: textBox.fontSize,
 		});
-		const grp = new fabric.Group(items, { objectId: id, type: ObjectType.postit, isSocketObject: false });
-		canvas.add(grp);
-
-		grp.on('mousedblclick', () => {
-			ungrouping(items, grp);
-		});
+		editableTextBox.fire('changed');
 	});
 
-	groupObject.on('mousedblclick', () => {
-		const items = groupObject._objects;
-		ungrouping(items, groupObject);
+	editableTextBox.on('changed', (e) => {
+		const inputText = editableTextBox.text;
+		textBox.set({ text: inputText });
+	});
+
+	editableTextBox.on('editing:exited', (e) => {
+		textBox.set({ visible: true });
+		canvas.remove(editableTextBox);
+
+		textBox.fire('changed');
 	});
 };
 
-export const setPreventResizeEvent = (id: string, canvas: fabric.Canvas, backgroundRect: fabric.Rect) => {
+export const setPreventResizeEvent = (
+	id: string,
+	canvas: fabric.Canvas,
+	textBox: fabric.Textbox | fabric.IText,
+	groupObject: fabric.Group
+) => {
 	canvas.on('object:scaling', (e) => {
 		if (e.target?.objectId !== id) return;
 		if (!(e.target instanceof fabric.Group)) return;
-		const objs = e.target._objects;
-		const rect = backgroundRect;
-
-		objs.forEach((obj) => {
-			if (obj instanceof fabric.Textbox || obj instanceof fabric.IText) {
-				const group = e.target;
-				const width = (group?.getScaledWidth() || 0) - 20 * (group?.scaleX || 1);
-
-				const scaleX = 1 / (group?.scaleX || 1);
-				const scaleY = 1 / (group?.scaleY || 1);
-				obj.set({
-					scaleX: scaleX,
-					scaleY: scaleY,
-					width: width,
-					left: (rect?.get('left') || 0) + 10,
-				});
-				obj.fire('changed');
-			}
+		const obj = textBox;
+		const group = groupObject;
+		const scaleX = 1 / (group?.scaleX || 1);
+		const scaleY = 1 / (group?.scaleY || 1);
+		obj.set({
+			scaleX: scaleX,
+			scaleY: scaleY,
+			width: (group?.getScaledWidth() || 0) * 0.93,
 		});
+		obj.fire('changed');
 	});
 };
 
@@ -174,7 +165,10 @@ export const addPostIt = (
 ) => {
 	const id = v4();
 	const nameLabel = createNameLabel({ objectId: id, text: creator, left: x, top: y });
-	const textBox = createTextBox({ objectId: id, left: x, top: y, fontSize: 40 });
+	const textBox = createTextBox({ objectId: id, left: x, top: y, fontSize: fontSize });
+	const editableTextBox = createTextBox({ objectId: id, left: x, top: y, fontSize: 40, editable: true });
+	console.log('textbox', textBox);
+	console.log('edit', editableTextBox);
 	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
 	const postit = createPostIt({
 		objectId: id,
@@ -186,8 +180,9 @@ export const addPostIt = (
 	});
 
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
-	setObjectEditEvent(canvas, postit, textBox);
-	setPreventResizeEvent(id, canvas, backgroundRect);
+	setLimitHeightEvent(canvas, editableTextBox, postit);
+	setPreventResizeEvent(id, canvas, textBox, postit);
+	setPostItEditEvent(canvas, postit, editableTextBox, textBox);
 
 	canvas.add(postit);
 };
@@ -200,7 +195,7 @@ export const createSectionTitle = (options: SectionTitleOptions) => {
 	const defaultFontSize = 15;
 
 	const title = new fabric.IText(options.text || 'SECTION', {
-		type: ObjectType.title,
+		type: options.editable ? ObjectType.editable : ObjectType.title,
 		objectId: options.objectId,
 		top: defaultTop,
 		left: defaultLeft,
@@ -247,21 +242,54 @@ export const createTitleBackground = (options: TitleBackgroundOptions) => {
 	return rect;
 };
 
-export const setLimitChar = (canvas: fabric.Canvas, title: fabric.IText, background: fabric.Rect) => {
+export const setLimitChar = (
+	canvas: fabric.Canvas,
+	section: fabric.Group,
+	title: fabric.IText,
+	background: fabric.Rect
+) => {
 	title.on('editing:entered', () => {
 		title.hiddenTextarea?.setAttribute('maxlength', '15');
 	});
-	const group = title.group;
+	const group = section;
 	if (!group) return;
 	title.on('changed', (e) => {
-		console.log(group);
 		background.set({ width: (title.get('width') || 0) + 10 });
 		canvas.renderAll();
 	});
 };
 
+export const setSectionEditEvent = (
+	canvas: fabric.Canvas,
+	groupObject: fabric.Group,
+	editableTitle: fabric.Textbox | fabric.IText,
+	sectionTitle: fabric.Textbox | fabric.IText
+) => {
+	groupObject.on('mousedblclick', (e) => {
+		sectionTitle.set({ visible: false });
+		canvas.add(editableTitle);
+		canvas.setActiveObject(editableTitle);
+		editableTitle.enterEditing();
+		editableTitle.set({
+			scaleX: groupObject.scaleX,
+			scaleY: groupObject.scaleY,
+			left: (groupObject?.left || 0) + 10 * (groupObject?.scaleX || 1),
+			top: groupObject.top,
+		});
+	});
+	editableTitle.on('changed', (e) => {
+		const inputText = editableTitle.text;
+		sectionTitle.set({ text: inputText });
+	});
+	editableTitle.on('editing:exited', (e) => {
+		sectionTitle.set({ visible: true });
+		canvas.remove(editableTitle);
+	});
+};
+
 export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: string) => {
 	const id = v4();
+	const editableTitle = createSectionTitle({ objectId: id, text: 'SECTION', left: x, top: y + 25, editable: true });
 	const sectionTitle = createSectionTitle({ objectId: id, text: 'SECTION', left: x, top: y });
 	const sectionBackground = createTitleBackground({ objectId: id, left: x, top: y, color: fill });
 	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
@@ -274,9 +302,8 @@ export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: st
 		backgroundRect,
 	});
 
-	setObjectEditEvent(canvas, section, sectionTitle);
-	setLimitChar(canvas, sectionTitle, sectionBackground);
-	section.sendBackwards(true);
-
+	setLimitChar(canvas, section, sectionTitle, sectionBackground);
+	setLimitChar(canvas, section, editableTitle, sectionBackground);
+	setSectionEditEvent(canvas, section, editableTitle, sectionTitle);
 	canvas.add(section);
 };
