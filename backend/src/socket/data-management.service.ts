@@ -6,6 +6,7 @@ import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 import { ObjectMapVO } from './dto/object-map.vo';
 import { WorkspaceObject } from 'src/object-database/entity/workspace-object.entity';
 import { ObjectMoveDTO } from './dto/object-move.dto';
+import { ObjectScaleDTO } from './dto/object-scale.dto';
 
 @Injectable()
 export class DataManagementService {
@@ -161,5 +162,14 @@ export class DataManagementService {
     objectMapVO.dleft = objectMoveDTO.dleft;
     objectMapVO.dtop = objectMoveDTO.dtop;
     this.objectDataMap.set(objectMoveDTO.objectId, objectMapVO);
+  }
+
+  updateScale(objectScaleDTO: ObjectScaleDTO) {
+    const objectMapVO = this.objectDataMap.get(objectScaleDTO.objectId);
+    objectMapVO.dleft = objectScaleDTO.dleft;
+    objectMapVO.dtop = objectScaleDTO.dtop;
+    objectMapVO.scaleX = objectScaleDTO.scaleX;
+    objectMapVO.scaleY = objectScaleDTO.scaleY;
+    this.objectDataMap.set(objectScaleDTO.objectId, objectMapVO);
   }
 }

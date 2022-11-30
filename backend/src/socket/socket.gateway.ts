@@ -23,6 +23,7 @@ import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 import { WorkspaceObject } from '../object-database/entity/workspace-object.entity';
 import { ObjectMoveDTO } from './dto/object-move.dto';
 import { ObjectMapVO } from './dto/object-map.vo';
+import { ObjectScaleDTO } from './dto/object-scale.dto';
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -189,8 +190,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   @SubscribeMessage('move_object')
   async moveObject(@MessageBody() objectMoveDTO: ObjectMoveDTO, @ConnectedSocket() socket: Socket) {
-    this.logger.log(`client: ${socket.id} / move_object`);
-
     // User 권한 체크
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
@@ -201,16 +200,45 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     // ObjectMap 변경
     this.dataManagementService.updateDerivative(objectMoveDTO);
-    console.log(this.dataManagementService.selectObjectMapByObjectId(objectMoveDTO.objectId));
 
     // 이벤트 전달
     socket.nsp.emit('move_object', {
       userId: userData.userId,
-      objectId: objectMoveDTO.objectId,
-      dleft: objectData.dleft,
-      dtop: objectData.dtop,
-      left: objectData.left,
-      top: objectData.top,
+      objectData: {
+        objectId: objectMoveDTO.objectId,
+        dleft: objectMoveDTO.dleft,
+        dtop: objectMoveDTO.dtop,
+        left: objectData.left,
+        top: objectData.top,
+      },
+    });
+  }
+
+  @SubscribeMessage('scale_object')
+  async scaleObject(@MessageBody() objectScaleDTO: ObjectScaleDTO, @ConnectedSocket() socket: Socket) {
+    // User 권한 체크
+    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+
+    // 객체 존재 여부 체크 및 조회
+    const objectData: ObjectMapVO = this.dataManagementService.selectObjectMapByObjectId(objectScaleDTO.objectId);
+    if (!objectData) throw new WsException('존재하지 않는 객체 접근');
+
+    // ObjectMap 변경
+    this.dataManagementService.updateScale(objectScaleDTO);
+
+    // 이벤트 전달
+    socket.nsp.emit('scale_object', {
+      userId: userData.userId,
+      objectData: {
+        objectId: objectScaleDTO.objectId,
+        dleft: objectScaleDTO.dleft,
+        dtop: objectScaleDTO.dtop,
+        left: objectData.left,
+        top: objectData.top,
+        scaleX: objectScaleDTO.scaleX,
+        scaleY: objectScaleDTO.scaleY,
+      },
     });
   }
 
