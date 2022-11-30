@@ -17,7 +17,7 @@ index 107db96..a7a0b29 100755
 +    isDragging?:boolean;
 +    lastPosX?:number;
 +    lastPosY?:number;
-+    mode: 'postit' | 'section' | 'move' | 'select' | 'draw';
++    mode: 'postit' | 'section' | 'move' | 'select' | 'draw' | 'edit';
      /**
       * When true, objects can be transformed by one side (unproportionally)
       * when dragged on the corners that normally would not do that.
@@ -32,9 +32,10 @@ index 107db96..a7a0b29 100755
       * If you modify, certain parts of Fabric (such as JSON loading) won't work correctly.
       */
 -    type?: string | undefined;
-+    type: "postit" | "section" | "draw" | "text" | "title" | "nameText" | "cursor" | "rect" | "line";
++    type: "postit" | "section" | "draw" | "text" | "title" | "nameText" | "cursor" | "rect" | "line" | "editable";
 +
 +    isSocketObject: boolean;
+ 
  
      /**
       * Horizontal origin of transformation of an object (one of "left", "right", "center")

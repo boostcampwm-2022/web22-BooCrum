@@ -40,6 +40,7 @@ export const ObjectType = {
 	cursor: 'cursor',
 	rect: 'rect',
 	line: 'line',
+	editable: 'editable',
 } as const;
 
 export type ObjectType = typeof ObjectType[keyof typeof ObjectType];
