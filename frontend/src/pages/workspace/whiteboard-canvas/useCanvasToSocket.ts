@@ -19,6 +19,11 @@ interface UseCanvasToSocketProps {
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 	const { isOpen, menuRef, openMenu, menuPosition } = useEditMenu(canvas);
 	const editedObjectId = useRef<string>('');
+
+	const getObjectIds = (objects: fabric.Object[]) => {
+		return objects.map((object) => object.objectId);
+	};
+
 	useEffect(() => {
 		if (!canvas.current) return;
 
@@ -26,6 +31,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (!e.target || !canvas.current) return;
 			const fabricObject = e.target;
 			if (fabricObject.isSocketObject) return;
+			console.log(fabricObject, editedObjectId.current);
 			if (fabricObject.objectId === editedObjectId.current) {
 				editedObjectId.current = '';
 				return;
@@ -33,11 +39,13 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 			if (fabricObject.type === ObjectType.postit) {
 				const message = formatCreatePostitEventToSocket(fabricObject as fabric.Group);
+				console.log('asd', message);
 				socket.current?.emit('create_object', message);
 			}
 		});
 
 		canvas.current.on('object:removed', ({ target }) => {
+			console.log(target);
 			if (!target) return;
 			// socket.current?.emit('delete_object', {
 			// 	objectId: target.objectId,
@@ -51,18 +59,26 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		});
 
 		canvas.current.on('text:editing:entered', ({ target }) => {
+			console.log('enter');
 			if (!target) return;
 			editedObjectId.current = target.objectId;
 		});
 
 		canvas.current.on('selection:created', ({ selected }) => {
-			if (!selected) return;
+			if (!selected || selected.length === 0) return;
 
-			selected.forEach((object) => {
-				socket.current?.emit('select_object', {
-					objectId: object.objectId,
-				});
-			});
+			console.log(getObjectIds(selected));
+			const messege = {
+				objectIds: getObjectIds(selected),
+			};
+			console.log(messege);
+			socket.current?.emit('select_object', messege);
+
+			// selected.forEach((object) => {
+			// 	socket.current?.emit('select_object', {
+			// 		objectId: object.objectId,
+			// 	});
+			// });
 
 			openMenu();
 		});
@@ -70,33 +86,43 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('selection:updated', ({ selected, deselected }) => {
 			if (!selected || !deselected) return;
 
-			selected.forEach((object) => {
-				socket.current?.emit('select_object', {
-					objectId: object.objectId,
-				});
-			});
-
-			deselected.forEach((object) => {
+			if (deselected.length !== 0) {
 				socket.current?.emit('unselect_object', {
-					objectId: object.objectId,
+					objectIds: getObjectIds(deselected),
 				});
-			});
+			}
+
+			if (selected.length !== 0) {
+				socket.current?.emit('select_object', {
+					objectIds: getObjectIds(selected),
+				});
+			}
+
 			openMenu();
 		});
 
 		canvas.current.on('selection:cleared', ({ deselected }) => {
 			if (!deselected) return;
-			deselected.forEach((object) => {
+			if (deselected.length !== 0) {
 				socket.current?.emit('unselect_object', {
-					objectId: object.objectId,
+					objectIds: getObjectIds(deselected),
 				});
-			});
+			}
 		});
 
-		canvas.current.on('object:moving', ({ target }) => {
+		canvas.current.on('object:moving', (arg) => {
+			const { target } = arg;
+			console.log(arg);
 			if (!target) return;
-			const message = formatMoveObjectEventToSocket(target);
-			socket.current?.emit('update_object', message);
+
+			if (target.type in ObjectType) {
+				const message = formatMoveObjectEventToSocket(target);
+				socket.current?.emit('update_object', message);
+				return;
+			}
+			console.log('asdasd', target);
+
+			// target._objects()
 		});
 
 		canvas.current.on('mouse:move', (e) => {

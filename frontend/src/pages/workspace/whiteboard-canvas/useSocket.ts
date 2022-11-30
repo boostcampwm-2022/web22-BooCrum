@@ -100,18 +100,19 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			canvas.current.renderAll();
 		});
 
-		socket.current.on('select_object', ({ userId, objectId }) => {
+		socket.current.on('select_object', ({ userId, objectIds }) => {
 			if (!canvas.current) return;
 			if (isMessageByMe(userId)) return;
 			const member = membersInCanvas.current.filter((memberInCanvas) => memberInCanvas.userId === userId);
 			if (member.length === 0) return;
-			selectObjectFromServer(canvas.current, objectId, member[0].color);
+
+			selectObjectFromServer(canvas.current, objectIds, member[0].color);
 		});
 
-		socket.current.on('unselect_object', ({ userId, objectId }) => {
+		socket.current.on('unselect_object', ({ userId, objectIds }) => {
 			if (!canvas.current) return;
 			if (isMessageByMe(userId)) return;
-			unselectObjectFromServer(canvas.current, objectId);
+			unselectObjectFromServer(canvas.current, objectIds);
 		});
 
 		socket.current.on('create_object', (arg) => {

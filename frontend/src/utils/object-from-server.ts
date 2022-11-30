@@ -89,37 +89,44 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	}
 };
 
-export const selectObjectFromServer = (canvas: fabric.Canvas, objectId: string, color: string) => {
-	const object: fabric.Object[] = canvas.getObjects().filter((object) => {
-		return object.objectId === objectId;
+export const selectObjectFromServer = (canvas: fabric.Canvas, objectIds: string[], color: string) => {
+	console.log(objectIds);
+	const objects: fabric.Object[] = canvas.getObjects().filter((object) => {
+		return objectIds.includes(object.objectId);
 	});
 
-	if (object.length === 0) return;
-	const groupObject = object[0] as fabric.Group;
-	groupObject._objects.forEach((object) => {
-		if (object.type === ObjectType.rect) {
-			object.set({
-				stroke: color,
-				strokeWidth: 3,
-			});
-		}
+	if (objects.length === 0) return;
+
+	const groupObjects = objects as fabric.Group[];
+	groupObjects.forEach((groupObject) => {
+		groupObject._objects.forEach((object) => {
+			if (object.type === ObjectType.rect) {
+				object.set({
+					stroke: color,
+					strokeWidth: 3,
+				});
+			}
+		});
 	});
 };
 
-export const unselectObjectFromServer = (canvas: fabric.Canvas, objectId: string) => {
-	const object: fabric.Object[] = canvas.getObjects().filter((object) => {
-		return object.objectId === objectId;
+export const unselectObjectFromServer = (canvas: fabric.Canvas, objectIds: string[]) => {
+	const objects: fabric.Object[] = canvas.getObjects().filter((object) => {
+		return objectIds.includes(object.objectId);
 	});
 
-	if (object.length === 0) return;
-	const groupObject = object[0] as fabric.Group;
-	groupObject._objects.forEach((object) => {
-		if (object.type === ObjectType.rect) {
-			object.set({
-				stroke: '',
-				strokeWidth: 0,
-			});
-		}
+	if (objects.length === 0) return;
+
+	const groupObjects = objects as fabric.Group[];
+	groupObjects.forEach((groupObject) => {
+		groupObject._objects.forEach((object) => {
+			if (object.type === ObjectType.rect) {
+				object.set({
+					stroke: '',
+					strokeWidth: 0,
+				});
+			}
+		});
 	});
 };
 
