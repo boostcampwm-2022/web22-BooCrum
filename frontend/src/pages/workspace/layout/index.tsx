@@ -15,7 +15,7 @@ function Layout({ workspaceId }: { workspaceId: string }) {
 
 	const openShareModal = useCallback(() => {
 		openModal();
-		setModalContent(<ShareModal modalRef={modalRef} id={workspaceId} closeModal={closeModal} />);
+		setModalContent(<ShareModal id={workspaceId} closeModal={closeModal} />);
 	}, []);
 
 	return (
@@ -23,7 +23,7 @@ function Layout({ workspaceId }: { workspaceId: string }) {
 			<Header workspaceId={workspaceId} openShareModal={openShareModal} />
 			{myInfoInWorkspace.role !== workspaceRole.GUEST && <Toolkit />}
 
-			<Modal isOpen={isOpenModal} modalRef={modalRef} width={600} height={400}>
+			<Modal isOpen={isOpenModal} modalRef={modalRef} width={600} height={400} title="Share" closeModal={closeModal}>
 				{modalContent}
 			</Modal>
 		</>

@@ -2,7 +2,7 @@ import { RefObject } from 'react';
 
 export interface ShareModalProps {
 	id: string;
-	modalRef: RefObject<HTMLDivElement>;
+	// modalRef: RefObject<HTMLDivElement>;
 	closeModal: () => void;
 }
 

@@ -5,7 +5,7 @@ import useModal from '@hooks/useModal';
 import ErrorModal from '@components/error-modal';
 
 function GithubLoginButton() {
-	const { isOpenModal, modalRef } = useModal();
+	const { isOpenModal, modalRef, closeModal } = useModal();
 
 	return (
 		<>
@@ -19,6 +19,7 @@ function GithubLoginButton() {
 				width={600}
 				height={450}
 				errorMessage="로그인에 실패했습니다."
+				closeModal={closeModal}
 			/>
 		</>
 	);
