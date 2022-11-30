@@ -3,11 +3,14 @@ import { UserMapVO } from './dto/user-map.vo';
 import { Socket } from 'socket.io';
 import { DbAccessService } from './db-access.service';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
+import { ObjectMapVO } from './dto/object-map.vo';
+import { WorkspaceObject } from 'src/object-database/entity/workspace-object.entity';
 
 @Injectable()
 export class DataManagementService {
   private socketUserDataMap = new Map<string, UserMapVO>(); // socketId -> userMapVO
   private workspaceUserDataMap = new Map<string, UserMapVO[]>(); // workspaceId -> userMapVO[]
+  private objectDataMap = new Map<string, ObjectMapVO>();
   private logger: Logger = new Logger('UserDataService');
 
   constructor(private dbAccessService: DbAccessService) {}
@@ -125,5 +128,37 @@ export class DataManagementService {
       else this.workspaceUserDataMap.set(userData.workspaceId, workspaceUserList);
     }
     return userData;
+  }
+
+  initObjectMap(workspaceId: string, workspaceObject: WorkspaceObject[]) {
+    workspaceObject.forEach((obj) => {
+      const objectId = obj.objectId;
+      delete obj.objectId;
+      this.objectDataMap.set(objectId, {
+        ...obj,
+        workspaceId,
+        dleft: 0,
+        dtop: 0,
+      });
+    });
+  }
+
+  selectObjectMapByObjectId(objectId: string): ObjectMapVO {
+    return this.objectDataMap.get(objectId);
+  }
+
+  selectObjectMapByWorkspaceId(workspaceId: string): ObjectMapVO[] {
+    const result = [];
+    this.objectDataMap.forEach((obj, key) => {
+      if (obj.workspaceId === workspaceId) result.push({ objectId: key, ...obj });
+    });
+    return result;
+  }
+
+  updateOBbjectMap(objectId: string, dleft: number, dtop: number) {
+    const objectMapVO = this.objectDataMap.get(objectId);
+    objectMapVO.dleft = dleft;
+    objectMapVO.dtop = dtop;
+    this.objectDataMap.set(objectId, objectMapVO);
   }
 }

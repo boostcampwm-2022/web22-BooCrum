@@ -21,6 +21,8 @@ import { ObjectDTO } from './dto/object.dto';
 import { UserDAO } from './dto/user.dao';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 import { WorkspaceObject } from '../object-database/entity/workspace-object.entity';
+import { ObjectMoveDTO } from './dto/object-move.dto';
+import { ObjectMapVO } from './dto/object-map.vo';
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -89,6 +91,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       .map((vo) => new UserDAO(vo.userId, vo.nickname, vo.color, vo.role));
     const objects: WorkspaceObject[] = await this.objectHandlerService.selectAllObjects(workspaceId);
     const userData = new UserDAO(userMapVO.userId, userMapVO.nickname, userMapVO.color, userMapVO.role);
+    this.dataManagementService.initObjectMap(workspaceId, objects);
 
     // 5. Socket 이벤트 Emit
     client.emit('init', { members, objects, userData });
@@ -182,6 +185,29 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.logger.error(e);
       throw new WsException(e.message);
     }
+  }
+
+  @SubscribeMessage('move_object')
+  async moveObject(@MessageBody() objectMoveDTO: ObjectMoveDTO, @ConnectedSocket() socket: Socket) {
+    this.logger.log(`client: ${socket.id} / move_object`);
+
+    // User 권한 체크
+    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+
+    // 객체 존재 여부 체크 및 조회
+    const objectData: ObjectMapVO = this.dataManagementService.selectObjectMapByObjectId(objectMoveDTO.objectId);
+    if (!objectData) throw new WsException('존재하지 않는 객체 접근');
+
+    // 이벤트 전달
+    socket.nsp.emit('move_object', {
+      userId: userData.userId,
+      objectId: objectMoveDTO.objectId,
+      dleft: objectData.dleft,
+      dtop: objectData.dtop,
+      left: objectData.left,
+      top: objectData.top,
+    });
   }
 
   @SubscribeMessage('update_object')
