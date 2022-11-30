@@ -15,7 +15,7 @@ function Layout({ workspaceId }: { workspaceId: string }) {
 
 	const openShareModal = useCallback(() => {
 		openModal();
-		setModalContent(<ShareModal id={workspaceId} closeModal={closeModal} />);
+		setModalContent(<ShareModal id={workspaceId} />);
 	}, []);
 
 	return (

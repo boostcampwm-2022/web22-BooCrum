@@ -2,7 +2,7 @@ import styled from 'styled-components';
 
 export const ModalContent = styled.div`
 	display: flex;
-	height: 100%;
+	height: calc(100% - 60px);
 	flex-direction: column;
 	justify-content: center;
 	align-items: center;

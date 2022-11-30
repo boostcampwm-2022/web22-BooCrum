@@ -6,7 +6,7 @@ import { Workspace } from '@api/workspace';
 import { ParticipantInfo, ShareModalProps } from './index.type';
 import ToastMessage from '@components/toast-message';
 
-function ShareModal({ id, closeModal }: ShareModalProps) {
+function ShareModal({ id }: ShareModalProps) {
 	const [email, setEmail] = useState('');
 	const [participant, setParticipant] = useState<ParticipantInfo[]>([]);
 	const [openToast, setOpenToast] = useState(false);
