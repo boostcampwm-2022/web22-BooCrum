@@ -15,7 +15,6 @@ import {
 } from '@utils/object-from-server';
 import { myInfoInWorkspaceState } from '@context/user';
 
-
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	// 자신의 정보 role을 이용해 작업하기 위해 생성
 	const [myInfoInWorkspace, setMyInfoInWorkspace] = useRecoilState(myInfoInWorkspaceState);
@@ -33,10 +32,6 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	};
 
 	useEffect(() => {
-		myInfoInWorkspaceRef.current = myInfoInWorkspace;
-	}, [myInfoInWorkspace]);
-
-	useEffect(() => {
 		socket.current = io(`/workspace/${workspaceId}`);
 		socket.current.on('connect', () => {
 			setIsConnected(true);
@@ -49,8 +44,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('init', ({ members, objects, userData }) => {
-			console.log(userData);
-			console.log(members);
+			myInfoInWorkspaceRef.current = userData;
 			setMyInfoInWorkspace(userData);
 			setMembers(members);
 			members.forEach((member) => {
