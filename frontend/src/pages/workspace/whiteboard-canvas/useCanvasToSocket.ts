@@ -1,9 +1,15 @@
+import { useRef } from 'react';
 import { Socket } from 'socket.io-client';
 import { ServerToClientEvents, ClientToServerEvents, MousePointer } from './types';
 import { useEffect } from 'react';
 import useEditMenu from './useEditMenu';
 import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
-import { formatPostitToSocket } from '@utils/socket.utils';
+import {
+	formatCreatePostitEventToSocket,
+	formatEditTextEventToSocket,
+	formatMoveObjectEventToSocket,
+	formatScalingObjectEventToSocket,
+} from '@utils/socket.utils';
 
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
@@ -12,39 +18,111 @@ interface UseCanvasToSocketProps {
 
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 	const { isOpen, menuRef, openMenu, menuPosition } = useEditMenu(canvas);
+	const editedObjectId = useRef<string>('');
+
+	const getObjectIds = (objects: fabric.Object[]) => {
+		return objects.map((object) => object.objectId);
+	};
+
 	useEffect(() => {
 		if (!canvas.current) return;
 
 		canvas.current.on('object:added', (e) => {
 			if (!e.target || !canvas.current) return;
-			if (e.target.isSocketObject) return;
-
 			const fabricObject = e.target;
+			if (fabricObject.isSocketObject) return;
+			console.log(fabricObject, editedObjectId.current);
+			if (fabricObject.objectId === editedObjectId.current) {
+				editedObjectId.current = '';
+				return;
+			}
+
 			if (fabricObject.type === ObjectType.postit) {
-				const message = formatPostitToSocket(canvas.current, fabricObject as fabric.Group);
+				const message = formatCreatePostitEventToSocket(fabricObject as fabric.Group);
+				console.log('asd', message);
 				socket.current?.emit('create_object', message);
 			}
 		});
 
-		canvas.current.on('object:removed', (e) => {
-			// console.log(e);
+		canvas.current.on('object:removed', ({ target }) => {
+			console.log(target);
+			if (!target) return;
+			// socket.current?.emit('delete_object', {
+			// 	objectId: target.objectId,
+			// });
 		});
 
-		canvas.current.on('selection:created', (e) => {
-			// todo select 로직
-			// console.log(e);
+		canvas.current.on('text:changed', ({ target }) => {
+			if (!target || target.type !== ObjectType.text) return;
+			const message = formatEditTextEventToSocket(target as fabric.Text);
+			socket.current?.emit('update_object', message);
+		});
+
+		canvas.current.on('text:editing:entered', ({ target }) => {
+			console.log('enter');
+			if (!target) return;
+			editedObjectId.current = target.objectId;
+		});
+
+		canvas.current.on('selection:created', ({ selected }) => {
+			if (!selected || selected.length === 0) return;
+
+			console.log(getObjectIds(selected));
+			const messege = {
+				objectIds: getObjectIds(selected),
+			};
+			console.log(messege);
+			socket.current?.emit('select_object', messege);
+
+			// selected.forEach((object) => {
+			// 	socket.current?.emit('select_object', {
+			// 		objectId: object.objectId,
+			// 	});
+			// });
 
 			openMenu();
 		});
 
-		canvas.current.on('selection:cleared', (e) => {
-			// todo unselect 로직
-			// console.log(e);
+		canvas.current.on('selection:updated', ({ selected, deselected }) => {
+			if (!selected || !deselected) return;
+
+			if (deselected.length !== 0) {
+				socket.current?.emit('unselect_object', {
+					objectIds: getObjectIds(deselected),
+				});
+			}
+
+			if (selected.length !== 0) {
+				socket.current?.emit('select_object', {
+					objectIds: getObjectIds(selected),
+				});
+			}
+
+			openMenu();
 		});
 
-		canvas.current.on('object:moving', (e) => {
-			// todo object update 로직
-			// console.log(e);
+		canvas.current.on('selection:cleared', ({ deselected }) => {
+			if (!deselected) return;
+			if (deselected.length !== 0) {
+				socket.current?.emit('unselect_object', {
+					objectIds: getObjectIds(deselected),
+				});
+			}
+		});
+
+		canvas.current.on('object:moving', (arg) => {
+			const { target } = arg;
+			console.log(arg);
+			if (!target) return;
+
+			if (target.type in ObjectType) {
+				const message = formatMoveObjectEventToSocket(target);
+				socket.current?.emit('update_object', message);
+				return;
+			}
+			console.log('asdasd', target);
+
+			// target._objects()
 		});
 
 		canvas.current.on('mouse:move', (e) => {
@@ -63,9 +141,10 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			socket.current?.emit('move_pointer', message);
 		});
 
-		canvas.current.on('object:scaling', (e) => {
-			// todo object update 로직
-			// console.log(e);
+		canvas.current.on('object:scaling', ({ target }) => {
+			if (!target) return;
+			const message = formatScalingObjectEventToSocket(target);
+			socket.current?.emit('update_object', message);
 		});
 	}, []);
 

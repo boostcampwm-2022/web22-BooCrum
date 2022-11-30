@@ -1,8 +1,16 @@
 diff --git a/node_modules/@types/fabric/fabric-impl.d.ts b/node_modules/@types/fabric/fabric-impl.d.ts
-index 107db96..b83c3ba 100644
+index 107db96..a7a0b29 100755
 --- a/node_modules/@types/fabric/fabric-impl.d.ts
 +++ b/node_modules/@types/fabric/fabric-impl.d.ts
-@@ -1693,6 +1693,10 @@ export class StaticCanvas {
+@@ -175,6 +175,7 @@ interface IEvent<E extends Event = Event> {
+     target?: Object | undefined;
+     subTargets?: Object[] | undefined;
+     selected?: Object[] | undefined;
++    deselected?: Object[] | undefined;
+     button?: number | undefined;
+     isClick?: boolean | undefined;
+     pointer?: Point | undefined;
+@@ -1693,6 +1694,10 @@ export class StaticCanvas {
  }
  
  interface ICanvasOptions extends IStaticCanvasOptions {
@@ -13,7 +21,7 @@ index 107db96..b83c3ba 100644
      /**
       * When true, objects can be transformed by one side (unproportionally)
       * when dragged on the corners that normally would not do that.
-@@ -2695,12 +2699,15 @@ export class Line {
+@@ -2695,12 +2700,15 @@ export class Line {
  }
  
  interface IObjectOptions {
@@ -28,9 +36,10 @@ index 107db96..b83c3ba 100644
 +
 +    isSocketObject: boolean;
  
+ 
      /**
       * Horizontal origin of transformation of an object (one of "left", "right", "center")
-@@ -4163,7 +4170,6 @@ export class Rect extends Object {
+@@ -4163,7 +4171,6 @@ export class Rect extends Object {
  }
  
  interface TextOptions extends IObjectOptions {

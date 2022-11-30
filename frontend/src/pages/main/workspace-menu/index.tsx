@@ -7,6 +7,7 @@ import { WorkspaceMenuProps } from './index.types';
 import DeleteModal from '../delete-modal';
 import RenameModal from '../rename-modal';
 import { Workspace } from '@api/workspace';
+import { workspaceRole } from '@data/workspace-role';
 
 function WorkspaceMenu({ workspaceId, role, workspaceName, setWorkspaceList }: WorkspaceMenuProps) {
 	const { isOpenModal, modalRef, toggleOpenModal } = useModal();
@@ -34,7 +35,7 @@ function WorkspaceMenu({ workspaceId, role, workspaceName, setWorkspaceList }: W
 		<>
 			<WorkspaceMenuList>
 				<WorkspaceMenuItem>Open</WorkspaceMenuItem>
-				{role == 2 && (
+				{role === workspaceRole.OWNER && (
 					<>
 						<WorkspaceMenuItem onClick={openReanmeModal}>Rename</WorkspaceMenuItem>
 						<WorkspaceMenuItem onClick={openDeleteModal}>Delete</WorkspaceMenuItem>

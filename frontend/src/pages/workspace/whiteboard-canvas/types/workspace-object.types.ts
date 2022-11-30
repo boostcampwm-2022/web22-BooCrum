@@ -11,7 +11,7 @@ export interface CanvasObject {
 }
 
 export interface ObjectDataToServer {
-	type: ObjectType;
+	type?: ObjectType;
 	objectId: string;
 	left?: number;
 	top?: number;
@@ -20,6 +20,8 @@ export interface ObjectDataToServer {
 	color?: string;
 	text?: string;
 	fontSize?: number;
+	scaleX?: number;
+	scaleY?: number;
 }
 
 export interface ObjectDataFromServer extends ObjectDataToServer {

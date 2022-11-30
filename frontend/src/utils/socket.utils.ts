@@ -23,18 +23,17 @@ export const formatMessageToSocket = (canvas: fabric.Canvas, object: fabric.Obje
 	return message;
 };
 
-export const formatPostitToSocket = (canvas: fabric.Canvas, objectGroup: fabric.Group): ObjectDataToServer => {
+export const formatCreatePostitEventToSocket = (objectGroup: fabric.Group): ObjectDataToServer => {
 	// todo fabric.Object -> text 포함된 타입으로 변경 필요
 	const message: ObjectDataToServer = {
-		type: canvas.mode as ObjectType,
-		objectId: v4(),
+		type: ObjectType.postit,
+		objectId: objectGroup.objectId,
 		left: objectGroup.left,
 		top: objectGroup.top,
 		width: objectGroup.width,
 		height: objectGroup.height,
-		// color: object.fill as string,
-		// text: '',
-		// fontSize: 12,
+		scaleX: objectGroup.scaleX,
+		scaleY: objectGroup.scaleY,
 	};
 
 	objectGroup._objects.forEach((object) => {
@@ -47,6 +46,43 @@ export const formatPostitToSocket = (canvas: fabric.Canvas, objectGroup: fabric.
 			message.fontSize = textObject.fontSize;
 		}
 	});
+
+	return message;
+};
+
+export const formatMoveObjectEventToSocket = (object: fabric.Object): ObjectDataToServer => {
+	// todo fabric.Object -> text 포함된 타입으로 변경 필요
+	const message: ObjectDataToServer = {
+		type: object.type,
+		objectId: object.objectId,
+		left: object.left,
+		top: object.top,
+	};
+
+	return message;
+};
+
+export const formatScalingObjectEventToSocket = (object: fabric.Object): ObjectDataToServer => {
+	// scaling 추가
+	const message: ObjectDataToServer = {
+		type: object.type,
+		objectId: object.objectId,
+		width: object.width,
+		height: object.height,
+		// scaleX: object.scaleX,
+		// scaleY: object.scaleY,
+	};
+
+	return message;
+};
+
+export const formatEditTextEventToSocket = (object: fabric.Text): ObjectDataToServer => {
+	// scaling 추가
+	const message: ObjectDataToServer = {
+		objectId: object.objectId,
+		text: object.text,
+		fontSize: object.fontSize,
+	};
 
 	return message;
 };
