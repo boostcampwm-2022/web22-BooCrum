@@ -5,6 +5,7 @@ import { DbAccessService } from './db-access.service';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 import { ObjectMapVO } from './dto/object-map.vo';
 import { WorkspaceObject } from 'src/object-database/entity/workspace-object.entity';
+import { ObjectMoveDTO } from './dto/object-move.dto';
 
 @Injectable()
 export class DataManagementService {
@@ -155,10 +156,10 @@ export class DataManagementService {
     return result;
   }
 
-  updateOBbjectMap(objectId: string, dleft: number, dtop: number) {
-    const objectMapVO = this.objectDataMap.get(objectId);
-    objectMapVO.dleft = dleft;
-    objectMapVO.dtop = dtop;
-    this.objectDataMap.set(objectId, objectMapVO);
+  updateDerivative(objectMoveDTO: ObjectMoveDTO) {
+    const objectMapVO = this.objectDataMap.get(objectMoveDTO.objectId);
+    objectMapVO.dleft = objectMoveDTO.dleft;
+    objectMapVO.dtop = objectMoveDTO.dtop;
+    this.objectDataMap.set(objectMoveDTO.objectId, objectMapVO);
   }
 }
