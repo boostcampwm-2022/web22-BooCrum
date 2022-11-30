@@ -19,6 +19,12 @@ export class CreateObjectDTO {
   @IsNumber()
   height: number;
 
+  @IsNumber()
+  scaleX: number;
+
+  @IsNumber()
+  scaleY: number;
+
   @IsString()
   color: string;
 
