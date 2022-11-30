@@ -1,0 +1,31 @@
+name: Check Build Possibility
+
+on:
+  pull_request:
+    branches:
+      - dev
+      
+jobs:
+  check:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2.5.0
+      - uses: actions/setup-node@v3.5.1
+        with:
+          node-version: "16.18.0"
+  try-frontend-build:
+    runs-on: ubuntu-20.04
+    needs: check
+    steps:
+      - run: |
+          cd ./frontend
+          npm install
+          npm build
+  try-backend-build:
+    runs-on: ubuntu-20.04
+    needs: check
+    steps:
+      - run: |
+          cd ./backend
+          npm install
+          npm build
