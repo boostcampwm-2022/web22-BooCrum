@@ -13,8 +13,10 @@ jobs:
       - uses: actions/setup-node@v3.5.1
         with:
           node-version: "16.18.0"
-      - run: |
-          export DISABLE_ESLINT_PLUGIN=true
+      - name: try build frontend
+        env: |
+          DISABLE_ESLINT_PLUGIN=true
+        run: |
           cd ./frontend
           npm install
           npm run build
@@ -25,7 +27,8 @@ jobs:
       - uses: actions/setup-node@v3.5.1
         with:
           node-version: "16.18.0"
-      - run: |
+      - name: try build backend
+        run: |
           cd ./backend
           npm install
           npm run build
