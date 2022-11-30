@@ -31,11 +31,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (!e.target || !canvas.current) return;
 			const fabricObject = e.target;
 			if (fabricObject.isSocketObject) return;
-			console.log(fabricObject, editedObjectId.current);
-			if (fabricObject.objectId === editedObjectId.current) {
-				editedObjectId.current = '';
-				return;
-			}
 
 			if (fabricObject.type === ObjectType.postit) {
 				const message = formatCreatePostitEventToSocket(fabricObject as fabric.Group);
@@ -45,9 +40,9 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		});
 
 		canvas.current.on('object:removed', ({ target }) => {
-			console.log(target);
 			if (!target) return;
 
+			if (target.isSocketObject) return;
 			if (target.type === ObjectType.editable) return;
 
 			socket.current?.emit('delete_object', {
@@ -58,11 +53,11 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('text:changed', ({ target }) => {
 			if (!target || target.type !== ObjectType.text) return;
 			const message = formatEditTextEventToSocket(target as fabric.Text);
+			console.log(message);
 			socket.current?.emit('update_object', message);
 		});
 
 		canvas.current.on('text:editing:entered', ({ target }) => {
-			console.log('enter');
 			if (!target) return;
 			editedObjectId.current = target.objectId;
 		});

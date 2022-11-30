@@ -125,6 +125,7 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 				if (obj instanceof fabric.Textbox || obj instanceof fabric.IText) {
 					return;
 				}
+				obj.isSocketObject = false;
 				canvas.remove(obj);
 			});
 		}
