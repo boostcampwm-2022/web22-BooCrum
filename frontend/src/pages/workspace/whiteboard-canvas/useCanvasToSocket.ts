@@ -47,9 +47,12 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('object:removed', ({ target }) => {
 			console.log(target);
 			if (!target) return;
-			// socket.current?.emit('delete_object', {
-			// 	objectId: target.objectId,
-			// });
+
+			if (target.type === ObjectType.editable) return;
+
+			socket.current?.emit('delete_object', {
+				objectId: target.objectId,
+			});
 		});
 
 		canvas.current.on('text:changed', ({ target }) => {
