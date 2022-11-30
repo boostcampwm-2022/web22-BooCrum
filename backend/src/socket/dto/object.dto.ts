@@ -19,6 +19,12 @@ export class ObjectDTO {
   @IsNumber()
   height: number;
 
+  @IsNumber()
+  scaleX: number;
+
+  @IsNumber()
+  scaleY: number;
+
   @IsString()
   color: string;
 

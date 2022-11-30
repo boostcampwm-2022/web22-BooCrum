@@ -1,5 +1,5 @@
 import { Workspace } from '../../workspace/entity/workspace.entity';
-import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, Index } from 'typeorm';
+import { Entity, PrimaryColumn, Column, ManyToOne, JoinColumn, Index, Double } from 'typeorm';
 
 @Entity({
   name: 'workspace_object',
@@ -21,29 +21,43 @@ export class WorkspaceObject {
 
   @Column({
     name: 'left',
-    type: 'int',
+    type: 'double',
     nullable: false,
   })
   left: number;
 
   @Column({
     name: 'top',
-    type: 'int',
+    type: 'double',
     nullable: false,
   })
   top: number;
 
   @Column({
-    type: 'int',
+    type: 'double',
     nullable: false,
   })
   width: number;
 
   @Column({
-    type: 'int',
+    type: 'double',
     nullable: false,
   })
   height: number;
+
+  @Column({
+    name: 'scale_x',
+    type: 'double',
+    nullable: false,
+  })
+  scaleX: number;
+
+  @Column({
+    name: 'scale_y',
+    type: 'double',
+    nullable: false,
+  })
+  scaleY: number;
 
   @Column({
     type: 'varchar',

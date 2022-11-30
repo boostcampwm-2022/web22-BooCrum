@@ -1,15 +1,27 @@
 import { useRef, useEffect } from 'react';
 import { fabric } from 'fabric';
-import { addObject, initDragPanning, initWheelPanning, initZoom, initGrid, deleteObject } from '@utils/fabric.utils';
+import {
+	addObject,
+	initDragPanning,
+	initWheelPanning,
+	initZoom,
+	initGrid,
+	deleteObject,
+	setObjectIndexLeveling,
+	setCursorMode,
+} from '@utils/fabric.utils';
 import { toolItems } from '@data/workspace-tool';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { cursorState, zoomState } from '@context/workspace';
 import { CanvasType } from './types';
+import { myInfoInWorkspaceState } from '@context/user';
+import { workspaceRole } from '@data/workspace-role';
 
 function useCanvas() {
 	const canvas = useRef<fabric.Canvas | null>(null);
 	const [zoom, setZoom] = useRecoilState(zoomState);
 	const cursor = useRecoilValue(cursorState);
+	const myInfoInWorkspace = useRecoilValue(myInfoInWorkspaceState);
 
 	useEffect(() => {
 		if (canvas.current && zoom.event === 'control')
@@ -30,24 +42,22 @@ function useCanvas() {
 		if (!canvas.current) return;
 
 		const fabricCanvas = canvas.current as fabric.Canvas;
-		if (cursor.type === toolItems.SECTION || cursor.type === toolItems.POST_IT) {
-			fabricCanvas.defaultCursor = 'context-menu';
-			fabricCanvas.selection = true;
-			if (cursor.type === toolItems.SECTION) fabricCanvas.mode = CanvasType.section;
-			else fabricCanvas.mode = CanvasType.postit;
-		} else if (cursor.type === toolItems.MOVE) {
-			fabricCanvas.defaultCursor = 'grab';
-			fabricCanvas.mode = CanvasType.move;
-			fabricCanvas.selection = false;
-		} else if (cursor.type === toolItems.SELECT) {
-			fabricCanvas.defaultCursor = 'default';
-			fabricCanvas.mode = CanvasType.select;
-			fabricCanvas.selection = true;
+		if (myInfoInWorkspace.role === workspaceRole.GUEST) {
+			setCursorMode(fabricCanvas, 'grab', CanvasType.move, false);
 		} else {
-			fabricCanvas.defaultCursor = 'default';
-			fabricCanvas.mode = CanvasType.draw;
+			if (cursor.type === toolItems.SECTION) {
+				setCursorMode(fabricCanvas, 'context-menu', CanvasType.section, true);
+			} else if (cursor.type === toolItems.POST_IT) {
+				setCursorMode(fabricCanvas, 'context-menu', CanvasType.postit, true);
+			} else if (cursor.type === toolItems.MOVE) {
+				setCursorMode(fabricCanvas, 'grab', CanvasType.move, false);
+			} else if (cursor.type === toolItems.SELECT) {
+				setCursorMode(fabricCanvas, 'default', CanvasType.select, true);
+			} else {
+				setCursorMode(fabricCanvas, 'default', CanvasType.draw, true);
+			}
 		}
-	}, [cursor]);
+	}, [cursor, myInfoInWorkspace]);
 
 	const initCanvas = () => {
 		const grid = 50;
@@ -65,8 +75,9 @@ function useCanvas() {
 		initZoom(fabricCanvas, setZoom);
 		initDragPanning(fabricCanvas);
 		initWheelPanning(fabricCanvas);
-		addObject(fabricCanvas);
+		addObject(fabricCanvas, 'NAME');
 		deleteObject(fabricCanvas);
+		setObjectIndexLeveling(fabricCanvas);
 
 		return fabricCanvas;
 	};

@@ -1,32 +1,23 @@
-import { colorChips } from '@data/workspace-object-color';
-import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
+import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import { v4 } from 'uuid';
 
-export const addSection = (canvas: fabric.Canvas, x: number, y: number) => {
-	canvas.add(
-		new fabric.Rect({
-			type: ObjectType.section,
-			objectId: v4(),
-			left: x,
-			top: y,
-			fill: colorChips[0],
-			width: 400,
-			height: 500,
-			objectCaching: false,
-			isSocketObject: false,
-		})
-	);
+export const setEditMenu = (object: fabric.Object) => {
+	const width = object?.width || 0;
+	const top = object?.top ? object.top - 50 : 0;
+	const left = object?.left ? object.left + width / 2 : 0;
+
+	return [left, top];
 };
 
-export const createNameLabel = (id: string, text: string, x: number, y: number) => {
-	const defaultLeft = x + 10;
-	const defaultTop = y + 275;
+export const createNameLabel = (options: NameLabelOptions) => {
+	const defaultLeft = options.left + 10;
+	const defaultTop = options.top + 275;
 	const defaultFontSize = 15;
 
-	const nameLabelText = new fabric.Text(text, {
+	const nameLabelText = new fabric.Text(options.text || '', {
 		type: ObjectType.nameText,
-		objectId: id,
+		objectId: options.objectId,
 		top: defaultTop,
 		left: defaultLeft,
 		fontSize: defaultFontSize,
@@ -37,16 +28,16 @@ export const createNameLabel = (id: string, text: string, x: number, y: number) 
 	return nameLabelText;
 };
 
-export const createRect = (id: string, x: number, y: number, fill: string) => {
+export const createRect = (options: RectOptions) => {
 	const defaultWidth = 300;
 	const defaultHeight = 300;
 
 	const rect = new fabric.Rect({
-		objectId: id,
+		objectId: options.objectId,
 		type: ObjectType.rect,
-		left: x,
-		top: y,
-		fill: fill,
+		left: options.left,
+		top: options.top,
+		fill: options.color,
 		width: defaultWidth,
 		height: defaultHeight,
 		objectCaching: false,
@@ -56,39 +47,33 @@ export const createRect = (id: string, x: number, y: number, fill: string) => {
 	return rect;
 };
 
-export const createTextBox = (id: string, x: number, y: number, fontSize: number, defaultText = 'Text...') => {
-	const defaultTop = y + 10;
-	const defaultLeft = x + 10;
+export const createTextBox = (options: TextBoxOptions) => {
+	const defaultTop = options.top + 10;
+	const defaultLeft = options.left + 10;
 	const defaultWidth = 280;
+	const defaultText = 'Text...';
 
-	const textbox = new fabric.Textbox(defaultText, {
+	const textbox = new fabric.Textbox(options.text || defaultText, {
 		type: ObjectType.text,
 		top: defaultTop,
 		left: defaultLeft,
-		objectId: id,
+		objectId: options.objectId,
 		width: defaultWidth,
 		objectCaching: false,
 		splitByGrapheme: true,
-		fontSize: fontSize,
+		fontSize: options.fontSize,
 		isSocketObject: false,
 	});
 
 	return textbox;
 };
 
-export const createPostIt = (
-	id: string,
-	x: number,
-	y: number,
-	textBox: fabric.Textbox,
-	nameLabel: fabric.Text,
-	backgroundRect: fabric.Rect
-) => {
-	const postit = new fabric.Group([backgroundRect, textBox, nameLabel], {
-		objectId: id,
+export const createPostIt = (options: PostItOptions) => {
+	const postit = new fabric.Group([options.backgroundRect, options.textBox, options.nameLabel], {
+		objectId: options.objectId,
 		type: ObjectType.postit,
-		left: x,
-		top: y,
+		left: options.left,
+		top: options.top,
 		objectCaching: false,
 		isSocketObject: false,
 	});
@@ -108,8 +93,12 @@ export const setLimitHeightEvent = (canvas: fabric.Canvas, textBox: fabric.Textb
 	textBox.on('changed', handler);
 };
 
-export const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, textBox: fabric.Textbox) => {
-	const id = postit.objectId;
+export const setObjectEditEvent = (
+	canvas: fabric.Canvas,
+	groupObject: fabric.Group,
+	textBox: fabric.Textbox | fabric.IText
+) => {
+	const id = groupObject.objectId;
 
 	const ungrouping = (items: fabric.Object[], activeObject: fabric.Group) => {
 		activeObject._restoreObjectsState();
@@ -118,12 +107,12 @@ export const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, 
 			canvas.add(items[i]);
 			items[i].lockMovementX = true;
 			items[i].lockMovementY = true;
-		}
-
-		if (items[1] instanceof fabric.Textbox) {
-			canvas.setActiveObject(items[1]);
-			items[1].enterEditing();
-			items[1].selectAll();
+			const obj = items[i];
+			if (obj instanceof fabric.Textbox || obj instanceof fabric.IText) {
+				canvas.setActiveObject(items[i]);
+				obj.enterEditing();
+				obj.selectAll();
+			}
 		}
 	};
 
@@ -147,48 +136,151 @@ export const setPostItEditEvent = (canvas: fabric.Canvas, postit: fabric.Group, 
 		});
 	});
 
-	postit.on('mousedblclick', () => {
-		const items = postit._objects;
-		ungrouping(items, postit);
+	groupObject.on('mousedblclick', () => {
+		const items = groupObject._objects;
+		ungrouping(items, groupObject);
 	});
 };
 
-export const setPreventResizeEvent = (canvas: fabric.Canvas) => {
+export const setPreventResizeEvent = (id: string, canvas: fabric.Canvas, backgroundRect: fabric.Rect) => {
 	canvas.on('object:scaling', (e) => {
+		if (e.target?.objectId !== id) return;
 		if (!(e.target instanceof fabric.Group)) return;
 		const objs = e.target._objects;
+		const rect = backgroundRect;
 
 		objs.forEach((obj) => {
-			if (obj instanceof fabric.Textbox || obj instanceof fabric.Text) {
+			if (obj instanceof fabric.Textbox || obj instanceof fabric.IText) {
 				const group = e.target;
-				const width = (group?.getScaledWidth() || 1) - 20 * (group?.scaleX || 1);
+				const width = (group?.getScaledWidth() || 0) - 20 * (group?.scaleX || 1);
+
 				const scaleX = 1 / (group?.scaleX || 1);
 				const scaleY = 1 / (group?.scaleY || 1);
-				obj.set({ scaleX: scaleX, scaleY: scaleY, width: width });
+				obj.set({
+					scaleX: scaleX,
+					scaleY: scaleY,
+					width: width,
+					left: (rect?.get('left') || 0) + 10,
+				});
 				obj.fire('changed');
 			}
 		});
 	});
 };
 
-export const addPostIt = (canvas: fabric.Canvas, x: number, y: number, fontSize: number, fill: string) => {
+export const addPostIt = (
+	canvas: fabric.Canvas,
+	x: number,
+	y: number,
+	fontSize: number,
+	fill: string,
+	creator: string
+) => {
 	const id = v4();
-	const nameLabel = createNameLabel(id, 'NAME', x, y);
-	const textBox = createTextBox(id, x, y, fontSize);
-	const backgroundRect = createRect(id, x, y, fill);
-	const postit = createPostIt(id, x, y, textBox, nameLabel, backgroundRect);
+	const nameLabel = createNameLabel({ objectId: id, text: creator, left: x, top: y });
+	const textBox = createTextBox({ objectId: id, left: x, top: y, fontSize: 40 });
+	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
+	const postit = createPostIt({
+		objectId: id,
+		left: x,
+		top: y,
+		textBox: textBox,
+		nameLabel: nameLabel,
+		backgroundRect: backgroundRect,
+	});
 
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
-	setPostItEditEvent(canvas, postit, textBox);
-	setPreventResizeEvent(canvas);
+	setObjectEditEvent(canvas, postit, textBox);
+	setPreventResizeEvent(id, canvas, backgroundRect);
 
 	canvas.add(postit);
 };
 
-export const setEditMenu = (object: fabric.Object) => {
-	const width = object?.width || 0;
-	const top = object?.top ? object.top - 50 : 0;
-	const left = object?.left ? object.left + width / 2 : 0;
+// Section
 
-	return [left, top];
+export const createSectionTitle = (options: SectionTitleOptions) => {
+	const defaultLeft = options.left + 10;
+	const defaultTop = options.top - 25;
+	const defaultFontSize = 15;
+
+	const title = new fabric.IText(options.text || 'SECTION', {
+		type: ObjectType.title,
+		objectId: options.objectId,
+		top: defaultTop,
+		left: defaultLeft,
+		fontSize: defaultFontSize,
+		isSocketObject: false,
+		objectCaching: false,
+	});
+
+	return title;
+};
+
+export const createSection = (options: SectionOption) => {
+	const section = new fabric.Group([options.backgroundRect, options.titleBackground, options.sectionTitle], {
+		type: ObjectType.section,
+		isSocketObject: false,
+		objectId: options.objectId,
+		left: options.left,
+		top: options.top,
+		objectCaching: false,
+	});
+	return section;
+};
+
+export const createTitleBackground = (options: TitleBackgroundOptions) => {
+	const defaultWidth = 70;
+	const defaultHeight = 20;
+	const defaultLeft = options.left + 7;
+	const defaultTop = options.top - 25;
+
+	const rect = new fabric.Rect({
+		type: ObjectType.rect,
+		objectId: options.objectId,
+		left: defaultLeft,
+		top: defaultTop,
+		fill: options.color,
+		width: defaultWidth,
+		height: defaultHeight,
+		objectCaching: false,
+		isSocketObject: false,
+		rx: 10,
+		ry: 10,
+	});
+
+	return rect;
+};
+
+export const setLimitChar = (canvas: fabric.Canvas, title: fabric.IText, background: fabric.Rect) => {
+	title.on('editing:entered', () => {
+		title.hiddenTextarea?.setAttribute('maxlength', '15');
+	});
+	const group = title.group;
+	if (!group) return;
+	title.on('changed', (e) => {
+		console.log(group);
+		background.set({ width: (title.get('width') || 0) + 10 });
+		canvas.renderAll();
+	});
+};
+
+export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: string) => {
+	const id = v4();
+	const sectionTitle = createSectionTitle({ objectId: id, text: 'SECTION', left: x, top: y });
+	const sectionBackground = createTitleBackground({ objectId: id, left: x, top: y, color: fill });
+	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
+	const section = createSection({
+		objectId: id,
+		left: x,
+		top: y,
+		sectionTitle,
+		titleBackground: sectionBackground,
+		backgroundRect,
+	});
+
+	setObjectEditEvent(canvas, section, sectionTitle);
+	setLimitChar(canvas, sectionTitle, sectionBackground);
+	section.sendBackwards(true);
+
+	canvas.add(section);
 };
