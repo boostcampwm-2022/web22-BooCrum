@@ -32,6 +32,8 @@ export const formatCreatePostitEventToSocket = (objectGroup: fabric.Group): Obje
 		top: objectGroup.top,
 		width: objectGroup.width,
 		height: objectGroup.height,
+		scaleX: objectGroup.scaleX,
+		scaleY: objectGroup.scaleY,
 	};
 
 	objectGroup._objects.forEach((object) => {
