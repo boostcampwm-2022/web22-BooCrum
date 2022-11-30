@@ -10,8 +10,9 @@ import { Workspace } from '@api/workspace';
 import { workspaceRole } from '@data/workspace-role';
 
 function WorkspaceMenu({ workspaceId, role, workspaceName, setWorkspaceList }: WorkspaceMenuProps) {
-	const { isOpenModal, modalRef, toggleOpenModal } = useModal();
+	const { isOpenModal, modalRef, toggleOpenModal, closeModal } = useModal();
 	const [modalContent, setModalContent] = useState(<></>);
+	const [title, setTitle] = useState('');
 
 	const openReanmeModal = () => {
 		const renameWorkspace = async (workspaceName: string) => {
@@ -20,6 +21,7 @@ function WorkspaceMenu({ workspaceId, role, workspaceName, setWorkspaceList }: W
 			setWorkspaceList();
 		};
 		toggleOpenModal();
+		setTitle('Rename');
 		setModalContent(<RenameModal action={renameWorkspace} workspaceName={workspaceName}></RenameModal>);
 	};
 	const openDeleteModal = () => {
@@ -29,6 +31,7 @@ function WorkspaceMenu({ workspaceId, role, workspaceName, setWorkspaceList }: W
 			setWorkspaceList();
 		};
 		toggleOpenModal();
+		setTitle('Delete');
 		setModalContent(<DeleteModal action={deleteWorkspace}></DeleteModal>);
 	};
 	return (
@@ -42,7 +45,7 @@ function WorkspaceMenu({ workspaceId, role, workspaceName, setWorkspaceList }: W
 					</>
 				)}
 			</WorkspaceMenuList>
-			<Modal isOpen={isOpenModal} modalRef={modalRef}>
+			<Modal width={400} height={200} isOpen={isOpenModal} modalRef={modalRef} title={title} closeModal={closeModal}>
 				{modalContent}
 			</Modal>
 		</>

@@ -1,15 +1,20 @@
-import { ModalBackground, ModalLayout } from './index.style';
+import { ModalBackground } from './index.style';
 import { ModalProps } from './index.types';
+import closeIcon from '@assets/icon/close.svg';
 
-function Modal({ isOpen, modalRef, width = 400, height = 200, children }: ModalProps) {
+function Modal({ isOpen, closeModal, modalRef, width, height, title, children }: ModalProps) {
 	if (!isOpen) return <></>;
 	return (
-		<>
-			<ModalLayout width={width} height={height} ref={modalRef}>
+		<ModalBackground width={width} height={height}>
+			<div className="modal-layout" ref={modalRef}>
+				<div className="header">
+					<h1 className="title">{title}</h1>
+					<img alt="close modal" src={closeIcon} className="modal-close" onClick={closeModal} />
+				</div>
+
 				{children}
-			</ModalLayout>
-			<ModalBackground></ModalBackground>
-		</>
+			</div>
+		</ModalBackground>
 	);
 }
 

@@ -1,11 +1,17 @@
-import { ErrorModalProps } from './index.types';
 import { ModalContent } from './index.style';
-import Modal from '@components/modal';
 import ErrorImage from '@assets/image/error-image.png';
+import useModal from '@hooks/useModal';
+import Modal from '@components/modal';
 
-function ErrorModal({ isOpen, modalRef, width = 400, height = 200, errorMessage }: ErrorModalProps) {
+interface ErrorModalProps {
+	errorMessage: string;
+}
+
+function ErrorModal({ errorMessage }: ErrorModalProps) {
+	const { isOpenModal, modalRef, closeModal } = useModal();
+
 	return (
-		<Modal isOpen={isOpen} modalRef={modalRef} width={width} height={height}>
+		<Modal isOpen={isOpenModal} modalRef={modalRef} width={600} height={450} closeModal={closeModal} title="Error">
 			<ModalContent>
 				<img className="error-image" src={ErrorImage} alt="error-image" />
 				<div className="error-message">{errorMessage}</div>

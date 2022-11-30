@@ -1,9 +1,5 @@
-import { RefObject } from 'react';
-
 export interface ShareModalProps {
 	id: string;
-	modalRef: RefObject<HTMLDivElement>;
-	closeModal: () => void;
 }
 
 interface UserInfo {

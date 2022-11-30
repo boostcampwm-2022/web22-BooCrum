@@ -4,7 +4,6 @@ import userProfileIcon from '@assets/icon/user-profile.svg';
 import logoutIcon from '@assets/icon/logout.svg';
 import useContextMenu from '@hooks/useContextMenu';
 import useAuth from '@hooks/useAuth';
-import { User } from '@api/user';
 import { useRecoilValueLoadable } from 'recoil';
 import { userProfileState } from '@context/user';
 
