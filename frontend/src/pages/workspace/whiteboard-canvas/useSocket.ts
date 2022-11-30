@@ -5,8 +5,16 @@ import { ClientToServerEvents, Member, MemberInCanvas, ServerToClientEvents } fr
 import { useRecoilState } from 'recoil';
 import { membersState } from '@context/workspace';
 import { fabric } from 'fabric';
-import { createCursorObject, createObjectFromServer, moveCursorFromServer } from '@utils/object-from-server';
+import {
+	createCursorObject,
+	createObjectFromServer,
+	moveCursorFromServer,
+	selectObjectFromServer,
+	unselectObjectFromServer,
+	updateObjectFromServer,
+} from '@utils/object-from-server';
 import { myInfoInWorkspaceState } from '@context/user';
+
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	// 자신의 정보 role을 이용해 작업하기 위해 생성
@@ -45,7 +53,23 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			console.log(members);
 			setMyInfoInWorkspace(userData);
 			setMembers(members);
-			//todo: objects 업데이트
+			members.forEach((member) => {
+				if (isMessageByMe(member.userId) === false) {
+					const cursorObject = createCursorObject(member.color);
+					const newMemberInCanvas: MemberInCanvas = {
+						userId: member.userId,
+						color: member.color,
+						cursorObject,
+					};
+					canvas.current?.add(cursorObject);
+					membersInCanvas.current.push(newMemberInCanvas);
+				}
+			});
+
+			objects.forEach((object) => {
+				if (!canvas.current) return;
+				createObjectFromServer(canvas.current, object);
+			});
 		});
 
 		socket.current.on('enter_user', (userData) => {
@@ -64,8 +88,13 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		socket.current.on('leave_user', ({ userId }) => {
 			setMembers((prev) => prev.filter((user) => user.userId !== userId));
-			membersInCanvas.current = membersInCanvas.current.filter((memberInCanvas) => memberInCanvas.userId !== userId);
-			console.log('leave_user');
+			membersInCanvas.current = membersInCanvas.current.filter((memberInCanvas) => {
+				if (memberInCanvas.userId === userId) {
+					canvas.current?.remove(memberInCanvas.cursorObject);
+					return false;
+				}
+				return true;
+			});
 		});
 
 		socket.current.on('exception', (arg) => {
@@ -74,32 +103,46 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		socket.current.on('move_pointer', (userMousePointer) => {
 			if (!canvas.current) return;
+			if (isMessageByMe(userMousePointer.userId)) return;
 			moveCursorFromServer(membersInCanvas.current, userMousePointer);
 
 			canvas.current.renderAll();
 		});
 
-		socket.current.on('select_object', ({ userId, objectId }) => {
-			//todo select 업데아트
+		socket.current.on('select_object', ({ userId, objectIds }) => {
+			if (!canvas.current) return;
+			if (isMessageByMe(userId)) return;
+			const member = membersInCanvas.current.filter((memberInCanvas) => memberInCanvas.userId === userId);
+			if (member.length === 0) return;
+
+			selectObjectFromServer(canvas.current, objectIds, member[0].color);
 		});
 
-		socket.current.on('unselect_object', ({ userId, objectId }) => {
-			//todo unselect 업데아트
+		socket.current.on('unselect_object', ({ userId, objectIds }) => {
+			if (!canvas.current) return;
+			if (isMessageByMe(userId)) return;
+			unselectObjectFromServer(canvas.current, objectIds);
 		});
 
 		socket.current.on('create_object', (arg) => {
 			if (!canvas.current) return;
 			if (isMessageByMe(arg.creator)) return;
 			createObjectFromServer(canvas.current, arg);
-			//todo object 추가
 		});
 
 		socket.current.on('delete_object', ({ objectId }) => {
-			// todo object 삭제
+			if (!canvas.current) return;
+			const objects = canvas.current.getObjects().filter((object) => {
+				return object.objectId === objectId;
+			});
+			if (!objects || objects.length === 0) return;
+			canvas.current.remove(...objects);
 		});
 
-		socket.current.on('update_object', ({ objectData }) => {
-			//todo object 업데이트
+		socket.current.on('update_object', ({ userId, objectData }) => {
+			if (!canvas.current) return;
+			if (isMessageByMe(userId)) return;
+			updateObjectFromServer(canvas.current, objectData);
 		});
 
 		return () => {

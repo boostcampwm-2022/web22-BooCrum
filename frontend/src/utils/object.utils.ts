@@ -124,7 +124,11 @@ export const setObjectEditEvent = (
 				canvas.remove(obj);
 			}
 		});
-		const grp = new fabric.Group(items, { objectId: id, type: ObjectType.postit, isSocketObject: false });
+		const grp = new fabric.Group(items, {
+			objectId: id,
+			type: ObjectType.postit,
+			isSocketObject: false,
+		});
 		canvas.add(grp);
 
 		grp.on('mousedblclick', () => {
