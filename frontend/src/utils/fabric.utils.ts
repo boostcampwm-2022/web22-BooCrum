@@ -110,10 +110,10 @@ export const addObject = (canvas: fabric.Canvas, creator: string) => {
 		const x = (evt.clientX - vpt[4]) / vpt[3];
 		const y = (evt.clientY - vpt[5]) / vpt[3];
 		if (canvas.mode === CanvasType.section && !canvas.getActiveObject()) {
-			addSection(canvas, x, y);
+			addSection(canvas, x, y, colorChips[8]);
 		} else if (canvas.mode === CanvasType.postit && !canvas.getActiveObject()) {
 			//todo 색 정보 받아와야함
-			addPostIt(canvas, x, y, 40, 'pink');
+			addPostIt(canvas, x, y, 40, colorChips[0], creator);
 		}
 	});
 };

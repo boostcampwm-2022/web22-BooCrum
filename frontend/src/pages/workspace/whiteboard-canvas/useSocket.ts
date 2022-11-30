@@ -1,8 +1,8 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
-import { ClientToServerEvents, MemberInCanvas, ServerToClientEvents } from './types';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { ClientToServerEvents, Member, MemberInCanvas, ServerToClientEvents } from './types';
+import { useRecoilState } from 'recoil';
 import { membersState } from '@context/workspace';
 import { fabric } from 'fabric';
 import { createCursorObject, createObjectFromServer, moveCursorFromServer } from '@utils/object-from-server';
@@ -11,6 +11,7 @@ import { myInfoInWorkspaceState } from '@context/user';
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	// 자신의 정보 role을 이용해 작업하기 위해 생성
 	const [myInfoInWorkspace, setMyInfoInWorkspace] = useRecoilState(myInfoInWorkspaceState);
+	const myInfoInWorkspaceRef = useRef<Member>();
 	const [members, setMembers] = useRecoilState(membersState);
 
 	const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
@@ -20,9 +21,12 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const { workspaceId } = useParams();
 
 	const isMessageByMe = (userId: string) => {
-		console.log(myInfoInWorkspace);
-		return myInfoInWorkspace.userId === userId;
+		return myInfoInWorkspaceRef.current?.userId === userId;
 	};
+
+	useEffect(() => {
+		myInfoInWorkspaceRef.current = myInfoInWorkspace;
+	}, [myInfoInWorkspace]);
 
 	useEffect(() => {
 		socket.current = io(`/workspace/${workspaceId}`);
