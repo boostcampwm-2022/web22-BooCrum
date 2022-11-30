@@ -21,6 +21,7 @@ jobs:
           cd ./frontend
           npm install
           npm build
+          
   try-backend-build:
     runs-on: ubuntu-20.04
     needs: check
