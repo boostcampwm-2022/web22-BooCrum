@@ -15,7 +15,7 @@ jobs:
           node-version: "16.18.0"
       - name: try build frontend
         env: |
-          DISABLE_ESLINT_PLUGIN=true
+          DISABLE_ESLINT_PLUGIN: true
         run: |
           cd ./frontend
           npm install
