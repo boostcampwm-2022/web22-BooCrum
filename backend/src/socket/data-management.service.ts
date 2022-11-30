@@ -7,6 +7,7 @@ import { ObjectMapVO } from './dto/object-map.vo';
 import { WorkspaceObject } from 'src/object-database/entity/workspace-object.entity';
 import { ObjectMoveDTO } from './dto/object-move.dto';
 import { ObjectScaleDTO } from './dto/object-scale.dto';
+import { ObjectDTO } from './dto/object.dto';
 
 @Injectable()
 export class DataManagementService {
@@ -157,19 +158,28 @@ export class DataManagementService {
     return result;
   }
 
-  updateDerivative(objectMoveDTO: ObjectMoveDTO) {
+  changeDerivative(objectMoveDTO: ObjectMoveDTO) {
     const objectMapVO = this.objectDataMap.get(objectMoveDTO.objectId);
     objectMapVO.dleft = objectMoveDTO.dleft;
     objectMapVO.dtop = objectMoveDTO.dtop;
     this.objectDataMap.set(objectMoveDTO.objectId, objectMapVO);
   }
 
-  updateScale(objectScaleDTO: ObjectScaleDTO) {
+  changeScale(objectScaleDTO: ObjectScaleDTO) {
     const objectMapVO = this.objectDataMap.get(objectScaleDTO.objectId);
     objectMapVO.dleft = objectScaleDTO.dleft;
     objectMapVO.dtop = objectScaleDTO.dtop;
     objectMapVO.scaleX = objectScaleDTO.scaleX;
     objectMapVO.scaleY = objectScaleDTO.scaleY;
     this.objectDataMap.set(objectScaleDTO.objectId, objectMapVO);
+  }
+
+  updateObjectData(objectDTO: ObjectDTO) {
+    const objectId = objectDTO.objectId;
+    const objectMapVO = new ObjectMapVO();
+    Object.assign(objectMapVO, objectDTO);
+    objectMapVO.dleft = 0;
+    objectMapVO.dtop = 0;
+    this.objectDataMap.set(objectId, objectMapVO);
   }
 }

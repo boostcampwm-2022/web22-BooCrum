@@ -199,7 +199,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (!objectData) throw new WsException('존재하지 않는 객체 접근');
 
     // ObjectMap 변경
-    this.dataManagementService.updateDerivative(objectMoveDTO);
+    this.dataManagementService.changeDerivative(objectMoveDTO);
 
     // 이벤트 전달
     socket.nsp.emit('move_object', {
@@ -225,7 +225,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (!objectData) throw new WsException('존재하지 않는 객체 접근');
 
     // ObjectMap 변경
-    this.dataManagementService.updateScale(objectScaleDTO);
+    this.dataManagementService.changeScale(objectScaleDTO);
 
     // 이벤트 전달
     socket.nsp.emit('scale_object', {
@@ -259,6 +259,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       // 수정을 시도하고, 성공하면 이를 전달한다.
       const ret = await this.objectHandlerService.updateObject(userData.workspaceId, objectData);
       if (!ret) throw new WsException('수정 실패');
+      this.dataManagementService.updateObjectData(objectData);
       socket.nsp.emit('update_object', { userId: userData.userId, objectData });
     } catch (e) {
       this.logger.error(e);
