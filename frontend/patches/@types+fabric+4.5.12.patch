@@ -1,5 +1,5 @@
 diff --git a/node_modules/@types/fabric/fabric-impl.d.ts b/node_modules/@types/fabric/fabric-impl.d.ts
-index 107db96..a7a0b29 100755
+index 107db96..dfbe3c9 100644
 --- a/node_modules/@types/fabric/fabric-impl.d.ts
 +++ b/node_modules/@types/fabric/fabric-impl.d.ts
 @@ -175,6 +175,7 @@ interface IEvent<E extends Event = Event> {
@@ -35,7 +35,6 @@ index 107db96..a7a0b29 100755
 +    type: "postit" | "section" | "draw" | "text" | "title" | "nameText" | "cursor" | "rect" | "line" | "editable";
 +
 +    isSocketObject: boolean;
- 
  
      /**
       * Horizontal origin of transformation of an object (one of "left", "right", "center")
