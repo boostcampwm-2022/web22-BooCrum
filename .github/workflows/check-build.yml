@@ -16,7 +16,7 @@ jobs:
       - run: |
           cd ./frontend
           npm install
-          npm build
+          npm run build
   try-backend-build:
     runs-on: ubuntu-20.04
     steps:
@@ -27,4 +27,4 @@ jobs:
       - run: |
           cd ./backend
           npm install
-          npm build
+          npm run build
