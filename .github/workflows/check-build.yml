@@ -8,14 +8,14 @@ on:
 jobs:
   try-frontend-build:
     runs-on: ubuntu-20.04
+    env: 
+      DISABLE_ESLINT_PLUGIN: true
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3.5.1
         with:
           node-version: "16.18.0"
       - name: try build frontend
-        env: |
-          DISABLE_ESLINT_PLUGIN: true
         run: |
           cd ./frontend
           npm install
