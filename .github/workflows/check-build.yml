@@ -9,7 +9,7 @@ jobs:
   try-frontend-build:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2.5.0
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v3.5.1
         with:
           node-version: "16.18.0"
@@ -20,7 +20,7 @@ jobs:
   try-backend-build:
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2.5.0
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v3.5.1
         with:
           node-version: "16.18.0"
