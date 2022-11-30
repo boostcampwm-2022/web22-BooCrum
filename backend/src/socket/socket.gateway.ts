@@ -138,14 +138,14 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('select_object')
-  async selectObject(@MessageBody('objectId') objectIds: string[], @ConnectedSocket() socket: Socket) {
+  async selectObject(@MessageBody('objectIds') objectIds: string[], @ConnectedSocket() socket: Socket) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('select_object', { objectIds, userId: userData.userId });
   }
 
   @SubscribeMessage('unselect_object')
-  async unselectObject(@MessageBody('objectId') objectIds: string[], @ConnectedSocket() socket: Socket) {
+  async unselectObject(@MessageBody('objectIds') objectIds: string[], @ConnectedSocket() socket: Socket) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('unselect_object', { objectIds, userId: userData.userId });
