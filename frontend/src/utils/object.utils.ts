@@ -11,7 +11,7 @@ export const setEditMenu = (object: fabric.Object) => {
 };
 
 export const createNameLabel = (options: NameLabelOptions) => {
-	const defaultLeft = options.left + 10;
+	const defaultLeft = options.left + 300 * 0.05;
 	const defaultTop = options.top + 275;
 	const defaultFontSize = 15;
 
@@ -48,9 +48,9 @@ export const createRect = (options: RectOptions) => {
 };
 
 export const createTextBox = (options: TextBoxOptions) => {
-	const defaultTop = options.top + 10;
-	const defaultLeft = options.left + 10;
-	const defaultWidth = 280;
+	const defaultTop = options.top + 300 * 0.05;
+	const defaultLeft = options.left + 300 * 0.05;
+	const defaultWidth = 300 * 0.9;
 	const defaultText = 'Text...';
 
 	const textbox = new fabric.Textbox(options.text || defaultText, {
@@ -102,19 +102,18 @@ export const setLimitHeightEvent = (
 export const setPostItEditEvent = (
 	canvas: fabric.Canvas,
 	groupObject: fabric.Group,
-	editableTextBox: fabric.Textbox | fabric.IText,
-	textBox: fabric.Textbox | fabric.IText
+	editableTextBox: fabric.Textbox,
+	textBox: fabric.Textbox
 ) => {
 	groupObject.on('mousedblclick', (e) => {
 		textBox.set({ visible: false });
-
 		canvas.add(editableTextBox);
 		canvas.setActiveObject(editableTextBox);
 		editableTextBox.enterEditing();
 		editableTextBox.set({
-			left: (groupObject?.left || 0) + groupObject.getScaledWidth() * 0.033,
-			top: (groupObject?.top || 0) + groupObject.getScaledHeight() * 0.033,
-			width: groupObject.getScaledWidth() * 0.93,
+			left: (groupObject?.left || 0) + groupObject.getScaledWidth() * 0.05,
+			top: (groupObject?.top || 0) + groupObject.getScaledHeight() * 0.05,
+			width: groupObject.getScaledWidth() * 0.9,
 			fontSize: textBox.fontSize,
 		});
 		editableTextBox.fire('changed');
@@ -128,7 +127,6 @@ export const setPostItEditEvent = (
 	editableTextBox.on('editing:exited', (e) => {
 		textBox.set({ visible: true });
 		canvas.remove(editableTextBox);
-
 		textBox.fire('changed');
 	});
 };
@@ -149,7 +147,7 @@ export const setPreventResizeEvent = (
 		obj.set({
 			scaleX: scaleX,
 			scaleY: scaleY,
-			width: (group?.getScaledWidth() || 0) * 0.93,
+			width: (group?.getScaledWidth() || 0) * 0.9,
 		});
 		obj.fire('changed');
 	});
@@ -167,8 +165,6 @@ export const addPostIt = (
 	const nameLabel = createNameLabel({ objectId: id, text: creator, left: x, top: y });
 	const textBox = createTextBox({ objectId: id, left: x, top: y, fontSize: fontSize });
 	const editableTextBox = createTextBox({ objectId: id, left: x, top: y, fontSize: 40, editable: true });
-	console.log('textbox', textBox);
-	console.log('edit', editableTextBox);
 	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
 	const postit = createPostIt({
 		objectId: id,
@@ -262,8 +258,8 @@ export const setLimitChar = (
 export const setSectionEditEvent = (
 	canvas: fabric.Canvas,
 	groupObject: fabric.Group,
-	editableTitle: fabric.Textbox | fabric.IText,
-	sectionTitle: fabric.Textbox | fabric.IText
+	editableTitle: fabric.IText,
+	sectionTitle: fabric.IText
 ) => {
 	groupObject.on('mousedblclick', (e) => {
 		sectionTitle.set({ visible: false });
