@@ -1,7 +1,5 @@
 import { useParams, Navigate } from 'react-router-dom';
 import WhiteboardCanvas from './whiteboard-canvas';
-import Header from './header';
-import Toolkit from './toolkit';
 import { useEffect } from 'react';
 import Loading from '@components/loading';
 import useAuth from '@hooks/useAuth';
