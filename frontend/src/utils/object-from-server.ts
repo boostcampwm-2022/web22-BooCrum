@@ -11,7 +11,7 @@ import {
 	createRect,
 	createTextBox,
 	setLimitHeightEvent,
-	setPostItEditEvent,
+	setObjectEditEvent,
 	setPreventResizeEvent,
 } from './object.utils';
 
@@ -25,9 +25,9 @@ export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
 	const { objectId, left, top, fontSize, color, text, width, height } = newObject;
 	if (!left || !top || !fontSize || !color || !text || !width || !height) return;
-	const nameLabel = createNameLabel(objectId, 'NAME', left, top);
-	const textBox = createTextBox(objectId, left, top, fontSize, text);
-	const backgroundRect = createRect(objectId, left, top, color);
+	const nameLabel = createNameLabel({ objectId, text: 'NAME', left, top });
+	const textBox = createTextBox({ objectId, left, top, fontSize, text });
+	const backgroundRect = createRect({ objectId, left, top, color });
 	backgroundRect.set({
 		width,
 		height,
@@ -42,13 +42,13 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 		isSocketObject: true,
 	});
 
-	const postit = createPostIt(objectId, left, top, textBox, nameLabel, backgroundRect);
+	const postit = createPostIt({ objectId, left, top, textBox, nameLabel, backgroundRect });
 	postit.set({
 		isSocketObject: true,
 	});
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
-	setPostItEditEvent(canvas, postit, textBox);
-	setPreventResizeEvent(canvas);
+	setObjectEditEvent(canvas, postit, textBox);
+	setPreventResizeEvent(postit.objectId, canvas, backgroundRect);
 	canvas.add(postit);
 };
 
