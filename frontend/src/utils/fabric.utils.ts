@@ -36,9 +36,9 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 	}
 
 	fabric.Image.fromURL(backgroundCanvas.toDataURL(), (img) => {
-		canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+		canvas.setBackgroundImage(img, () => canvas.renderAll.bind(canvas), {
 			objectId: v4(),
-			type: ObjectType.rect,
+			type: ObjectType.line,
 			left: -width,
 			top: -height,
 			isSocketObject: false,
