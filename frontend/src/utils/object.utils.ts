@@ -1,5 +1,5 @@
 import { fabric } from 'fabric';
-import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
+import { CanvasType, ObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import { v4 } from 'uuid';
 
 export const setEditMenu = (object: fabric.Object) => {
@@ -107,7 +107,12 @@ export const setPostItEditEvent = (
 	editableTextBox: fabric.Textbox,
 	textBox: fabric.Textbox
 ) => {
+	let prevCanvasMode: CanvasType;
+
 	groupObject.on('mousedblclick', (e) => {
+		if (canvas.mode === CanvasType.move) return;
+
+		prevCanvasMode = canvas.mode;
 		textBox.set({ visible: false });
 		canvas.add(editableTextBox);
 		canvas.setActiveObject(editableTextBox);
@@ -118,7 +123,7 @@ export const setPostItEditEvent = (
 			width: groupObject.getScaledWidth() * 0.9,
 			fontSize: textBox.fontSize,
 		});
-		canvas.mode = 'edit';
+		canvas.mode = CanvasType.edit;
 		editableTextBox.fire('changed');
 	});
 
@@ -128,9 +133,10 @@ export const setPostItEditEvent = (
 	});
 
 	editableTextBox.on('editing:exited', (e) => {
+		console.log(prevCanvasMode);
 		canvas.remove(editableTextBox);
 		textBox.set({ visible: true });
-		canvas.mode = 'select';
+		canvas.mode = prevCanvasMode;
 		textBox.fire('changed');
 	});
 };

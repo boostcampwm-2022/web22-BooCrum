@@ -51,6 +51,7 @@ export const CanvasType = {
 	move: 'move',
 	select: 'select',
 	draw: 'draw',
+	edit: 'edit',
 } as const;
 
 export type CanvasType = typeof CanvasType[keyof typeof CanvasType];

@@ -164,6 +164,7 @@ export const setObjectIndexLeveling = (canvas: fabric.Canvas) => {
 
 export const setCursorMode = (canvas: fabric.Canvas, cursor: string, mode: CanvasType, selectable: boolean) => {
 	canvas.defaultCursor = cursor;
+	canvas.hoverCursor = cursor;
 	canvas.mode = mode;
 	canvas.forEachObject((obj) => (obj.selectable = selectable));
 };
