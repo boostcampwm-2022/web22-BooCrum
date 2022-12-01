@@ -140,6 +140,7 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 		if (e.key === 'Backspace') {
 			if (canvas.mode === 'edit') return;
 			canvas.getActiveObjects().forEach((obj) => {
+				obj.isSocketObject = false;
 				canvas.remove(obj);
 			});
 			document.removeEventListener('keydown', objectDeleteHandler);

@@ -126,7 +126,11 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('delete_object', ({ objectId }) => {
 			if (!canvas.current) return;
 			const objects = canvas.current.getObjects().filter((object) => {
-				return object.objectId === objectId;
+				if (object.objectId === objectId) {
+					object.isSocketObject = true;
+					return true;
+				}
+				return false;
 			});
 			if (!objects || objects.length === 0) return;
 			canvas.current.remove(...objects);
