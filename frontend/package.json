@@ -7,7 +7,7 @@
     "@testing-library/jest-dom": "^5.16.5",
     "@testing-library/react": "^13.4.0",
     "@testing-library/user-event": "^13.5.0",
-    "@types/fabric": "^4.5.12",
+    "@types/fabric": "https://registry.npmjs.org/@seonghunyang/boocrum-types/-/boocrum-types-0.0.5.tgz",
     "@types/jest": "^27.5.2",
     "@types/node": "^16.18.3",
     "@types/react": "^18.0.25",
@@ -32,8 +32,7 @@
     "eject": "craco eject",
     "lint": "eslint './src/**/*.{ts,tsx,js,jsx}'",
     "lint:fix": "eslint --fix './src/**/*.{ts,tsx,js,jsx}'",
-    "prettier": "prettier --write --config ./.prettierrc './src/**/*.{ts,tsx}'",
-    "postinstall": "npx patch-package"
+    "prettier": "prettier --write --config ./.prettierrc './src/**/*.{ts,tsx}'"
   },
   "eslintConfig": {
     "extends": [
