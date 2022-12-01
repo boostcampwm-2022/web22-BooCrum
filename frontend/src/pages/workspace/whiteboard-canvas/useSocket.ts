@@ -43,6 +43,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('init', ({ members, objects, userData }) => {
+			console.log(objects);
 			myInfoInWorkspaceRef.current = userData;
 			setMyInfoInWorkspace(userData);
 			setMembers(members);
@@ -134,6 +135,17 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			});
 			if (!objects || objects.length === 0) return;
 			canvas.current.remove(...objects);
+		});
+
+		socket.current.on('move_object', ({ userId, objectData }) => {
+			if (!canvas.current) return;
+			if (isMessageByMe(userId)) return;
+			console.log('move', objectData);
+			if (!objectData.left || !objectData.dleft) return;
+			objectData.left += objectData.dleft;
+			if (!objectData.top || !objectData.dtop) return;
+			objectData.top += objectData.dtop;
+			updateObjectFromServer(canvas.current, objectData);
 		});
 
 		socket.current.on('update_object', ({ userId, objectData }) => {

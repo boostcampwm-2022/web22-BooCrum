@@ -5,19 +5,16 @@ import {
 	CanvasObject,
 } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
-import { v4 } from 'uuid';
-export const formatMessageToSocket = (canvas: fabric.Canvas, object: fabric.Object): ObjectDataToServer => {
-	// todo fabric.Object -> text 포함된 타입으로 변경 필요
+export const formatMessageToSocket = (object: fabric.Object): ObjectDataToServer => {
 	const message: ObjectDataToServer = {
-		type: canvas.mode as ObjectType,
-		objectId: v4(),
+		objectId: object.objectId,
 		left: object.left,
 		top: object.top,
 		width: object.width,
 		height: object.height,
-		color: object.fill as string,
-		text: '',
-		fontSize: 12,
+		// color: object.fill as string,
+		scaleX: object.scaleX,
+		scaleY: object.scaleY,
 	};
 
 	return message;
@@ -50,13 +47,16 @@ export const formatCreatePostitEventToSocket = (objectGroup: fabric.Group): Obje
 	return message;
 };
 
-export const formatMoveObjectEventToSocket = (object: fabric.Object): ObjectDataToServer => {
+export const formatMoveObjectEventToSocket = (
+	object: fabric.Object,
+	dleft: number,
+	dtop: number
+): ObjectDataToServer => {
 	// todo fabric.Object -> text 포함된 타입으로 변경 필요
 	const message: ObjectDataToServer = {
-		type: object.type,
 		objectId: object.objectId,
-		left: object.left,
-		top: object.top,
+		dleft,
+		dtop,
 	};
 
 	return message;

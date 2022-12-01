@@ -10,6 +10,8 @@ import {
 	formatMoveObjectEventToSocket,
 	formatScalingObjectEventToSocket,
 } from '@utils/socket.utils';
+import { Transform } from 'fabric/fabric-impl';
+import { formatMessageToSocket } from '../../../utils/socket.utils';
 
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
@@ -88,6 +90,11 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				socket.current?.emit('unselect_object', {
 					objectIds: getObjectIds(deselected),
 				});
+
+				deselected.forEach((object) => {
+					const message = formatMessageToSocket(object);
+					socket.current?.emit('update_object', message);
+				});
 			}
 
 			if (selected.length !== 0) {
@@ -105,23 +112,69 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				socket.current?.emit('unselect_object', {
 					objectIds: getObjectIds(deselected),
 				});
+
+				deselected.forEach((object) => {
+					const message = formatMessageToSocket(object);
+					socket.current?.emit('update_object', message);
+				});
 			}
 		});
 
-		canvas.current.on('object:moving', (arg) => {
-			const { target } = arg;
-			console.log(arg);
-			if (!target) return;
+		canvas.current.on('object:moving', ({ target, transform, e }) => {
+			if (!target || !transform) return;
+
+			const dx = (e as MouseEvent).x - (transform as Transform).ex;
+			const dy = (e as MouseEvent).y - (transform as Transform).ey;
 
 			if (target.type in ObjectType) {
-				const message = formatMoveObjectEventToSocket(target);
-				socket.current?.emit('update_object', message);
+				const message = formatMoveObjectEventToSocket(target, dx, dy);
+				socket.current?.emit('move_object', message);
 				return;
 			}
 			console.log('asdasd', target);
 
 			// target._objects()
 		});
+
+		// canvas.current.on('object:moving', ({ target, transform, e }) => {
+		// 	if (!target || !transform || !transformedObject.current) return;
+		// 	// 변화량
+		// 	// if (!target.left || !target.top || !transformedObject.current.left || !transformedObject.current.top) return;
+		// 	// const p_dx = target.left - transformedObject.current.left;
+		// 	// const p_dy = target.top - transformedObject.current.top;
+
+		// 	// 이동량 진짜 개화나게 타입을 거지같이 넘겨준다
+		// const dx = (e as MouseEvent).x - (transform as Transform).ex;
+		// const dy = (e as MouseEvent).y - (transform as Transform).ey;
+
+		// 	if (target.type in ObjectType) {
+		// 		const message = formatMoveObjectEventToSocket(target);
+		// 		const message = formatMoveObjectEventToSocket(target, dx, dy);
+		// 		socket.current?.emit('update_object', message);
+		// 		return;
+		// 	}
+		// 	console.log('asdasd', target);
+
+		// 	// target._objects()
+		// 	console.log('trans', transform);
+
+		// 	const groupObject = transformedObject.current as fabric.Group;
+		// 	console.log(groupObject);
+		// 	console.log(dx, dy);
+		// 	groupObject._objects.forEach((object) => {
+		// 		// ...?
+		// 		console.log(object.left);
+		// 		const message = formatMoveObjectEventToSocket(object, dx, dy);
+		// 		socket.current?.emit('update_object', message);
+		// 	});
+		// });
+
+		// canvas.current.on('object:modified', ({ target, transform }) => {
+		// 	if (!target || !transform) return;
+
+		// 	const dx = (e as MouseEvent).x - (transform as Transform).ex;
+		// 	const dy = (e as MouseEvent).y - (transform as Transform).ey;
+		// });
 
 		canvas.current.on('mouse:move', (e) => {
 			// todo object update 로직
