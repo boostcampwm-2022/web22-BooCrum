@@ -3,11 +3,17 @@ import { UserMapVO } from './dto/user-map.vo';
 import { Socket } from 'socket.io';
 import { DbAccessService } from './db-access.service';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
+import { ObjectMapVO } from './dto/object-map.vo';
+import { WorkspaceObject } from 'src/object-database/entity/workspace-object.entity';
+import { ObjectMoveDTO } from './dto/object-move.dto';
+import { ObjectScaleDTO } from './dto/object-scale.dto';
+import { ObjectDTO } from './dto/object.dto';
 
 @Injectable()
 export class DataManagementService {
   private socketUserDataMap = new Map<string, UserMapVO>(); // socketId -> userMapVO
   private workspaceUserDataMap = new Map<string, UserMapVO[]>(); // workspaceId -> userMapVO[]
+  private objectDataMap = new Map<string, ObjectMapVO>();
   private logger: Logger = new Logger('UserDataService');
 
   constructor(private dbAccessService: DbAccessService) {}
@@ -125,5 +131,37 @@ export class DataManagementService {
       else this.workspaceUserDataMap.set(userData.workspaceId, workspaceUserList);
     }
     return userData;
+  }
+
+  // Workspace 접속 시 DB에 존재하는 Object Data를 objectMap에 저장하는 메서드
+  initObjectMap(workspaceId: string, workspaceObject: WorkspaceObject[]) {
+    workspaceObject.forEach((obj) => {
+      const objectId = obj.objectId;
+      this.objectDataMap.set(objectId, { ...obj, workspaceId });
+    });
+  }
+
+  // objectId를 통해 objectMap에 존재하는 ObjectData를 조회하는 메서드
+  selectObjectMapByObjectId(objectId: string): ObjectMapVO {
+    return this.objectDataMap.get(objectId);
+  }
+
+  // Object Data를 objectMap에 추가하는 메서드
+  insertObjectData(objectDTO: ObjectDTO) {
+    const objectId = objectDTO.objectId;
+    this.objectDataMap.set(objectId, objectDTO);
+  }
+
+  // objectMap에 update된 속성을 수정(덮어쓰기)하는 메서드
+  updateObjectData(objectDTO: ObjectDTO) {
+    const objectId = objectDTO.objectId;
+    const oldObjectData = this.selectObjectMapByObjectId(objectDTO.objectId);
+    const objectMapVO: ObjectMapVO = Object.assign(oldObjectData, objectDTO);
+    this.objectDataMap.set(objectId, objectMapVO);
+  }
+
+  // objectId를 통해 objectMap의 데이터를 삭제하는 메서드
+  deleteObjectData(objectId: string) {
+    this.objectDataMap.delete(objectId);
   }
 }

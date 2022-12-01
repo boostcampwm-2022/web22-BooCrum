@@ -6,8 +6,14 @@ import { v4 } from 'uuid';
 import { addPostIt, addSection } from './object.utils';
 
 export const initGrid = (canvas: fabric.Canvas, width: number, height: number, gridSize: number) => {
-	for (let i = -width / gridSize + 1; i <= (2 * width) / gridSize; i++) {
-		const lineY = new fabric.Line([i * gridSize, -height, i * gridSize, height * 2], {
+	const backgroundCanvas = new fabric.Canvas('', {
+		mode: canvas.mode,
+		height: height * 4,
+		width: width * 4,
+		backgroundColor: '#f1f1f1',
+	});
+	for (let i = 0; i <= (4 * width) / gridSize; i++) {
+		const lineY = new fabric.Line([i * gridSize, 0, i * gridSize, height * 4], {
 			objectId: v4(),
 			type: 'line',
 			stroke: '#ccc',
@@ -15,10 +21,10 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 			isSocketObject: false,
 		});
 
-		canvas.sendToBack(lineY);
+		backgroundCanvas.add(lineY);
 	}
-	for (let i = -height / gridSize + 1; i <= (2 * height) / gridSize; i++) {
-		const lineX = new fabric.Line([-width, i * gridSize, width * 2, i * gridSize], {
+	for (let i = 0; i <= (4 * height) / gridSize; i++) {
+		const lineX = new fabric.Line([0, i * gridSize, width * 4, i * gridSize], {
 			objectId: v4(),
 			type: 'line',
 			stroke: '#ccc',
@@ -26,8 +32,18 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 			isSocketObject: false,
 		});
 
-		canvas.sendToBack(lineX);
+		backgroundCanvas.add(lineX);
 	}
+
+	fabric.Image.fromURL(backgroundCanvas.toDataURL(), (img) => {
+		canvas.setBackgroundImage(img, () => canvas.renderAll.bind(canvas), {
+			objectId: v4(),
+			type: ObjectType.line,
+			left: -width,
+			top: -height,
+			isSocketObject: false,
+		});
+	});
 };
 
 export const initZoom = (
@@ -120,24 +136,20 @@ export const addObject = (canvas: fabric.Canvas, creator: string) => {
 
 export const deleteObject = (canvas: fabric.Canvas) => {
 	const objectDeleteHandler = (e: KeyboardEvent) => {
+		console.log(e.key);
 		if (e.key === 'Backspace') {
+			if (canvas.mode === 'edit') return;
 			canvas.getActiveObjects().forEach((obj) => {
-				if (obj instanceof fabric.Textbox || obj instanceof fabric.IText) {
-					return;
-				}
 				obj.isSocketObject = false;
 				canvas.remove(obj);
 			});
+			document.removeEventListener('keydown', objectDeleteHandler);
 		}
 	};
 
 	// object 선택시 이벤트 추가
 	canvas.on('selection:created', () => {
 		document.addEventListener('keydown', objectDeleteHandler);
-	});
-	// object 선택 해제시 이벤트 삭제
-	canvas.on('selection:cleared', () => {
-		document.removeEventListener('keydown', objectDeleteHandler);
 	});
 };
 
@@ -153,6 +165,7 @@ export const setObjectIndexLeveling = (canvas: fabric.Canvas) => {
 
 export const setCursorMode = (canvas: fabric.Canvas, cursor: string, mode: CanvasType, selectable: boolean) => {
 	canvas.defaultCursor = cursor;
+	canvas.hoverCursor = cursor;
 	canvas.mode = mode;
 	canvas.forEachObject((obj) => (obj.selectable = selectable));
 };

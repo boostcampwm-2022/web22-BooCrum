@@ -21,6 +21,9 @@ import { ObjectDTO } from './dto/object.dto';
 import { UserDAO } from './dto/user.dao';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 import { WorkspaceObject } from '../object-database/entity/workspace-object.entity';
+import { ObjectMoveDTO } from './dto/object-move.dto';
+import { ObjectMapVO } from './dto/object-map.vo';
+import { ObjectScaleDTO } from './dto/object-scale.dto';
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -89,6 +92,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       .map((vo) => new UserDAO(vo.userId, vo.nickname, vo.color, vo.role));
     const objects: WorkspaceObject[] = await this.objectHandlerService.selectAllObjects(workspaceId);
     const userData = new UserDAO(userMapVO.userId, userMapVO.nickname, userMapVO.color, userMapVO.role);
+    this.dataManagementService.initObjectMap(workspaceId, objects);
 
     // 5. Socket 이벤트 Emit
     client.emit('init', { members, objects, userData });
@@ -177,11 +181,60 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       // 생성을 시도하고, 성공하면 이를 전달한다.
       const ret = await this.objectHandlerService.createObject(userData.workspaceId, objectData);
       if (!ret) throw new WsException('생성 실패');
+      this.dataManagementService.insertObjectData(objectData);
       socket.nsp.emit('create_object', objectData);
     } catch (e) {
       this.logger.error(e);
       throw new WsException(e.message);
     }
+  }
+
+  @SubscribeMessage('move_object')
+  async moveObject(@MessageBody() objectMoveDTO: ObjectMoveDTO, @ConnectedSocket() socket: Socket) {
+    // User 권한 체크
+    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+
+    // 객체 존재 여부 체크 및 조회
+    const objectData: ObjectMapVO = this.dataManagementService.selectObjectMapByObjectId(objectMoveDTO.objectId);
+    if (!objectData) throw new WsException('존재하지 않는 객체 접근');
+
+    // 이벤트 전달
+    socket.nsp.emit('move_object', {
+      userId: userData.userId,
+      objectData: {
+        objectId: objectMoveDTO.objectId,
+        dleft: objectMoveDTO.dleft,
+        dtop: objectMoveDTO.dtop,
+        left: objectData.left,
+        top: objectData.top,
+      },
+    });
+  }
+
+  @SubscribeMessage('scale_object')
+  async scaleObject(@MessageBody() objectScaleDTO: ObjectScaleDTO, @ConnectedSocket() socket: Socket) {
+    // User 권한 체크
+    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+
+    // 객체 존재 여부 체크 및 조회
+    const objectData: ObjectMapVO = this.dataManagementService.selectObjectMapByObjectId(objectScaleDTO.objectId);
+    if (!objectData) throw new WsException('존재하지 않는 객체 접근');
+
+    // 이벤트 전달
+    socket.nsp.emit('scale_object', {
+      userId: userData.userId,
+      objectData: {
+        objectId: objectScaleDTO.objectId,
+        dleft: objectScaleDTO.dleft,
+        dtop: objectScaleDTO.dtop,
+        left: objectData.left,
+        top: objectData.top,
+        scaleX: objectScaleDTO.scaleX,
+        scaleY: objectScaleDTO.scaleY,
+      },
+    });
   }
 
   @SubscribeMessage('update_object')
@@ -201,6 +254,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       // 수정을 시도하고, 성공하면 이를 전달한다.
       const ret = await this.objectHandlerService.updateObject(userData.workspaceId, objectData);
       if (!ret) throw new WsException('수정 실패');
+      this.dataManagementService.updateObjectData(objectData);
       socket.nsp.emit('update_object', { userId: userData.userId, objectData });
     } catch (e) {
       this.logger.error(e);
@@ -216,6 +270,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       const ret = await this.objectHandlerService.deleteObject(userData.workspaceId, objectId);
       if (!ret) new WsException('삭제 실패');
+      this.dataManagementService.deleteObjectData(objectId);
       socket.nsp.emit('delete_object', { userId: userData.userId, objectId });
     } catch (e) {
       this.logger.error(e);
