@@ -133,6 +133,7 @@ export class DataManagementService {
     return userData;
   }
 
+  // Workspace 접속 시 DB에 존재하는 Object Data를 objectMap에 저장하는 메서드
   initObjectMap(workspaceId: string, workspaceObject: WorkspaceObject[]) {
     workspaceObject.forEach((obj) => {
       const objectId = obj.objectId;
@@ -141,24 +142,19 @@ export class DataManagementService {
     });
   }
 
+  // objectId를 통해 objectMap에 존재하는 ObjectData를 조회하는 메서드
   selectObjectMapByObjectId(objectId: string): ObjectMapVO {
     return this.objectDataMap.get(objectId);
   }
 
-  selectObjectMapByWorkspaceId(workspaceId: string): ObjectMapVO[] {
-    const result = [];
-    this.objectDataMap.forEach((obj, key) => {
-      if (obj.workspaceId === workspaceId) result.push({ objectId: key, ...obj });
-    });
-    return result;
-  }
-
+  // Object Data를 objectMap에 추가하는 메서드
   insertObjectData(objectDTO: ObjectDTO) {
     const objectId = objectDTO.objectId;
     delete objectDTO.objectId;
     this.objectDataMap.set(objectId, objectDTO);
   }
 
+  // objectMap에 update된 속성을 수정(덮어쓰기)하는 메서드
   updateObjectData(objectDTO: ObjectDTO) {
     const objectId = objectDTO.objectId;
     const oldObjectData = this.selectObjectMapByObjectId(objectDTO.objectId);
@@ -167,6 +163,7 @@ export class DataManagementService {
     this.objectDataMap.set(objectId, objectMapVO);
   }
 
+  // objectId를 통해 objectMap의 데이터를 삭제하는 메서드
   deleteObjectData(objectId: string) {
     this.objectDataMap.delete(objectId);
   }
