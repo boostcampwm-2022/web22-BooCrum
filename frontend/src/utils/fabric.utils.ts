@@ -120,23 +120,19 @@ export const addObject = (canvas: fabric.Canvas, creator: string) => {
 
 export const deleteObject = (canvas: fabric.Canvas) => {
 	const objectDeleteHandler = (e: KeyboardEvent) => {
+		console.log(e.key);
 		if (e.key === 'Backspace') {
+			if (canvas.mode === 'edit') return;
 			canvas.getActiveObjects().forEach((obj) => {
-				if (obj instanceof fabric.Textbox || obj instanceof fabric.IText) {
-					return;
-				}
 				canvas.remove(obj);
 			});
+			document.removeEventListener('keydown', objectDeleteHandler);
 		}
 	};
 
 	// object 선택시 이벤트 추가
 	canvas.on('selection:created', () => {
 		document.addEventListener('keydown', objectDeleteHandler);
-	});
-	// object 선택 해제시 이벤트 삭제
-	canvas.on('selection:cleared', () => {
-		document.removeEventListener('keydown', objectDeleteHandler);
 	});
 };
 
