@@ -22,8 +22,8 @@ export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 };
 
 export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
-	const { objectId, left, top, fontSize, color, text, width, height, creator } = newObject;
-	if (!left || !top || !fontSize || !color || !text || !width || !height) return;
+	const { objectId, left, top, fontSize, color, text, width, height, creator, scaleX, scaleY } = newObject;
+	if (!left || !top || !fontSize || !color || !text || !width || !height || !scaleX || !scaleY) return;
 	const nameLabel = createNameLabel({ objectId, text: creator, left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
 	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
@@ -46,6 +46,8 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 	const postit = createPostIt({ objectId, left, top, textBox, nameLabel, backgroundRect });
 	postit.set({
 		isSocketObject: true,
+		scaleX,
+		scaleY,
 	});
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
 	setLimitHeightEvent(canvas, editableTextBox, postit);

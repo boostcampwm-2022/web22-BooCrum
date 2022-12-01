@@ -29,8 +29,8 @@ export const formatCreatePostitEventToSocket = (objectGroup: fabric.Group): Obje
 		top: objectGroup.top,
 		width: objectGroup.width,
 		height: objectGroup.height,
-		scaleX: objectGroup.scaleX,
-		scaleY: objectGroup.scaleY,
+		scaleX: objectGroup.scaleX || 1,
+		scaleY: objectGroup.scaleY || 1,
 	};
 
 	objectGroup._objects.forEach((object) => {
@@ -62,7 +62,11 @@ export const formatMoveObjectEventToSocket = (
 	return message;
 };
 
-export const formatScalingObjectEventToSocket = (object: fabric.Object): ObjectDataToServer => {
+export const formatScalingObjectEventToSocket = (
+	object: fabric.Object,
+	scaleX: number,
+	scaleY: number
+): ObjectDataToServer => {
 	// scaling 추가
 	const message: ObjectDataToServer = {
 		type: object.type,
