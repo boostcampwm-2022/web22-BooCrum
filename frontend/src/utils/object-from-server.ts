@@ -22,21 +22,21 @@ export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 };
 
 export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
-	const { objectId, left, top, fontSize, color, text, width, height } = newObject;
+	const { objectId, left, top, fontSize, color, text, width, height, creator } = newObject;
 	if (!left || !top || !fontSize || !color || !text || !width || !height) return;
-	const nameLabel = createNameLabel({ objectId, text: 'NAME', left, top });
+	const nameLabel = createNameLabel({ objectId, text: creator, left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
 	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
 
 	const backgroundRect = createRect({ objectId, left, top, color });
 	backgroundRect.set({
-		width,
-		height,
+		// width,
+		// height,
 		isSocketObject: true,
 	});
 	textBox.set({
-		width,
-		height,
+		// width,
+		// height,
 		isSocketObject: true,
 	});
 	nameLabel.set({
