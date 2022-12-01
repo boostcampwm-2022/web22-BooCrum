@@ -4,6 +4,7 @@ import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
 import { addPostIt, addSection } from './object.utils';
+import { toolItems } from '@data/workspace-tool';
 
 export const initGrid = (canvas: fabric.Canvas, width: number, height: number, gridSize: number) => {
 	const backgroundCanvas = new fabric.Canvas('', {
@@ -117,7 +118,16 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 	});
 };
 
-export const addObject = (canvas: fabric.Canvas, creator: string) => {
+export const addObject = (
+	canvas: fabric.Canvas,
+	creator: string,
+	setCursor: SetterOrUpdater<{
+		type: number;
+		x: number;
+		y: number;
+		color: string;
+	}>
+) => {
 	//todo 색 정보 받아와야함
 	canvas.on('mouse:down', function (opt) {
 		const evt = opt.e;
@@ -127,9 +137,15 @@ export const addObject = (canvas: fabric.Canvas, creator: string) => {
 		const y = (evt.clientY - vpt[5]) / vpt[3];
 		if (canvas.mode === CanvasType.section && !canvas.getActiveObject()) {
 			addSection(canvas, x, y, colorChips[8]);
+			setCursor((prev) => {
+				return { ...prev, type: toolItems.SELECT };
+			});
 		} else if (canvas.mode === CanvasType.postit && !canvas.getActiveObject()) {
 			//todo 색 정보 받아와야함
 			addPostIt(canvas, x, y, 40, colorChips[0], creator);
+			setCursor((prev) => {
+				return { ...prev, type: toolItems.SELECT };
+			});
 		}
 	});
 };
