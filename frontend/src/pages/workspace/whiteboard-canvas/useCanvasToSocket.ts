@@ -71,14 +71,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			const messege = {
 				objectIds: getObjectIds(selected),
 			};
-			console.log(messege);
 			socket.current?.emit('select_object', messege);
-
-			// selected.forEach((object) => {
-			// 	socket.current?.emit('select_object', {
-			// 		objectId: object.objectId,
-			// 	});
-			// });
 
 			openMenu();
 		});
@@ -131,53 +124,15 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				socket.current?.emit('move_object', message);
 				return;
 			}
-			console.log('asdasd', target);
 
-			// target._objects()
+			const groupObject = target as fabric.Group;
+			groupObject._objects.forEach((object) => {
+				const message = formatMoveObjectEventToSocket(object, dx, dy);
+				socket.current?.emit('move_object', message);
+			});
 		});
 
-		// canvas.current.on('object:moving', ({ target, transform, e }) => {
-		// 	if (!target || !transform || !transformedObject.current) return;
-		// 	// 변화량
-		// 	// if (!target.left || !target.top || !transformedObject.current.left || !transformedObject.current.top) return;
-		// 	// const p_dx = target.left - transformedObject.current.left;
-		// 	// const p_dy = target.top - transformedObject.current.top;
-
-		// 	// 이동량 진짜 개화나게 타입을 거지같이 넘겨준다
-		// const dx = (e as MouseEvent).x - (transform as Transform).ex;
-		// const dy = (e as MouseEvent).y - (transform as Transform).ey;
-
-		// 	if (target.type in ObjectType) {
-		// 		const message = formatMoveObjectEventToSocket(target);
-		// 		const message = formatMoveObjectEventToSocket(target, dx, dy);
-		// 		socket.current?.emit('update_object', message);
-		// 		return;
-		// 	}
-		// 	console.log('asdasd', target);
-
-		// 	// target._objects()
-		// 	console.log('trans', transform);
-
-		// 	const groupObject = transformedObject.current as fabric.Group;
-		// 	console.log(groupObject);
-		// 	console.log(dx, dy);
-		// 	groupObject._objects.forEach((object) => {
-		// 		// ...?
-		// 		console.log(object.left);
-		// 		const message = formatMoveObjectEventToSocket(object, dx, dy);
-		// 		socket.current?.emit('update_object', message);
-		// 	});
-		// });
-
-		// canvas.current.on('object:modified', ({ target, transform }) => {
-		// 	if (!target || !transform) return;
-
-		// 	const dx = (e as MouseEvent).x - (transform as Transform).ex;
-		// 	const dy = (e as MouseEvent).y - (transform as Transform).ey;
-		// });
-
 		canvas.current.on('mouse:move', (e) => {
-			// todo object update 로직
 			if (!e.pointer) return;
 			if (!canvas.current) return;
 			const vpt = canvas.current?.viewportTransform;

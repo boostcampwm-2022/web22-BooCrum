@@ -140,7 +140,6 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('move_object', ({ userId, objectData }) => {
 			if (!canvas.current) return;
 			if (isMessageByMe(userId)) return;
-			console.log('move', objectData);
 			if (!objectData.left || !objectData.dleft) return;
 			objectData.left += objectData.dleft;
 			if (!objectData.top || !objectData.dtop) return;
