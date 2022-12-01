@@ -15,7 +15,7 @@ interface SectionOption {
 }
 
 interface SectionTitleOptions {
-	editable?: boolean;
+	editable: boolean;
 	objectId: string;
 	text?: string;
 	left: number;
@@ -37,7 +37,7 @@ interface TextBoxOptions {
 	top: number;
 	fontSize: number;
 	text?: string;
-	editable?: boolean;
+	editable: boolean;
 }
 
 interface RectOptions {

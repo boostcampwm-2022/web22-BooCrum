@@ -25,8 +25,8 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 	const { objectId, left, top, fontSize, color, text, width, height } = newObject;
 	if (!left || !top || !fontSize || !color || !text || !width || !height) return;
 	const nameLabel = createNameLabel({ objectId, text: 'NAME', left, top });
-	const textBox = createTextBox({ objectId, left, top, fontSize, text });
-	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text });
+	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
+	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
 
 	const backgroundRect = createRect({ objectId, left, top, color });
 	backgroundRect.set({
