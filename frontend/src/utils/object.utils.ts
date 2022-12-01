@@ -63,6 +63,8 @@ export const createTextBox = (options: TextBoxOptions) => {
 		splitByGrapheme: true,
 		fontSize: options.fontSize,
 		isSocketObject: false,
+		selectable: false,
+		evented: false,
 	});
 
 	return textbox;
@@ -116,6 +118,7 @@ export const setPostItEditEvent = (
 			width: groupObject.getScaledWidth() * 0.9,
 			fontSize: textBox.fontSize,
 		});
+		canvas.mode = 'edit';
 		editableTextBox.fire('changed');
 	});
 
@@ -125,8 +128,9 @@ export const setPostItEditEvent = (
 	});
 
 	editableTextBox.on('editing:exited', (e) => {
-		textBox.set({ visible: true });
 		canvas.remove(editableTextBox);
+		textBox.set({ visible: true });
+		canvas.mode = 'select';
 		textBox.fire('changed');
 	});
 };
