@@ -55,7 +55,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('text:changed', ({ target }) => {
 			if (!target || target.type !== ObjectType.editable) return;
 			const message = formatEditTextEventToSocket(target as fabric.Text);
-			console.log(message);
 			socket.current?.emit('update_object', message);
 		});
 
