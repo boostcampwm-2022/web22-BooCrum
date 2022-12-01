@@ -14,14 +14,15 @@ import { toolItems } from '@data/workspace-tool';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { cursorState, zoomState } from '@context/workspace';
 import { CanvasType } from './types';
-import { myInfoInWorkspaceState } from '@context/user';
+import { myInfoInWorkspaceState, userProfileState } from '@context/user';
 import { workspaceRole } from '@data/workspace-role';
 
 function useCanvas() {
 	const canvas = useRef<fabric.Canvas | null>(null);
 	const [zoom, setZoom] = useRecoilState(zoomState);
-	const cursor = useRecoilValue(cursorState);
+	const [cursor, setCursor] = useRecoilState(cursorState);
 	const myInfoInWorkspace = useRecoilValue(myInfoInWorkspaceState);
+	const userProfile = useRecoilValue(userProfileState);
 
 	useEffect(() => {
 		if (canvas.current && zoom.event === 'control')
@@ -46,9 +47,9 @@ function useCanvas() {
 			setCursorMode(fabricCanvas, 'grab', CanvasType.move, false);
 		} else {
 			if (cursor.type === toolItems.SECTION) {
-				setCursorMode(fabricCanvas, 'context-menu', CanvasType.section, true);
+				setCursorMode(fabricCanvas, 'context-menu', CanvasType.section, false);
 			} else if (cursor.type === toolItems.POST_IT) {
-				setCursorMode(fabricCanvas, 'context-menu', CanvasType.postit, true);
+				setCursorMode(fabricCanvas, 'context-menu', CanvasType.postit, false);
 			} else if (cursor.type === toolItems.MOVE) {
 				setCursorMode(fabricCanvas, 'grab', CanvasType.move, false);
 			} else if (cursor.type === toolItems.SELECT) {
@@ -56,6 +57,8 @@ function useCanvas() {
 			} else {
 				setCursorMode(fabricCanvas, 'default', CanvasType.draw, true);
 			}
+			canvas.current.discardActiveObject();
+			canvas.current.renderAll();
 		}
 	}, [cursor, myInfoInWorkspace]);
 
@@ -75,7 +78,7 @@ function useCanvas() {
 		initZoom(fabricCanvas, setZoom);
 		initDragPanning(fabricCanvas);
 		initWheelPanning(fabricCanvas);
-		addObject(fabricCanvas, 'NAME');
+		addObject(fabricCanvas, userProfile.nickname, setCursor);
 		deleteObject(fabricCanvas);
 		setObjectIndexLeveling(fabricCanvas);
 

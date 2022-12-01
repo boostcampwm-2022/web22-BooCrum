@@ -173,7 +173,7 @@ export const addPostIt = (
 ) => {
 	const id = v4();
 	const nameLabel = createNameLabel({ objectId: id, text: creator, left: x, top: y });
-	const textBox = createTextBox({ objectId: id, left: x, top: y, fontSize: fontSize });
+	const textBox = createTextBox({ objectId: id, left: x, top: y, fontSize: fontSize, editable: false });
 	const editableTextBox = createTextBox({ objectId: id, left: x, top: y, fontSize: 40, editable: true });
 	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
 	const postit = createPostIt({
@@ -296,7 +296,7 @@ export const setSectionEditEvent = (
 export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: string) => {
 	const id = v4();
 	const editableTitle = createSectionTitle({ objectId: id, text: 'SECTION', left: x, top: y + 25, editable: true });
-	const sectionTitle = createSectionTitle({ objectId: id, text: 'SECTION', left: x, top: y });
+	const sectionTitle = createSectionTitle({ objectId: id, text: 'SECTION', left: x, top: y, editable: false });
 	const sectionBackground = createTitleBackground({ objectId: id, left: x, top: y, color: fill });
 	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
 	const section = createSection({
