@@ -198,9 +198,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const objectData: ObjectMapVO = this.dataManagementService.selectObjectMapByObjectId(objectMoveDTO.objectId);
     if (!objectData) throw new WsException('존재하지 않는 객체 접근');
 
-    // ObjectMap 변경
-    this.dataManagementService.changeDerivative(objectMoveDTO);
-
     // 이벤트 전달
     socket.nsp.emit('move_object', {
       userId: userData.userId,
@@ -223,9 +220,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     // 객체 존재 여부 체크 및 조회
     const objectData: ObjectMapVO = this.dataManagementService.selectObjectMapByObjectId(objectScaleDTO.objectId);
     if (!objectData) throw new WsException('존재하지 않는 객체 접근');
-
-    // ObjectMap 변경
-    this.dataManagementService.changeScale(objectScaleDTO);
 
     // 이벤트 전달
     socket.nsp.emit('scale_object', {

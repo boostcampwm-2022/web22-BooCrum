@@ -40,12 +40,4 @@ export class ObjectMapVO {
   @IsUUID()
   @IsOptional()
   workspaceId: string;
-
-  @IsNumber()
-  @IsOptional()
-  dleft: number;
-
-  @IsNumber()
-  @IsOptional()
-  dtop: number;
 }

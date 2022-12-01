@@ -137,12 +137,7 @@ export class DataManagementService {
     workspaceObject.forEach((obj) => {
       const objectId = obj.objectId;
       delete obj.objectId;
-      this.objectDataMap.set(objectId, {
-        ...obj,
-        workspaceId,
-        dleft: 0,
-        dtop: 0,
-      });
+      this.objectDataMap.set(objectId, { ...obj, workspaceId });
     });
   }
 
@@ -158,28 +153,11 @@ export class DataManagementService {
     return result;
   }
 
-  changeDerivative(objectMoveDTO: ObjectMoveDTO) {
-    const objectMapVO = this.objectDataMap.get(objectMoveDTO.objectId);
-    objectMapVO.dleft = objectMoveDTO.dleft;
-    objectMapVO.dtop = objectMoveDTO.dtop;
-    this.objectDataMap.set(objectMoveDTO.objectId, objectMapVO);
-  }
-
-  changeScale(objectScaleDTO: ObjectScaleDTO) {
-    const objectMapVO = this.objectDataMap.get(objectScaleDTO.objectId);
-    objectMapVO.dleft = objectScaleDTO.dleft;
-    objectMapVO.dtop = objectScaleDTO.dtop;
-    objectMapVO.scaleX = objectScaleDTO.scaleX;
-    objectMapVO.scaleY = objectScaleDTO.scaleY;
-    this.objectDataMap.set(objectScaleDTO.objectId, objectMapVO);
-  }
-
   updateObjectData(objectDTO: ObjectDTO) {
     const objectId = objectDTO.objectId;
-    const objectMapVO = new ObjectMapVO();
-    Object.assign(objectMapVO, objectDTO);
-    objectMapVO.dleft = 0;
-    objectMapVO.dtop = 0;
+    const oldObjectData = this.selectObjectMapByObjectId(objectDTO.objectId);
+    delete objectDTO.objectId;
+    const objectMapVO: ObjectMapVO = Object.assign(oldObjectData, objectDTO);
     this.objectDataMap.set(objectId, objectMapVO);
   }
 }
