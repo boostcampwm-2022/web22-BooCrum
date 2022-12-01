@@ -10,6 +10,8 @@ import {
 	formatMoveObjectEventToSocket,
 	formatScalingObjectEventToSocket,
 } from '@utils/socket.utils';
+import { Transform } from 'fabric/fabric-impl';
+import { formatMessageToSocket } from '../../../utils/socket.utils';
 
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
@@ -69,14 +71,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			const messege = {
 				objectIds: getObjectIds(selected),
 			};
-			console.log(messege);
 			socket.current?.emit('select_object', messege);
-
-			// selected.forEach((object) => {
-			// 	socket.current?.emit('select_object', {
-			// 		objectId: object.objectId,
-			// 	});
-			// });
 
 			openMenu();
 		});
@@ -87,6 +82,11 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (deselected.length !== 0) {
 				socket.current?.emit('unselect_object', {
 					objectIds: getObjectIds(deselected),
+				});
+
+				deselected.forEach((object) => {
+					const message = formatMessageToSocket(object);
+					socket.current?.emit('update_object', message);
 				});
 			}
 
@@ -105,26 +105,34 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				socket.current?.emit('unselect_object', {
 					objectIds: getObjectIds(deselected),
 				});
+
+				deselected.forEach((object) => {
+					const message = formatMessageToSocket(object);
+					socket.current?.emit('update_object', message);
+				});
 			}
 		});
 
-		canvas.current.on('object:moving', (arg) => {
-			const { target } = arg;
-			console.log(arg);
-			if (!target) return;
+		canvas.current.on('object:moving', ({ target, transform, e }) => {
+			if (!target || !transform) return;
+
+			const dx = (e as MouseEvent).x - (transform as Transform).ex;
+			const dy = (e as MouseEvent).y - (transform as Transform).ey;
 
 			if (target.type in ObjectType) {
-				const message = formatMoveObjectEventToSocket(target);
-				socket.current?.emit('update_object', message);
+				const message = formatMoveObjectEventToSocket(target, dx, dy);
+				socket.current?.emit('move_object', message);
 				return;
 			}
-			console.log('asdasd', target);
 
-			// target._objects()
+			const groupObject = target as fabric.Group;
+			groupObject._objects.forEach((object) => {
+				const message = formatMoveObjectEventToSocket(object, dx, dy);
+				socket.current?.emit('move_object', message);
+			});
 		});
 
 		canvas.current.on('mouse:move', (e) => {
-			// todo object update 로직
 			if (!e.pointer) return;
 			if (!canvas.current) return;
 			const vpt = canvas.current?.viewportTransform;

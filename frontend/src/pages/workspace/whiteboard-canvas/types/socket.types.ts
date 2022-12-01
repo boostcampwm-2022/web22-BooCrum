@@ -14,6 +14,7 @@ export interface ServerToClientEvents {
 	create_object: (arg: ObjectDataFromServer) => void;
 	delete_object: (arg: { userId: string; objectId: string }) => void;
 	update_object: (arg: { userId: string; objectData: ObjectDataFromServer }) => void;
+	move_object: (arg: { userId: string; objectData: ObjectDataFromServer }) => void;
 	exception: (arg: any) => void;
 }
 
@@ -24,4 +25,5 @@ export interface ClientToServerEvents {
 	create_object: (arg: ObjectDataToServer) => void;
 	delete_object: (arg: { objectId: string }) => void;
 	update_object: (arg: ObjectDataToServer) => void;
+	move_object: (arg: ObjectDataToServer) => void;
 }
