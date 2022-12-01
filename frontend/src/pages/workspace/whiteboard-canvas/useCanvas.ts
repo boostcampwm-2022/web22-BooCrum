@@ -14,7 +14,7 @@ import { toolItems } from '@data/workspace-tool';
 import { useRecoilState, useRecoilValue } from 'recoil';
 import { cursorState, zoomState } from '@context/workspace';
 import { CanvasType } from './types';
-import { myInfoInWorkspaceState } from '@context/user';
+import { myInfoInWorkspaceState, userProfileState } from '@context/user';
 import { workspaceRole } from '@data/workspace-role';
 
 function useCanvas() {
@@ -22,6 +22,7 @@ function useCanvas() {
 	const [zoom, setZoom] = useRecoilState(zoomState);
 	const [cursor, setCursor] = useRecoilState(cursorState);
 	const myInfoInWorkspace = useRecoilValue(myInfoInWorkspaceState);
+	const userProfile = useRecoilValue(userProfileState);
 
 	useEffect(() => {
 		if (canvas.current && zoom.event === 'control')
@@ -75,7 +76,7 @@ function useCanvas() {
 		initZoom(fabricCanvas, setZoom);
 		initDragPanning(fabricCanvas);
 		initWheelPanning(fabricCanvas);
-		addObject(fabricCanvas, 'NAME', setCursor);
+		addObject(fabricCanvas, userProfile.nickname, setCursor);
 		deleteObject(fabricCanvas);
 		setObjectIndexLeveling(fabricCanvas);
 
