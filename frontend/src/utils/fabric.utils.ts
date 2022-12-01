@@ -6,8 +6,14 @@ import { v4 } from 'uuid';
 import { addPostIt, addSection } from './object.utils';
 
 export const initGrid = (canvas: fabric.Canvas, width: number, height: number, gridSize: number) => {
-	for (let i = -width / gridSize + 1; i <= (2 * width) / gridSize; i++) {
-		const lineY = new fabric.Line([i * gridSize, -height, i * gridSize, height * 2], {
+	const backgroundCanvas = new fabric.Canvas('', {
+		mode: canvas.mode,
+		height: height * 4,
+		width: width * 4,
+		backgroundColor: '#f1f1f1',
+	});
+	for (let i = 0; i <= (4 * width) / gridSize; i++) {
+		const lineY = new fabric.Line([i * gridSize, 0, i * gridSize, height * 4], {
 			objectId: v4(),
 			type: 'line',
 			stroke: '#ccc',
@@ -15,10 +21,10 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 			isSocketObject: false,
 		});
 
-		canvas.sendToBack(lineY);
+		backgroundCanvas.add(lineY);
 	}
-	for (let i = -height / gridSize + 1; i <= (2 * height) / gridSize; i++) {
-		const lineX = new fabric.Line([-width, i * gridSize, width * 2, i * gridSize], {
+	for (let i = 0; i <= (4 * height) / gridSize; i++) {
+		const lineX = new fabric.Line([0, i * gridSize, width * 4, i * gridSize], {
 			objectId: v4(),
 			type: 'line',
 			stroke: '#ccc',
@@ -26,8 +32,18 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 			isSocketObject: false,
 		});
 
-		canvas.sendToBack(lineX);
+		backgroundCanvas.add(lineX);
 	}
+
+	fabric.Image.fromURL(backgroundCanvas.toDataURL(), (img) => {
+		canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas), {
+			objectId: v4(),
+			type: ObjectType.rect,
+			left: -width,
+			top: -height,
+			isSocketObject: false,
+		});
+	});
 };
 
 export const initZoom = (
