@@ -183,7 +183,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       if (!ret) throw new WsException('생성 실패');
       this.dataManagementService.insertObjectData(objectData);
       socket.nsp.emit('create_object', objectData);
-      console.log(this.dataManagementService.selectObjectMapByObjectId(objectData.objectId));
     } catch (e) {
       this.logger.error(e);
       throw new WsException(e.message);
@@ -257,7 +256,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       if (!ret) throw new WsException('수정 실패');
       this.dataManagementService.updateObjectData(objectData);
       socket.nsp.emit('update_object', { userId: userData.userId, objectData });
-      console.log(this.dataManagementService.selectObjectMapByObjectId(objectData.objectId));
     } catch (e) {
       this.logger.error(e);
       throw new WsException(e.message);
@@ -274,7 +272,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       if (!ret) new WsException('삭제 실패');
       this.dataManagementService.deleteObjectData(objectId);
       socket.nsp.emit('delete_object', { userId: userData.userId, objectId });
-      console.log(this.dataManagementService.selectObjectMapByObjectId(objectId));
     } catch (e) {
       this.logger.error(e);
       throw new WsException(e.message);
