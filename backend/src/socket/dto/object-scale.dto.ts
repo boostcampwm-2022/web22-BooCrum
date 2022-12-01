@@ -4,15 +4,21 @@ export class ObjectScaleDTO {
   @IsString()
   objectId: string;
 
-  @IsNumber()
-  dleft: number;
+  // @IsNumber()
+  // dleft: number;
+  //
+  // @IsNumber()
+  // dtop: number;
 
   @IsNumber()
-  dtop: number;
+  left: number;
 
   @IsNumber()
-  scaleX;
+  top: number;
 
   @IsNumber()
-  scaleY;
+  scaleX: number;
+
+  @IsNumber()
+  scaleY: number;
 }
