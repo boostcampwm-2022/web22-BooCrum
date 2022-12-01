@@ -137,7 +137,6 @@ export class DataManagementService {
   initObjectMap(workspaceId: string, workspaceObject: WorkspaceObject[]) {
     workspaceObject.forEach((obj) => {
       const objectId = obj.objectId;
-      delete obj.objectId;
       this.objectDataMap.set(objectId, { ...obj, workspaceId });
     });
   }
@@ -150,7 +149,6 @@ export class DataManagementService {
   // Object Data를 objectMap에 추가하는 메서드
   insertObjectData(objectDTO: ObjectDTO) {
     const objectId = objectDTO.objectId;
-    delete objectDTO.objectId;
     this.objectDataMap.set(objectId, objectDTO);
   }
 
@@ -158,7 +156,6 @@ export class DataManagementService {
   updateObjectData(objectDTO: ObjectDTO) {
     const objectId = objectDTO.objectId;
     const oldObjectData = this.selectObjectMapByObjectId(objectDTO.objectId);
-    delete objectDTO.objectId;
     const objectMapVO: ObjectMapVO = Object.assign(oldObjectData, objectDTO);
     this.objectDataMap.set(objectId, objectMapVO);
   }

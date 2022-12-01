@@ -56,7 +56,6 @@ export class ObjectHandlerService {
     if (!(await this.findWorkspace(workspaceId))) {
       throw new BadRequestException('잘못된 워크스페이스 ID 입니다.');
     }
-
     return await this.objectRepository
       .createQueryBuilder('wo')
       .select()
