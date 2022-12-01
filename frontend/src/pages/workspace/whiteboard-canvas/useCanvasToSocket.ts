@@ -7,6 +7,7 @@ import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import {
 	formatCreatePostitEventToSocket,
 	formatEditTextEventToSocket,
+	formatMessageToSocketForGroup,
 	formatMoveObjectEventToSocket,
 	formatScalingObjectEventToSocket,
 } from '@utils/socket.utils';
@@ -53,7 +54,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('text:changed', ({ target }) => {
 			if (!target || target.type !== ObjectType.editable) return;
 			const message = formatEditTextEventToSocket(target as fabric.Text);
-			console.log(message);
 			socket.current?.emit('update_object', message);
 		});
 
@@ -65,7 +65,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('selection:created', ({ selected }) => {
 			if (!selected || selected.length === 0) return;
 
-			console.log(getObjectIds(selected));
 			const messege = {
 				objectIds: getObjectIds(selected),
 			};
@@ -82,10 +81,12 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 					objectIds: getObjectIds(deselected),
 				});
 
-				deselected.forEach((object) => {
-					const message = formatMessageToSocket(object);
-					socket.current?.emit('update_object', message);
-				});
+				// deselected.forEach((object) => {
+				// 	if (object.type !== ObjectType.editable) {
+				// 		const message = formatMessageToSocket(object);
+				// 		socket.current?.emit('update_object', message);
+				// 	}
+				// });
 			}
 
 			if (selected.length !== 0) {
@@ -103,12 +104,24 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				socket.current?.emit('unselect_object', {
 					objectIds: getObjectIds(deselected),
 				});
-
-				deselected.forEach((object) => {
-					const message = formatMessageToSocket(object);
-					socket.current?.emit('update_object', message);
-				});
 			}
+		});
+
+		canvas.current.on('object:modified', ({ target }) => {
+			if (!target) return;
+
+			if (target.type in ObjectType) {
+				const message = formatMessageToSocket(target);
+				socket.current?.emit('update_object', message);
+				return;
+			}
+
+			const groupObject = target as fabric.Group;
+
+			groupObject._objects.forEach((object) => {
+				const message = formatMessageToSocketForGroup(groupObject, object);
+				socket.current?.emit('update_object', message);
+			});
 		});
 
 		canvas.current.on('object:moving', ({ target, transform, e }) => {
@@ -159,15 +172,24 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 					scaleX: target.scaleX || 1,
 					scaleY: target.scaleY || 1,
 				});
-				console.log(message);
 				socket.current?.emit('scale_object', message);
 				return;
 			}
 
 			const groupObject = target as fabric.Group;
+			const groupScaleX = groupObject.scaleX || 1;
+			const groupScaleY = groupObject.scaleY || 1;
 
-			// const message = formatScalingObjectEventToSocket(target);
-			// socket.current?.emit('update_object', message);
+			groupObject._objects.forEach((object) => {
+				const message = formatScalingObjectEventToSocket({
+					object: object,
+					dleft: dx,
+					dtop: dy,
+					scaleX: groupScaleX * (object.scaleX || 1),
+					scaleY: groupScaleY * (object.scaleY || 1),
+				});
+				socket.current?.emit('scale_object', message);
+			});
 		});
 	}, []);
 

@@ -20,6 +20,23 @@ export const formatMessageToSocket = (object: fabric.Object): ObjectDataToServer
 	return message;
 };
 
+export const formatMessageToSocketForGroup = (group: fabric.Group, object: fabric.Object): ObjectDataToServer => {
+	const groupCenterPoint = group.getCenterPoint();
+	const { left, top, scaleX, scaleY, width, height } = object;
+	const message: ObjectDataToServer = {
+		objectId: object.objectId,
+		left: groupCenterPoint.x + (left || 0) * (group.scaleX || 1),
+		top: groupCenterPoint.y + (top || 0) * (group.scaleY || 1),
+		scaleX: (group.scaleX || 1) * (scaleX || 1),
+		scaleY: (group.scaleY || 1) * (scaleY || 1),
+		width,
+		height,
+		// color: object.fill as string,
+	};
+
+	return message;
+};
+
 export const formatCreatePostitEventToSocket = (objectGroup: fabric.Group): ObjectDataToServer => {
 	// todo fabric.Object -> text 포함된 타입으로 변경 필요
 	const message: ObjectDataToServer = {
