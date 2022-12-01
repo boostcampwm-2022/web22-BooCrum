@@ -12,7 +12,7 @@ import {
 	formatScalingObjectEventToSocket,
 	formatScalingObjectEventToSocketForGroup,
 } from '@utils/socket.utils';
-import fabric, { Transform } from 'fabric/fabric-impl';
+import { fabric } from 'fabric';
 import { formatMessageToSocket } from '../../../utils/socket.utils';
 
 interface UseCanvasToSocketProps {
@@ -113,7 +113,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (!(target instanceof fabric.Group)) return;
 
 			target._objects.forEach((object) => {
-				const message = formatMessageToSocketForGroup(groupObject, object);
+				const message = formatMessageToSocketForGroup(target, object);
 				socket.current?.emit('update_object', message);
 			});
 		});
@@ -121,8 +121,8 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('object:moving', ({ target, transform, e }) => {
 			if (!target || !transform) return;
 
-			const dx = (e as MouseEvent).x - (transform as Transform).ex;
-			const dy = (e as MouseEvent).y - (transform as Transform).ey;
+			const dx = (e as MouseEvent).x - (transform as fabric.Transform).ex;
+			const dy = (e as MouseEvent).y - (transform as fabric.Transform).ey;
 
 			if (target.type in ObjectType) {
 				const message = formatMoveObjectEventToSocket({ object: target, dleft: dx, dtop: dy });
@@ -165,7 +165,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (!(target instanceof fabric.Group)) return;
 
 			target._objects.forEach((object) => {
-				const message = formatScalingObjectEventToSocketForGroup(groupObject, object);
+				const message = formatScalingObjectEventToSocketForGroup(target, object);
 				if (message) {
 					socket.current?.emit('scale_object', message);
 				}

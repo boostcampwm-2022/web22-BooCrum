@@ -43,7 +43,6 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('init', ({ members, objects, userData }) => {
-			console.log(objects);
 			myInfoInWorkspaceRef.current = userData;
 			setMyInfoInWorkspace(userData);
 			setMembers(members);
