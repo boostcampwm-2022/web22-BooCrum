@@ -153,11 +153,21 @@ export class DataManagementService {
     return result;
   }
 
+  insertObjectData(objectDTO: ObjectDTO) {
+    const objectId = objectDTO.objectId;
+    delete objectDTO.objectId;
+    this.objectDataMap.set(objectId, objectDTO);
+  }
+
   updateObjectData(objectDTO: ObjectDTO) {
     const objectId = objectDTO.objectId;
     const oldObjectData = this.selectObjectMapByObjectId(objectDTO.objectId);
     delete objectDTO.objectId;
     const objectMapVO: ObjectMapVO = Object.assign(oldObjectData, objectDTO);
     this.objectDataMap.set(objectId, objectMapVO);
+  }
+
+  deleteObjectData(objectId: string) {
+    this.objectDataMap.delete(objectId);
   }
 }

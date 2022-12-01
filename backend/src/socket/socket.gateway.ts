@@ -181,6 +181,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       // 생성을 시도하고, 성공하면 이를 전달한다.
       const ret = await this.objectHandlerService.createObject(userData.workspaceId, objectData);
       if (!ret) throw new WsException('생성 실패');
+      this.dataManagementService.insertObjectData(objectData);
       socket.nsp.emit('create_object', objectData);
     } catch (e) {
       this.logger.error(e);
@@ -269,6 +270,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       const ret = await this.objectHandlerService.deleteObject(userData.workspaceId, objectId);
       if (!ret) new WsException('삭제 실패');
+      this.dataManagementService.deleteObjectData(objectId);
       socket.nsp.emit('delete_object', { userId: userData.userId, objectId });
     } catch (e) {
       this.logger.error(e);
