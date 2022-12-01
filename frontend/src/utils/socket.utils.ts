@@ -47,11 +47,13 @@ export const formatCreatePostitEventToSocket = (objectGroup: fabric.Group): Obje
 	return message;
 };
 
-export const formatMoveObjectEventToSocket = (
-	object: fabric.Object,
-	dleft: number,
-	dtop: number
-): ObjectDataToServer => {
+export interface MoveObjectEventParmas {
+	object: fabric.Object;
+	dleft: number;
+	dtop: number;
+}
+
+export const formatMoveObjectEventToSocket = ({ object, dleft, dtop }: MoveObjectEventParmas): ObjectDataToServer => {
 	// todo fabric.Object -> text 포함된 타입으로 변경 필요
 	const message: ObjectDataToServer = {
 		objectId: object.objectId,
@@ -62,19 +64,25 @@ export const formatMoveObjectEventToSocket = (
 	return message;
 };
 
-export const formatScalingObjectEventToSocket = (
-	object: fabric.Object,
-	scaleX: number,
-	scaleY: number
-): ObjectDataToServer => {
+export interface ScaleObjectEventParams extends MoveObjectEventParmas {
+	scaleX: number;
+	scaleY: number;
+}
+
+export const formatScalingObjectEventToSocket = ({
+	object,
+	dleft,
+	dtop,
+	scaleX,
+	scaleY,
+}: ScaleObjectEventParams): ObjectDataToServer => {
 	// scaling 추가
 	const message: ObjectDataToServer = {
-		type: object.type,
 		objectId: object.objectId,
-		width: object.width,
-		height: object.height,
-		// scaleX: object.scaleX,
-		// scaleY: object.scaleY,
+		dleft,
+		dtop,
+		scaleX,
+		scaleY,
 	};
 
 	return message;

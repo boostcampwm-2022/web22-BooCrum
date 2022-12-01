@@ -33,10 +33,8 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (!e.target || !canvas.current) return;
 			const fabricObject = e.target;
 			if (fabricObject.isSocketObject) return;
-
 			if (fabricObject.type === ObjectType.postit) {
 				const message = formatCreatePostitEventToSocket(fabricObject as fabric.Group);
-				console.log('asd', message);
 				socket.current?.emit('create_object', message);
 			}
 		});
@@ -120,14 +118,14 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			const dy = (e as MouseEvent).y - (transform as Transform).ey;
 
 			if (target.type in ObjectType) {
-				const message = formatMoveObjectEventToSocket(target, dx, dy);
+				const message = formatMoveObjectEventToSocket({ object: target, dleft: dx, dtop: dy });
 				socket.current?.emit('move_object', message);
 				return;
 			}
 
 			const groupObject = target as fabric.Group;
 			groupObject._objects.forEach((object) => {
-				const message = formatMoveObjectEventToSocket(object, dx, dy);
+				const message = formatMoveObjectEventToSocket({ object, dleft: dx, dtop: dy });
 				socket.current?.emit('move_object', message);
 			});
 		});
@@ -147,10 +145,29 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			socket.current?.emit('move_pointer', message);
 		});
 
-		canvas.current.on('object:scaling', ({ target }) => {
+		canvas.current.on('object:scaling', ({ e, target, transform }) => {
 			if (!target) return;
-			const message = formatScalingObjectEventToSocket(target);
-			socket.current?.emit('update_object', message);
+
+			const dx = Math.min((e as MouseEvent).x - (transform as Transform).ex, 0);
+			const dy = Math.min((e as MouseEvent).y - (transform as Transform).ey, 0);
+
+			if (target.type in ObjectType) {
+				const message = formatScalingObjectEventToSocket({
+					object: target,
+					dleft: dx,
+					dtop: dy,
+					scaleX: target.scaleX || 1,
+					scaleY: target.scaleY || 1,
+				});
+				console.log(message);
+				socket.current?.emit('scale_object', message);
+				return;
+			}
+
+			const groupObject = target as fabric.Group;
+
+			// const message = formatScalingObjectEventToSocket(target);
+			// socket.current?.emit('update_object', message);
 		});
 	}, []);
 
