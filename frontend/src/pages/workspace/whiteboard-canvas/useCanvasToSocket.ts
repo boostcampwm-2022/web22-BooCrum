@@ -12,7 +12,7 @@ import {
 	formatScalingObjectEventToSocket,
 	formatScalingObjectEventToSocketForGroup,
 } from '@utils/socket.utils';
-import { Transform } from 'fabric/fabric-impl';
+import fabric, { Transform } from 'fabric/fabric-impl';
 import { formatMessageToSocket } from '../../../utils/socket.utils';
 
 interface UseCanvasToSocketProps {
@@ -81,13 +81,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				socket.current?.emit('unselect_object', {
 					objectIds: getObjectIds(deselected),
 				});
-
-				// deselected.forEach((object) => {
-				// 	if (object.type !== ObjectType.editable) {
-				// 		const message = formatMessageToSocket(object);
-				// 		socket.current?.emit('update_object', message);
-				// 	}
-				// });
 			}
 
 			if (selected.length !== 0) {
@@ -117,9 +110,9 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				return;
 			}
 
-			const groupObject = target as fabric.Group;
+			if (!(target instanceof fabric.Group)) return;
 
-			groupObject._objects.forEach((object) => {
+			target._objects.forEach((object) => {
 				const message = formatMessageToSocketForGroup(groupObject, object);
 				socket.current?.emit('update_object', message);
 			});
@@ -137,8 +130,9 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				return;
 			}
 
-			const groupObject = target as fabric.Group;
-			groupObject._objects.forEach((object) => {
+			if (!(target instanceof fabric.Group)) return;
+
+			target._objects.forEach((object) => {
 				const message = formatMoveObjectEventToSocket({ object, dleft: dx, dtop: dy });
 				socket.current?.emit('move_object', message);
 			});
@@ -168,9 +162,9 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				return;
 			}
 
-			const groupObject = target as fabric.Group;
+			if (!(target instanceof fabric.Group)) return;
 
-			groupObject._objects.forEach((object) => {
+			target._objects.forEach((object) => {
 				const message = formatScalingObjectEventToSocketForGroup(groupObject, object);
 				if (message) {
 					socket.current?.emit('scale_object', message);
