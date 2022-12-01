@@ -7,10 +7,12 @@ import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import {
 	formatCreatePostitEventToSocket,
 	formatEditTextEventToSocket,
+	formatMessageToSocketForGroup,
 	formatMoveObjectEventToSocket,
 	formatScalingObjectEventToSocket,
+	formatScalingObjectEventToSocketForGroup,
 } from '@utils/socket.utils';
-import { Transform } from 'fabric/fabric-impl';
+import fabric, { Transform } from 'fabric/fabric-impl';
 import { formatMessageToSocket } from '../../../utils/socket.utils';
 
 interface UseCanvasToSocketProps {
@@ -33,10 +35,8 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (!e.target || !canvas.current) return;
 			const fabricObject = e.target;
 			if (fabricObject.isSocketObject) return;
-
 			if (fabricObject.type === ObjectType.postit) {
 				const message = formatCreatePostitEventToSocket(fabricObject as fabric.Group);
-				console.log('asd', message);
 				socket.current?.emit('create_object', message);
 			}
 		});
@@ -66,7 +66,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('selection:created', ({ selected }) => {
 			if (!selected || selected.length === 0) return;
 
-			console.log(getObjectIds(selected));
 			const messege = {
 				objectIds: getObjectIds(selected),
 			};
@@ -81,11 +80,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (deselected.length !== 0) {
 				socket.current?.emit('unselect_object', {
 					objectIds: getObjectIds(deselected),
-				});
-
-				deselected.forEach((object) => {
-					const message = formatMessageToSocket(object);
-					socket.current?.emit('update_object', message);
 				});
 			}
 
@@ -104,12 +98,24 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				socket.current?.emit('unselect_object', {
 					objectIds: getObjectIds(deselected),
 				});
-
-				deselected.forEach((object) => {
-					const message = formatMessageToSocket(object);
-					socket.current?.emit('update_object', message);
-				});
 			}
+		});
+
+		canvas.current.on('object:modified', ({ target }) => {
+			if (!target) return;
+
+			if (target.type in ObjectType) {
+				const message = formatMessageToSocket(target);
+				socket.current?.emit('update_object', message);
+				return;
+			}
+
+			if (!(target instanceof fabric.Group)) return;
+
+			target._objects.forEach((object) => {
+				const message = formatMessageToSocketForGroup(groupObject, object);
+				socket.current?.emit('update_object', message);
+			});
 		});
 
 		canvas.current.on('object:moving', ({ target, transform, e }) => {
@@ -119,14 +125,15 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			const dy = (e as MouseEvent).y - (transform as Transform).ey;
 
 			if (target.type in ObjectType) {
-				const message = formatMoveObjectEventToSocket(target, dx, dy);
+				const message = formatMoveObjectEventToSocket({ object: target, dleft: dx, dtop: dy });
 				socket.current?.emit('move_object', message);
 				return;
 			}
 
-			const groupObject = target as fabric.Group;
-			groupObject._objects.forEach((object) => {
-				const message = formatMoveObjectEventToSocket(object, dx, dy);
+			if (!(target instanceof fabric.Group)) return;
+
+			target._objects.forEach((object) => {
+				const message = formatMoveObjectEventToSocket({ object, dleft: dx, dtop: dy });
 				socket.current?.emit('move_object', message);
 			});
 		});
@@ -148,8 +155,21 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 		canvas.current.on('object:scaling', ({ target }) => {
 			if (!target) return;
-			const message = formatScalingObjectEventToSocket(target);
-			socket.current?.emit('update_object', message);
+
+			if (target.type in ObjectType) {
+				const message = formatScalingObjectEventToSocket(target);
+				socket.current?.emit('scale_object', message);
+				return;
+			}
+
+			if (!(target instanceof fabric.Group)) return;
+
+			target._objects.forEach((object) => {
+				const message = formatScalingObjectEventToSocketForGroup(groupObject, object);
+				if (message) {
+					socket.current?.emit('scale_object', message);
+				}
+			});
 		});
 	}, []);
 

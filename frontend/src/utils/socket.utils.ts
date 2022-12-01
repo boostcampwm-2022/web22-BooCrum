@@ -20,6 +20,23 @@ export const formatMessageToSocket = (object: fabric.Object): ObjectDataToServer
 	return message;
 };
 
+export const formatMessageToSocketForGroup = (group: fabric.Group, object: fabric.Object): ObjectDataToServer => {
+	const groupCenterPoint = group.getCenterPoint();
+	const { left, top, scaleX, scaleY, width, height } = object;
+	const message: ObjectDataToServer = {
+		objectId: object.objectId,
+		left: groupCenterPoint.x + (left || 0) * (group.scaleX || 1),
+		top: groupCenterPoint.y + (top || 0) * (group.scaleY || 1),
+		scaleX: (group.scaleX || 1) * (scaleX || 1),
+		scaleY: (group.scaleY || 1) * (scaleY || 1),
+		width,
+		height,
+		// color: object.fill as string,
+	};
+
+	return message;
+};
+
 export const formatCreatePostitEventToSocket = (objectGroup: fabric.Group): ObjectDataToServer => {
 	// todo fabric.Object -> text 포함된 타입으로 변경 필요
 	const message: ObjectDataToServer = {
@@ -29,8 +46,8 @@ export const formatCreatePostitEventToSocket = (objectGroup: fabric.Group): Obje
 		top: objectGroup.top,
 		width: objectGroup.width,
 		height: objectGroup.height,
-		scaleX: objectGroup.scaleX,
-		scaleY: objectGroup.scaleY,
+		scaleX: objectGroup.scaleX || 1,
+		scaleY: objectGroup.scaleY || 1,
 	};
 
 	objectGroup._objects.forEach((object) => {
@@ -47,11 +64,13 @@ export const formatCreatePostitEventToSocket = (objectGroup: fabric.Group): Obje
 	return message;
 };
 
-export const formatMoveObjectEventToSocket = (
-	object: fabric.Object,
-	dleft: number,
-	dtop: number
-): ObjectDataToServer => {
+export interface MoveObjectEventParmas {
+	object: fabric.Object;
+	dleft: number;
+	dtop: number;
+}
+
+export const formatMoveObjectEventToSocket = ({ object, dleft, dtop }: MoveObjectEventParmas): ObjectDataToServer => {
 	// todo fabric.Object -> text 포함된 타입으로 변경 필요
 	const message: ObjectDataToServer = {
 		objectId: object.objectId,
@@ -62,17 +81,44 @@ export const formatMoveObjectEventToSocket = (
 	return message;
 };
 
-export const formatScalingObjectEventToSocket = (object: fabric.Object): ObjectDataToServer => {
-	// scaling 추가
+export const formatScalingObjectEventToSocket = (object: fabric.Object) => {
 	const message: ObjectDataToServer = {
-		type: object.type,
 		objectId: object.objectId,
-		width: object.width,
-		height: object.height,
-		// scaleX: object.scaleX,
-		// scaleY: object.scaleY,
+		left: object.left,
+		top: object.top,
+		scaleX: object.scaleX,
+		scaleY: object.scaleY,
 	};
+	return message;
+};
 
+export const formatScalingObjectEventToSocketForGroup = (
+	group: fabric.Object,
+	object: fabric.Object
+): ObjectDataToServer | undefined => {
+	const groupCenterPoint = group.getCenterPoint();
+	if (
+		object.left === undefined ||
+		object.top === undefined ||
+		object.scaleX === undefined ||
+		object.scaleY === undefined ||
+		group.scaleX === undefined ||
+		group.scaleY === undefined
+	)
+		return;
+
+	const left = groupCenterPoint.x + object.left * group.scaleX;
+	const top = groupCenterPoint.y + object.top * group.scaleY;
+	const scaleX = group.scaleX * object.scaleX;
+	const scaleY = group.scaleY * object.scaleY;
+
+	const message: ObjectDataToServer = {
+		objectId: object.objectId,
+		left,
+		top,
+		scaleX,
+		scaleY,
+	};
 	return message;
 };
 
