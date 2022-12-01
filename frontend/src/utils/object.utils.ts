@@ -107,7 +107,7 @@ export const setPostItEditEvent = (
 	editableTextBox: fabric.Textbox,
 	textBox: fabric.Textbox
 ) => {
-	let prevCanvasMode = 'select' as CanvasType;
+	let prevCanvasMode: CanvasType;
 
 	groupObject.on('mousedblclick', (e) => {
 		if (canvas.mode === CanvasType.move) return;
@@ -123,7 +123,7 @@ export const setPostItEditEvent = (
 			width: groupObject.getScaledWidth() * 0.9,
 			fontSize: textBox.fontSize,
 		});
-		canvas.mode = 'edit';
+		canvas.mode = CanvasType.edit;
 		editableTextBox.fire('changed');
 	});
 
