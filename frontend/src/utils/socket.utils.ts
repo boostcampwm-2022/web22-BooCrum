@@ -81,27 +81,33 @@ export const formatMoveObjectEventToSocket = ({ object, dleft, dtop }: MoveObjec
 	return message;
 };
 
-export interface ScaleObjectEventParams extends MoveObjectEventParmas {
-	scaleX: number;
-	scaleY: number;
-}
+// export const formatScalingObjectEventToSocket = ({
+// 	objectId,
+// 	left,
+// 	top,
+// 	scaleX,
+// 	scaleY,
+// }: ScaleObjectEventParams): ObjectDataToServer => {
+// 	// scaling 추가
+// const message: ObjectDataToServer = {
+// 	objectId: objectId,
+// 	left,
+// 	top,
+// 	scaleX,
+// 	scaleY,
+// };
 
-export const formatScalingObjectEventToSocket = ({
-	object,
-	dleft,
-	dtop,
-	scaleX,
-	scaleY,
-}: ScaleObjectEventParams): ObjectDataToServer => {
-	// scaling 추가
+// 	return message;
+// };
+
+export const formatScalingObjectEventToSocket = (object: fabric.Object) => {
 	const message: ObjectDataToServer = {
 		objectId: object.objectId,
-		dleft,
-		dtop,
-		scaleX,
-		scaleY,
+		left: object.left,
+		top: object.top,
+		scaleX: object.scaleX,
+		scaleY: object.scaleY,
 	};
-
 	return message;
 };
 

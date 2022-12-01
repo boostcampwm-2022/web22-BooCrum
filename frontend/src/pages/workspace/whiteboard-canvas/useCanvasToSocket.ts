@@ -158,20 +158,11 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			socket.current?.emit('move_pointer', message);
 		});
 
-		canvas.current.on('object:scaling', ({ e, target, transform }) => {
+		canvas.current.on('object:scaling', ({ target }) => {
 			if (!target) return;
 
-			const dx = Math.min((e as MouseEvent).x - (transform as Transform).ex, 0);
-			const dy = Math.min((e as MouseEvent).y - (transform as Transform).ey, 0);
-
 			if (target.type in ObjectType) {
-				const message = formatScalingObjectEventToSocket({
-					object: target,
-					dleft: dx,
-					dtop: dy,
-					scaleX: target.scaleX || 1,
-					scaleY: target.scaleY || 1,
-				});
+				const message = formatScalingObjectEventToSocket(target);
 				socket.current?.emit('scale_object', message);
 				return;
 			}
@@ -180,16 +171,16 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			const groupScaleX = groupObject.scaleX || 1;
 			const groupScaleY = groupObject.scaleY || 1;
 
-			groupObject._objects.forEach((object) => {
-				const message = formatScalingObjectEventToSocket({
-					object: object,
-					dleft: dx,
-					dtop: dy,
-					scaleX: groupScaleX * (object.scaleX || 1),
-					scaleY: groupScaleY * (object.scaleY || 1),
-				});
-				socket.current?.emit('scale_object', message);
-			});
+			// groupObject._objects.forEach((object) => {
+			// 	const message = formatScalingObjectEventToSocket({
+			// 		object: object,
+			// 		dleft: dx,
+			// 		dtop: dy,
+			// 		scaleX: groupScaleX * (object.scaleX || 1),
+			// 		scaleY: groupScaleY * (object.scaleY || 1),
+			// 	});
+			// 	socket.current?.emit('scale_object', message);
+			// });
 		});
 	}, []);
 
