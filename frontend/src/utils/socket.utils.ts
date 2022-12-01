@@ -81,25 +81,6 @@ export const formatMoveObjectEventToSocket = ({ object, dleft, dtop }: MoveObjec
 	return message;
 };
 
-// export const formatScalingObjectEventToSocket = ({
-// 	objectId,
-// 	left,
-// 	top,
-// 	scaleX,
-// 	scaleY,
-// }: ScaleObjectEventParams): ObjectDataToServer => {
-// 	// scaling 추가
-// const message: ObjectDataToServer = {
-// 	objectId: objectId,
-// 	left,
-// 	top,
-// 	scaleX,
-// 	scaleY,
-// };
-
-// 	return message;
-// };
-
 export const formatScalingObjectEventToSocket = (object: fabric.Object) => {
 	const message: ObjectDataToServer = {
 		objectId: object.objectId,
@@ -107,6 +88,36 @@ export const formatScalingObjectEventToSocket = (object: fabric.Object) => {
 		top: object.top,
 		scaleX: object.scaleX,
 		scaleY: object.scaleY,
+	};
+	return message;
+};
+
+export const formatScalingObjectEventToSocketForGroup = (
+	group: fabric.Object,
+	object: fabric.Object
+): ObjectDataToServer | undefined => {
+	const groupCenterPoint = group.getCenterPoint();
+	if (
+		object.left === undefined ||
+		object.top === undefined ||
+		object.scaleX === undefined ||
+		object.scaleY === undefined ||
+		group.scaleX === undefined ||
+		group.scaleY === undefined
+	)
+		return;
+
+	const left = groupCenterPoint.x + object.left * group.scaleX;
+	const top = groupCenterPoint.y + object.top * group.scaleY;
+	const scaleX = group.scaleX * object.scaleX;
+	const scaleY = group.scaleY * object.scaleY;
+
+	const message: ObjectDataToServer = {
+		objectId: object.objectId,
+		left,
+		top,
+		scaleX,
+		scaleY,
 	};
 	return message;
 };

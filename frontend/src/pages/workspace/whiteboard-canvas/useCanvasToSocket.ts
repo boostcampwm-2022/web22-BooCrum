@@ -10,6 +10,7 @@ import {
 	formatMessageToSocketForGroup,
 	formatMoveObjectEventToSocket,
 	formatScalingObjectEventToSocket,
+	formatScalingObjectEventToSocketForGroup,
 } from '@utils/socket.utils';
 import { Transform } from 'fabric/fabric-impl';
 import { formatMessageToSocket } from '../../../utils/socket.utils';
@@ -168,19 +169,13 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			}
 
 			const groupObject = target as fabric.Group;
-			const groupScaleX = groupObject.scaleX || 1;
-			const groupScaleY = groupObject.scaleY || 1;
 
-			// groupObject._objects.forEach((object) => {
-			// 	const message = formatScalingObjectEventToSocket({
-			// 		object: object,
-			// 		dleft: dx,
-			// 		dtop: dy,
-			// 		scaleX: groupScaleX * (object.scaleX || 1),
-			// 		scaleY: groupScaleY * (object.scaleY || 1),
-			// 	});
-			// 	socket.current?.emit('scale_object', message);
-			// });
+			groupObject._objects.forEach((object) => {
+				const message = formatScalingObjectEventToSocketForGroup(groupObject, object);
+				if (message) {
+					socket.current?.emit('scale_object', message);
+				}
+			});
 		});
 	}, []);
 
