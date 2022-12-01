@@ -152,7 +152,6 @@ export const addObject = (
 
 export const deleteObject = (canvas: fabric.Canvas) => {
 	const objectDeleteHandler = (e: KeyboardEvent) => {
-		console.log(e.key);
 		if (e.key === 'Backspace') {
 			if (canvas.mode === 'edit') return;
 			canvas.getActiveObjects().forEach((obj) => {
