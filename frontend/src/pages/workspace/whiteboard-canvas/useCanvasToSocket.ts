@@ -22,7 +22,6 @@ interface UseCanvasToSocketProps {
 
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 	const { isOpen, menuRef, openMenu, menuPosition } = useEditMenu(canvas);
-	const editedObjectId = useRef<string>('');
 
 	const getObjectIds = (objects: fabric.Object[]) => {
 		return objects.map((object) => object.objectId);
@@ -112,11 +111,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (!target || target.type !== ObjectType.editable) return;
 			const message = formatEditTextEventToSocket(target as fabric.Text);
 			socket.current?.emit('update_object', message);
-		});
-
-		canvas.current.on('text:editing:entered', ({ target }) => {
-			if (!target) return;
-			editedObjectId.current = target.objectId;
 		});
 
 		canvas.current.on('selection:created', ({ selected }) => {
