@@ -68,8 +68,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     // 1. 워크스페이스 조회
     const workspaceId = client.nsp.name.match(/workspace\/(.+)/)[1];
     if (!(await this.dbAccessService.isWorkspaceExist(workspaceId))) {
-      this.logger.error(`존재하지 않는 Workspace 접근`);
-      client.emit('exception', { message: `존재하지 않는 Workspace 접근` });
+      const errMsg = `존재하지 않는 Workspace 접근 / 요청 워크스페이스 ID: ${workspaceId}`;
+      this.logger.error(errMsg);
+      client.emit('exception', { message: errMsg });
       client.disconnect();
       return;
     }
@@ -130,7 +131,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
           );
       }
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error(`Disconnect Error: ${e.message}`, e.stack);
       throw new WsException(e.message);
     }
   }
@@ -177,14 +178,13 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       // section의 제목의 최대 길이는 50자
       if (objectData.type === 'section' && objectData.text.length > 50) throw new WsException('섹션 제목 길이 초과');
-
       // 생성을 시도하고, 성공하면 이를 전달한다.
       const ret = await this.objectHandlerService.createObject(userData.workspaceId, objectData);
       if (!ret) throw new WsException('생성 실패');
       this.dataManagementService.insertObjectData(objectData);
       socket.nsp.emit('create_object', objectData);
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error(`Create Error: ${e.message}`, e.stack);
       throw new WsException(e.message);
     }
   }
@@ -255,7 +255,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.dataManagementService.updateObjectData(objectData);
       socket.nsp.emit('update_object', { userId: userData.userId, objectData });
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error(`Update Error: ${e.message}`, e.stack);
       throw new WsException(e.message);
     }
   }
@@ -271,7 +271,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.dataManagementService.deleteObjectData(objectId);
       socket.nsp.emit('delete_object', { userId: userData.userId, objectId });
     } catch (e) {
-      this.logger.error(e);
+      this.logger.error(`Delete Error: ${e.message}`, e.stack);
       throw new WsException(e.message);
     }
   }
