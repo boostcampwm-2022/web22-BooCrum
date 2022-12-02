@@ -13,17 +13,16 @@ import {
 import { Server, Socket } from 'socket.io';
 import { createSessionMiddleware } from '../middlewares/session.middleware';
 import { Request, Response, NextFunction } from 'express';
-import { ObjectHandlerService } from '../object-database/object-handler.service';
-import { DataManagementService } from './data-management.service';
+import { UserManagementService } from './user-management.service';
 import { DbAccessService } from './db-access.service';
 import { UserMapVO } from './dto/user-map.vo';
 import { ObjectDTO } from './dto/object.dto';
 import { UserDAO } from './dto/user.dao';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
-import { WorkspaceObject } from '../object-database/entity/workspace-object.entity';
 import { ObjectMoveDTO } from './dto/object-move.dto';
 import { ObjectMapVO } from './dto/object-map.vo';
 import { ObjectScaleDTO } from './dto/object-scale.dto';
+import { ObjectManagementService } from './object-management.service';
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -35,9 +34,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   private logger: Logger = new Logger('SocketGateway');
 
   constructor(
-    private objectHandlerService: ObjectHandlerService,
     private dbAccessService: DbAccessService,
-    private dataManagementService: DataManagementService,
+    private dataManagementService: UserManagementService,
+    private objectManagementService: ObjectManagementService,
   ) {}
 
   /**
@@ -91,9 +90,8 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const members: UserDAO[] = this.dataManagementService
       .findUserDataListInWorkspace(workspaceId)
       .map((vo) => new UserDAO(vo.userId, vo.nickname, vo.color, vo.role));
-    const objects: WorkspaceObject[] = await this.objectHandlerService.selectAllObjects(workspaceId);
+    const objects: ObjectMapVO[] = await this.objectManagementService.findAllObjectsInWorkspace(workspaceId);
     const userData = new UserDAO(userMapVO.userId, userMapVO.nickname, userMapVO.color, userMapVO.role);
-    this.dataManagementService.initObjectMap(workspaceId, objects);
 
     // 5. Socket 이벤트 Emit
     client.emit('init', { members, objects, userData });
@@ -178,10 +176,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       // section의 제목의 최대 길이는 50자
       if (objectData.type === 'section' && objectData.text.length > 50) throw new WsException('섹션 제목 길이 초과');
+
       // 생성을 시도하고, 성공하면 이를 전달한다.
-      const ret = await this.objectHandlerService.createObject(userData.workspaceId, objectData);
-      if (!ret) throw new WsException('생성 실패');
-      this.dataManagementService.insertObjectData(objectData);
+      await this.objectManagementService.insertObjectIntoWorkspace(userData.workspaceId, objectData);
       socket.nsp.emit('create_object', objectData);
     } catch (e) {
       this.logger.error(`Create Error: ${e.message}`, e.stack);
@@ -196,7 +193,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
     // 객체 존재 여부 체크 및 조회
-    const objectData: ObjectMapVO = this.dataManagementService.selectObjectMapByObjectId(objectMoveDTO.objectId);
+    const objectData: ObjectMapVO = await this.objectManagementService.findOneObjectInWorkspace(
+      userData.workspaceId,
+      objectMoveDTO.objectId,
+    );
     if (!objectData) throw new WsException('존재하지 않는 객체 접근');
 
     // 이벤트 전달
@@ -219,7 +219,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
     // 객체 존재 여부 체크 및 조회
-    const objectData: ObjectMapVO = this.dataManagementService.selectObjectMapByObjectId(objectScaleDTO.objectId);
+    const objectData: ObjectMapVO = await this.objectManagementService.findOneObjectInWorkspace(
+      userData.workspaceId,
+      objectScaleDTO.objectId,
+    );
     if (!objectData) throw new WsException('존재하지 않는 객체 접근');
 
     // 이벤트 전달
@@ -250,9 +253,8 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       if (objectData.type === 'section' && objectData.text.length > 50) throw new WsException('섹션 제목 길이 초과');
 
       // 수정을 시도하고, 성공하면 이를 전달한다.
-      const ret = await this.objectHandlerService.updateObject(userData.workspaceId, objectData);
-      if (!ret) throw new WsException('수정 실패');
-      this.dataManagementService.updateObjectData(objectData);
+
+      await this.objectManagementService.updateObjectInWorkspace(userData.workspaceId, objectData);
       socket.nsp.emit('update_object', { userId: userData.userId, objectData });
     } catch (e) {
       this.logger.error(`Update Error: ${e.message}`, e.stack);
@@ -266,9 +268,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
       if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
-      const ret = await this.objectHandlerService.deleteObject(userData.workspaceId, objectId);
-      if (!ret) new WsException('삭제 실패');
-      this.dataManagementService.deleteObjectData(objectId);
+      await this.objectManagementService.deleteObjectInWorkspace(userData.workspaceId, objectId);
       socket.nsp.emit('delete_object', { userId: userData.userId, objectId });
     } catch (e) {
       this.logger.error(`Delete Error: ${e.message}`, e.stack);
