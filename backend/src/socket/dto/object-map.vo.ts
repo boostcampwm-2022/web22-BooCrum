@@ -2,6 +2,9 @@ import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class ObjectMapVO {
   @IsString()
+  objectId: string;
+
+  @IsString()
   type: string;
 
   @IsNumber()
@@ -36,8 +39,4 @@ export class ObjectMapVO {
   @IsString()
   @IsOptional()
   creator: string;
-
-  @IsUUID()
-  @IsOptional()
-  workspaceId: string;
 }
