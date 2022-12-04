@@ -1,5 +1,5 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
-import { isUUID, validate } from 'class-validator';
+import { isUUID } from 'class-validator';
 import { HydratedDocument } from 'mongoose';
 
 type ObjectTypes = 'postit' | 'section' | 'draw';

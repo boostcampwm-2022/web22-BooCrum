@@ -7,8 +7,10 @@ import { CreateObjectDTO } from './dto/create-object.dto';
 import { UpdateObjectDTO } from './dto/update-object.dto';
 import { WorkspaceObject } from './entity/workspace-object.entity';
 
+import { AbstractObjectHandlerService } from './abstract/object-handler.abstract';
+
 @Injectable()
-export class ObjectHandlerService {
+export class ObjectHandlerService implements AbstractObjectHandlerService {
   constructor(
     private dataSource: DataSource,
     @InjectRepository(WorkspaceObject)
