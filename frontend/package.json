@@ -57,7 +57,7 @@
     "@types/uuid": "^8.3.4",
     "@typescript-eslint/eslint-plugin": "^5.42.1",
     "@typescript-eslint/parser": "^5.42.1",
-    "artillery": "2.0.0-27",
+    "artillery": "2.0.0-6",
     "artillery-engine-socketio-v3": "^1.1.2",
     "artillery-plugin-metrics-by-endpoint": "^1.0.2",
     "craco-alias": "^3.0.1",
