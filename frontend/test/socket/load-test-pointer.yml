@@ -1,0 +1,32 @@
+config:
+  target: "https://bc7m-j045.xyz"
+  plugins:
+    metrics-by-endpoint: {}
+  phases:
+    - duration: 40
+      arrivalRate: 1
+      maxVusers: 5
+      name: "small group"
+    - duration: 40
+      arrivalRate: 2
+      maxVusers: 10
+      name: "medium group"
+    - duration: 40
+      arrivalRate: 5
+      name: "maxium point"
+    
+  engines:
+   socketio-v3: {
+    transports: ["websocket"]
+   }
+
+scenarios:
+  - name: load-test-pointer
+    width: 10
+    engine: socketio
+    flow:
+      - loop:
+        - emit: ["move_pointer", { x: 500, y: 500 }]
+          namespace: /workspace/caff9f57-c584-49ce-9bba-9bea919cd0c0
+        - think: 0.01
+        count: 4000
