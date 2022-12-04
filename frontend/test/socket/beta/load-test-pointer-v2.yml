@@ -1,0 +1,33 @@
+config:
+  target: "https://bc7m-j045.xyz"
+  phases:
+    - duration: 30
+      arrivalRate: 1
+      maxVusers: 5
+      name: "small group"
+    
+    - duration: 30
+      arrivalRate: 3
+      maxVusers: 20
+      name: "medium group"
+    
+    - duration: 30
+      arrivalRate: 5
+      name: "maxium point"
+
+scenarios:
+  - name: load-test-pointer
+    engine: socketio
+    flow:
+      - loop:
+        - name: "emit test"
+          engine: socketio
+          emit:
+            namespace: "/workspace/f15539ec-2e82-4fc4-858b-989451747cfd"
+            channel: "move_pointer"
+            data:
+              "x": 500
+              "y": 500
+        - think: 0.01
+        count: 3000
+      - think: 150
