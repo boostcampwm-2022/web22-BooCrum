@@ -122,7 +122,6 @@ export const setPostItEditEvent = (
 			top: (groupObject?.top || 0) + groupObject.getScaledHeight() * 0.05,
 			width: groupObject.getScaledWidth() * 0.9,
 			fontSize: textBox.fontSize,
-			evented: true,
 		});
 		canvas.mode = CanvasType.edit;
 		editableTextBox.fire('changed');
