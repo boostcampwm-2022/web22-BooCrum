@@ -328,21 +328,4 @@ export class WorkspaceService {
       ).affected > 0
     );
   }
-
-  /**
-   *
-   * @param workspaceId   썸네일을 조회할 워크스페이스 ID
-   * @returns             썸네일 URL (존재하지 않을 경우 null 반환)
-   */
-  async selectThumbnail(workspaceId: string) {
-    const isExistWorkspace = this.getWorkspaceMetadata(workspaceId);
-    if (!isExistWorkspace) return null;
-
-    const workspace = await this.workspaceRepository
-      .createQueryBuilder()
-      .select()
-      .where('workspace_id = :workspaceId', { workspaceId })
-      .getOne();
-    return !workspace ? null : workspace.thumbnailUrl;
-  }
 }

@@ -147,9 +147,4 @@ export class WorkspaceController {
   async uploadThumbnail(@Param('workspaceId') workspaceId: string, @UploadedFile() file: MulterS3.File) {
     return await this.workspaceService.uploadThumbnail(workspaceId, file);
   }
-
-  @Get('/:workspaceId/thumbnail')
-  async selectThumbnail(@Param('workspaceId') workspaceId: string) {
-    return await this.workspaceService.selectThumbnail(workspaceId);
-  }
 }
