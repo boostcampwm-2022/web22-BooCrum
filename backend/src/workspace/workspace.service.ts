@@ -307,6 +307,12 @@ export class WorkspaceService {
     return !member ? WORKSPACE_ROLE.NOT_FOUND : member.role;
   }
 
+  /**
+   *
+   * @param workspaceId   썸네일을 저장할 워크스페이스 ID
+   * @param file          썸네일로 저장할 이미지 파일
+   * @returns             썸네일 저장 성공 여부 반환
+   */
   async uploadThumbnail(workspaceId: string, file: MulterS3.File): Promise<boolean> {
     const thumbnailUrl = file.location;
     return (
@@ -320,6 +326,11 @@ export class WorkspaceService {
     );
   }
 
+  /**
+   *
+   * @param workspaceId   썸네일을 조회할 워크스페이스 ID
+   * @returns             썸네일 URL (존재하지 않을 경우 null 반환)
+   */
   async selectThumbnail(workspaceId: string) {
     const workspace = await this.workspaceRepository
       .createQueryBuilder()
