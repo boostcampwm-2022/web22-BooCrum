@@ -307,12 +307,25 @@ export class WorkspaceService {
     return !member ? WORKSPACE_ROLE.NOT_FOUND : member.role;
   }
 
-  async uploadThumbnail(workspaceId: string, file: MulterS3.File) {
+  async uploadThumbnail(workspaceId: string, file: MulterS3.File): Promise<boolean> {
     const thumbnailUrl = file.location;
-    this.workspaceRepository
+    return (
+      (
+        await this.workspaceRepository
+          .createQueryBuilder()
+          .update({ thumbnailUrl })
+          .where('workspace_id = :workspaceId', { workspaceId })
+          .execute()
+      ).affected > 0
+    );
+  }
+
+  async selectThumbnail(workspaceId: string) {
+    const workspace = await this.workspaceRepository
       .createQueryBuilder()
-      .update({ thumbnailUrl })
+      .select()
       .where('workspace_id = :workspaceId', { workspaceId })
-      .execute();
+      .getOne();
+    return !workspace ? null : workspace.thumbnailUrl;
   }
 }
