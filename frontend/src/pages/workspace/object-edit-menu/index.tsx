@@ -1,9 +1,9 @@
 import { colorChips } from '@data/workspace-object-color';
 import { useState } from 'react';
-import { ColorChip, ColorSelect, Container, Rename, FontSize } from './index.style';
+import { ColorChip, ColorSelect, Container, FontSize } from './index.style';
 import dropdownColor from '@assets/icon/dropdown-color.svg';
-import { ReactComponent as RenameSection } from '@assets/icon/rename-section.svg';
 import { ObjectEditMenuProps } from './index.type';
+import { ObjectType } from '../whiteboard-canvas/types';
 
 const selectedType: { [index: string]: number } = {
 	NONE: 0,
@@ -24,17 +24,11 @@ function ObjectEditMenu({ selectedObject, color, setObjectColor }: ObjectEditMen
 	};
 
 	const renderOptionBySelect = () => {
-		if (selectedObject === 'section') {
-			return (
-				<Rename selected={selected === selectedType.TYPE} onClick={() => setSelected(selectedType.TYPE)}>
-					<RenameSection stroke={selected === selectedType.TYPE ? 'white' : '#777777'} />
-				</Rename>
-			);
-		} else {
+		if (selectedObject === ObjectType.postit) {
 			return (
 				<FontSize selected={selected === selectedType.TYPE} onClick={() => setSelected(selectedType.TYPE)}></FontSize>
 			);
-		}
+		} else return <></>;
 	};
 
 	return (
