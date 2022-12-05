@@ -1,4 +1,4 @@
-import { IsNumber, IsOptional, IsString, IsUUID, IsArray } from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export class CreateObjectDTO implements AbstractWorkspaceObject {
   @IsUUID()
@@ -37,7 +37,7 @@ export class CreateObjectDTO implements AbstractWorkspaceObject {
   @IsOptional()
   fontSize: number;
 
-  @IsArray()
+  @IsString()
   @IsOptional()
   path: string;
 
