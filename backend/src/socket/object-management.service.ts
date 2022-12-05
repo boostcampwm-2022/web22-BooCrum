@@ -1,15 +1,16 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { ObjectHandlerService } from '../object-database/object-handler.service';
 import { WorkspaceObjectMapper } from 'src/types/socket';
 import { ObjectMapVO } from './dto/object-map.vo';
 import { ObjectDTO } from './dto/object.dto';
+import { MongooseObjectHandlerService } from '../object-database/mongoose-object-handler.service';
+import { ObjectHandlerService } from '../object-database/object-handler.service';
 
 @Injectable()
 export class ObjectManagementService {
   private workspaceObjectDataMap = new Map<string, WorkspaceObjectMapper>();
   private logger: Logger = new Logger('ObjectManagementService');
 
-  constructor(private objectHandlerService: ObjectHandlerService) {}
+  constructor(private objectHandlerService: MongooseObjectHandlerService) {}
 
   /**
    * 캐싱 여부와 무관하게, 지정한 워크스페이스의 Object 데이터를 가져와 모두 캐싱한다.
@@ -141,6 +142,7 @@ export class ObjectManagementService {
         objectMapper.objects.delete(objectDto.objectId);
         this.logger.error(
           `Insert Fatal Error: Failed to update data on Database\nWorkspace ID: ${workspaceId}\nObject ID: ${objectDto.objectId}\nReason: ${reason}`,
+          reason.stack,
         );
       });
   }
@@ -153,12 +155,11 @@ export class ObjectManagementService {
    * @param objectDto 갱신할 Object에 관한 데이터
    */
   async updateObjectInWorkspace(workspaceId: string, objectDto: ObjectDTO): Promise<void> {
-    await this.saveOrRefreshCache(workspaceId);
-
     // 업데이트 목적 메서드에 네이밍을 달아준다.
     const updateCacheData = (modified, reserved) => Object.assign(modified, reserved);
 
-    //
+    await this.saveOrRefreshCache(workspaceId);
+
     const objectMapper = this.workspaceObjectDataMap.get(workspaceId);
     if (!objectMapper.objects.has(objectDto.objectId))
       throw new Error(`존재하지 않는 Object ID: ${objectDto.objectId}`);
@@ -182,6 +183,7 @@ export class ObjectManagementService {
         updateCacheData(modifiedData, reservedData);
         this.logger.error(
           `Update Fatal Error: Failed to update data on Database\nWorkspace ID: ${workspaceId}\nObject ID: ${objectDto.objectId}\nReason: ${reason}`,
+          reason.stack,
         );
       });
   }
@@ -212,6 +214,7 @@ export class ObjectManagementService {
         objectMapper.objects.set(objectId, reservedData); // DB 삭제 실패 시 캐시를 다시 복구함.
         this.logger.error(
           `Delete Fatal Error: Failed to delete data on Database\nWorkspace ID: ${workspaceId}\nObject ID: ${objectId}\nReason: ${reason}`,
+          reason.stack,
         );
       });
   }

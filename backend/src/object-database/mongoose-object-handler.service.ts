@@ -8,6 +8,9 @@ import { WorkspaceObjectInterface } from './abstract/workspace-object.interface'
 import { CreateObjectDTO } from './dto/create-object.dto';
 import { UpdateObjectDTO } from './dto/update-object.dto';
 
+const updateFormatter = (updateDto: UpdateObjectDTO) =>
+  Object.fromEntries(Object.entries(updateDto).map(([key, val]) => [`objects.$.${key}`, val]));
+
 @Injectable()
 export class MongooseObjectHandlerService implements AbstractObjectHandlerService {
   constructor(
@@ -48,15 +51,18 @@ export class MongooseObjectHandlerService implements AbstractObjectHandlerServic
   }
 
   async updateObject(workspaceId: string, updateObjectDTO: UpdateObjectDTO): Promise<boolean> {
-    const ret = await this.objectBucketModel.findOneAndUpdate(
+    // $set에 쓰기 위해 맞는 형식으로 전환.
+    const newValue = updateFormatter(updateObjectDTO);
+
+    const ret = await this.objectBucketModel.updateOne(
       {
         workspaceId: workspaceId,
         'objects.objectId': updateObjectDTO.objectId,
       },
-      { $set: updateObjectDTO },
+      { $set: newValue },
       { runValidators: true, returnDocument: 'after', lean: true },
     );
-    return ret !== null && ret !== undefined;
+    return ret.matchedCount > 0;
   }
 
   async deleteObject(workspaceId: string, objectId: string): Promise<boolean> {
