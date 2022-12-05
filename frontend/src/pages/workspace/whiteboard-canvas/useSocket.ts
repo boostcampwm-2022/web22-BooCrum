@@ -67,12 +67,8 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			});
 
 			objects.forEach((object) => {
-				if (isNull(canvas.current)) return;
-				const creator = members.filter((member) => {
-					if (member.userId == object.creator) return true;
-				})[0];
-				const obj = { ...object, creator: creator.nickname };
-				createObjectFromServer(canvas.current, obj);
+				if (!canvas.current) return;
+				createObjectFromServer(canvas.current, object);
 			});
 		});
 
