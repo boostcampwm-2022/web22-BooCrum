@@ -65,7 +65,7 @@ export class WorkspaceObject {
     required: true,
     immutable: true,
   })
-  type: string;
+  type: ObjectType;
 
   @Prop({
     type: Number,
@@ -105,6 +105,18 @@ export class WorkspaceObject {
 
   @Prop({
     type: String,
+    required: true,
+  })
+  color: string;
+
+  @Prop({
+    type: String,
+    required: true,
+  })
+  creator: string;
+
+  @Prop({
+    type: String,
     required: function () {
       return REQUIRED_OPTONAL_PARAMS[this.type as ObjectTypes].indexOf('text') !== -1;
     },
@@ -132,6 +144,11 @@ export class WorkspaceObject {
     },
   })
   fontSize: number;
+
+  @Prop({
+    type: [[Number, Number]],
+  })
+  path: number[][];
 }
 
 export const workspaceObjectSchema = SchemaFactory.createForClass(WorkspaceObject);

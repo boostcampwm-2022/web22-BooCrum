@@ -5,7 +5,7 @@ export class CreateObjectDTO {
   objectId: string;
 
   @IsString()
-  type: string;
+  type: ObjectType;
 
   @IsNumber()
   left: number;

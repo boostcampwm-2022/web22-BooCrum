@@ -1,7 +1,8 @@
 import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import { isUUID } from 'class-validator';
 import { HydratedDocument } from 'mongoose';
-import { WorkspaceObject, workspaceObjectSchema } from './workspace-object.schema';
+import { WorkspaceObjectInterface } from '../abstract/workspace-object.interface';
+import { workspaceObjectSchema } from './workspace-object.schema';
 
 @Schema({ collection: 'boocrum-objects', timestamps: true, skipVersioning: { objects: true } })
 export class ObjectBucket {
@@ -19,7 +20,7 @@ export class ObjectBucket {
     type: [workspaceObjectSchema],
     default: [],
   })
-  objects: WorkspaceObject[];
+  objects: WorkspaceObjectInterface[];
 }
 
 export type ObjectBucketDocument = HydratedDocument<ObjectBucket>;

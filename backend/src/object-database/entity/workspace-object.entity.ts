@@ -17,7 +17,7 @@ export class WorkspaceObject {
     length: '120',
     nullable: false,
   })
-  type: string;
+  type: ObjectType;
 
   @Column({
     name: 'left',
