@@ -9,7 +9,7 @@ import { WorkspaceMetadataDto } from './dto/workspaceMetadata.dto';
 import { WorkspaceMember } from './entity/workspace-member.entity';
 import { Workspace } from './entity/workspace.entity';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
-import { MulterS3 } from 'multer-s3';
+import * as MulterS3 from 'multer-s3';
 
 @Injectable()
 export class WorkspaceService {
@@ -314,6 +314,9 @@ export class WorkspaceService {
    * @returns             썸네일 저장 성공 여부 반환
    */
   async uploadThumbnail(workspaceId: string, file: MulterS3.File): Promise<boolean> {
+    const isExistWorkspace = this.getWorkspaceMetadata(workspaceId);
+    if (!isExistWorkspace) return false;
+
     const thumbnailUrl = file.location;
     return (
       (
@@ -332,6 +335,9 @@ export class WorkspaceService {
    * @returns             썸네일 URL (존재하지 않을 경우 null 반환)
    */
   async selectThumbnail(workspaceId: string) {
+    const isExistWorkspace = this.getWorkspaceMetadata(workspaceId);
+    if (!isExistWorkspace) return null;
+
     const workspace = await this.workspaceRepository
       .createQueryBuilder()
       .select()

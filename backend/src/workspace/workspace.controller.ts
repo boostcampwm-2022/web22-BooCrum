@@ -22,19 +22,8 @@ import { WorkspaceIdDto } from './dto/workspaceId.dto';
 import { WorkspaceMetadataDto } from './dto/workspaceMetadata.dto';
 import { Workspace } from './entity/workspace.entity';
 import { WorkspaceService } from './workspace.service';
-import * as AWS from 'aws-sdk';
 import * as MulterS3 from 'multer-s3';
-import { FileInterceptor } from '@nestjs/platform-express';
-import { ObjectStorageConfig } from 'src/util/config/object-storage.config';
-
-const s3 = new AWS.S3({
-  endpoint: ObjectStorageConfig.endpoint,
-  region: ObjectStorageConfig.region,
-  credentials: {
-    accessKeyId: ObjectStorageConfig.access_key,
-    secretAccessKey: ObjectStorageConfig.secret_key,
-  },
-});
+import { ThumbnailInterceptor } from 'src/workspace/file-interceptor/thumbnail.interceptor';
 
 @Controller('workspace')
 export class WorkspaceController {
@@ -154,19 +143,7 @@ export class WorkspaceController {
   }
 
   @Post('/:workspaceId/thumbnail')
-  @UseInterceptors(
-    FileInterceptor('file', {
-      storage: new MulterS3({
-        s3: s3,
-        bucket: 'boocrum',
-        acl: 'public-read',
-        key: function (request, file, cb) {
-          cb(null, `thumbnail/${Date.now().toString()}-${file.originalname}`);
-        },
-      }),
-      limits: {},
-    }),
-  )
+  @UseInterceptors(ThumbnailInterceptor)
   async uploadThumbnail(@Param('workspaceId') workspaceId: string, @UploadedFile() file: MulterS3.File) {
     return await this.workspaceService.uploadThumbnail(workspaceId, file);
   }
