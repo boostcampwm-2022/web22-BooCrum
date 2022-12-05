@@ -24,6 +24,11 @@ import { ObjectScaleDTO } from './dto/object-scale.dto';
 import { ObjectManagementService } from './object-management.service';
 import { CreateObjectDTO } from 'src/object-database/dto/create-object.dto';
 import { UpdateObjectDTO } from 'src/object-database/dto/update-object.dto';
+import { ObjectTransformPipe } from './pipe/object-transform.pipe';
+import { ValidationError } from 'class-validator';
+
+const errorMsgFormatter = (errors: ValidationError[]) =>
+  new WsException(`잘못된 속성 전달: ${errors.map((e) => e.property).join(', ')}`);
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -155,37 +160,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     socket.nsp.emit('unselect_object', { objectIds, userId: userData.userId });
   }
 
-  @SubscribeMessage('create_object')
-  async createObject(
-    @MessageBody(
-      new ValidationPipe({
-        exceptionFactory: (errors) => new WsException(`잘못된 속성 전달: ${errors.map((e) => e.property).join(', ')}`),
-      }),
-    )
-    objectData: CreateObjectDTO,
-    @ConnectedSocket() socket: Socket,
-  ) {
-    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
-    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
-
-    // Optional 값들 중 값을 채워줘야 하는 것은 값을 넣어준다.
-    try {
-      if (!objectData.text) objectData.text = '';
-      if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) objectData.fontSize = 16;
-      objectData.creator = userData.userId;
-
-      // section의 제목의 최대 길이는 50자
-      if (objectData.type === 'section' && objectData.text.length > 50) throw new WsException('섹션 제목 길이 초과');
-
-      // 생성을 시도하고, 성공하면 이를 전달한다.
-      await this.objectManagementService.insertObjectIntoWorkspace(userData.workspaceId, objectData);
-      socket.nsp.emit('create_object', objectData);
-    } catch (e) {
-      this.logger.error(`Create Error: ${e.message}`, e.stack);
-      throw new WsException(e.message);
-    }
-  }
-
   @SubscribeMessage('move_object')
   async moveObject(@MessageBody() objectMoveDTO: ObjectMoveDTO, @ConnectedSocket() socket: Socket) {
     // User 권한 체크
@@ -238,21 +212,39 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     });
   }
 
+  @SubscribeMessage('create_object')
+  async createObject(
+    @MessageBody(new ValidationPipe({ exceptionFactory: errorMsgFormatter }), new ObjectTransformPipe())
+    objectData: CreateObjectDTO,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
+
+    // Optional 값들 중 값을 채워줘야 하는 것은 값을 넣어준다.
+    try {
+      objectData.creator = userData.userId;
+
+      // 생성을 시도하고, 성공하면 이를 전달한다.
+      await this.objectManagementService.insertObjectIntoWorkspace(userData.workspaceId, objectData);
+      socket.nsp.emit('create_object', objectData);
+    } catch (e) {
+      this.logger.error(`Create Error: ${e.message}`, e.stack);
+      throw new WsException(e.message);
+    }
+  }
+
   @SubscribeMessage('update_object')
-  async updateObject(@MessageBody() objectData: UpdateObjectDTO, @ConnectedSocket() socket: Socket) {
+  async updateObject(
+    @MessageBody(new ValidationPipe({ exceptionFactory: errorMsgFormatter }), new ObjectTransformPipe())
+    objectData: UpdateObjectDTO,
+    @ConnectedSocket() socket: Socket,
+  ) {
     try {
       const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
       if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
-      // 변경되어서는 안되는 값들은 미리 제거하거나 덮어버린다.
-      delete objectData.type;
-      if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) delete objectData.fontSize;
-
-      // section의 제목의 최대 길이는 50자
-      if (objectData.type === 'section' && objectData.text.length > 50) throw new WsException('섹션 제목 길이 초과');
-
       // 수정을 시도하고, 성공하면 이를 전달한다.
-
       await this.objectManagementService.updateObjectInWorkspace(userData.workspaceId, objectData);
       socket.nsp.emit('update_object', { userId: userData.userId, objectData });
     } catch (e) {
