@@ -54,6 +54,7 @@ export const CanvasType = {
 	select: 'select',
 	draw: 'draw',
 	edit: 'edit',
+	erase: 'erase',
 } as const;
 
 export type CanvasType = typeof CanvasType[keyof typeof CanvasType];

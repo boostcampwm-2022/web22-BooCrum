@@ -56,10 +56,13 @@ function useCanvas() {
 				setCursorMode(fabricCanvas, 'grab', CanvasType.move, false);
 			} else if (cursor.type === toolItems.SELECT) {
 				setCursorMode(fabricCanvas, 'default', CanvasType.select, true);
-			} else {
+			} else if (cursor.type === toolItems.PEN) {
 				setCursorMode(fabricCanvas, 'default', CanvasType.draw, true);
 				fabricCanvas.isDrawingMode = true;
 				fabricCanvas.freeDrawingBrush.color = cursor.color;
+			} else if (cursor.type === toolItems.ERASER) {
+				// todo canvas.mode에 erase 추가해줘야함
+				setCursorMode(fabricCanvas, 'default', CanvasType.draw, false);
 			}
 			canvas.current.discardActiveObject();
 			canvas.current.renderAll();

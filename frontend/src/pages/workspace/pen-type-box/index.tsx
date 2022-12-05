@@ -27,7 +27,7 @@ function PenTypeBox() {
 				selected={isSelectedCursor(cursor.type, toolItems.ERASER)}
 				onClick={() => handleCursorType(toolItems.ERASER)}
 			>
-				<img alt="section" className="tool" src={eraserTool} />
+				<img alt="eraser" className="tool" src={eraserTool} />
 			</Tool>
 			{isSelectedCursor(cursor.type, toolItems.PEN) &&
 				colorChips.map((color) => (
