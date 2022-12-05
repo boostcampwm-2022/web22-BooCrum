@@ -143,6 +143,9 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 					text: updatedObject.text || textObject.text,
 					fontSize: updatedObject.fontSize || textObject.fontSize,
 				});
+			} else if (object.type === ObjectType.rect && updatedObject.color) {
+				const backgroundRect = object as fabric.Rect;
+				backgroundRect.set({ fill: updatedObject.color });
 			}
 		});
 	}

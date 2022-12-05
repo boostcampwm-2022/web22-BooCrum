@@ -32,7 +32,7 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		const top = coord ? coord[0].y - 40 : 0;
 		const left = coord ? (coord[0].x + coord[1].x) / 2 - 30 : 0;
 
-		if (currentObject._objects.length < 3) return;
+		if (!(currentObject instanceof fabric.Group)) return;
 
 		setSelectedType(currentObject.type);
 		setColor(currentObject._objects[0].fill as string);
@@ -77,6 +77,7 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		setColor(color);
 
+		currentCanvas.fire('color:modified', { target: currentGroup });
 		currentCanvas.renderAll();
 	};
 
