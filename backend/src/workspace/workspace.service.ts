@@ -9,6 +9,7 @@ import { WorkspaceMetadataDto } from './dto/workspaceMetadata.dto';
 import { WorkspaceMember } from './entity/workspace-member.entity';
 import { Workspace } from './entity/workspace.entity';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
+import { MulterS3 } from 'multer-s3';
 
 @Injectable()
 export class WorkspaceService {
@@ -304,5 +305,14 @@ export class WorkspaceService {
       .getOne();
 
     return !member ? WORKSPACE_ROLE.NOT_FOUND : member.role;
+  }
+
+  async uploadThumbnail(workspaceId: string, file: MulterS3.File) {
+    const thumbnailUrl = file.location;
+    this.workspaceRepository
+      .createQueryBuilder()
+      .update({ thumbnailUrl })
+      .where('workspace_id = :workspaceId', { workspaceId })
+      .execute();
   }
 }
