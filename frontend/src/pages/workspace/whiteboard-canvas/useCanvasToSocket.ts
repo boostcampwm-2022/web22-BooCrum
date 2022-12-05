@@ -30,8 +30,8 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('object:added', ({ target: fabricObject }) => {
 			if (isUndefined(fabricObject) || fabricObject.isSocketObject) return;
 
-			if (fabricObject.type === ObjectType.postit) {
-				const message = formatObjectDataToServer(fabricObject as fabric.Group, fabricObject.type);
+			if (fabricObject.type in SocketObjectType) {
+				const message = formatObjectDataToServer(fabricObject as fabric.Group, fabricObject.type as SocketObjectType);
 				socket.current?.emit('create_object', message);
 			}
 		});

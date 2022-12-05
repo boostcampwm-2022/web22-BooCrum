@@ -4,21 +4,31 @@ import {
 	UserMousePointer,
 	ObjectType,
 	Member,
+	SocketObjectType,
 } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 import {
 	createNameLabel,
 	createPostIt,
 	createRect,
+	createSection,
+	createSectionTitle,
 	createTextBox,
+	createTitleBackground,
+	setLimitChar,
 	setLimitHeightEvent,
 	setPostItEditEvent,
 	setPreventResizeEvent,
+	setSectionEditEvent,
 } from './object.utils';
 
 export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
-	if (newObject.type === ObjectType.postit) {
+	if (newObject.type === SocketObjectType.postit) {
 		createPostitFromServer(canvas, newObject);
+	}
+
+	if (newObject.type === SocketObjectType.section) {
+		createSectionFromServer(canvas, newObject);
 	}
 };
 
@@ -28,8 +38,11 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 	const nameLabel = createNameLabel({ objectId, text: creator, left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
 	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
-
 	const backgroundRect = createRect({ objectId, left, top, color });
+
+	editableTextBox.set({
+		isSocketObject: true,
+	});
 	backgroundRect.set({
 		isSocketObject: true,
 	});
@@ -46,11 +59,55 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 		scaleX,
 		scaleY,
 	});
+
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
 	setLimitHeightEvent(canvas, editableTextBox, postit);
 	setPostItEditEvent(canvas, postit, editableTextBox, textBox);
 	setPreventResizeEvent(objectId, canvas, textBox, postit);
 	canvas.add(postit);
+};
+
+export const createSectionFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
+	const { objectId, left, top, fontSize, color, scaleX, scaleY, text } = newObject;
+	if (!left || !top || !fontSize || !color || !scaleX || !scaleY || !text) return;
+
+	const editableTitle = createSectionTitle({ objectId, text: text, left, top: top + 25, editable: true });
+	const sectionTitle = createSectionTitle({ objectId, text: text, left, top, editable: false });
+	const sectionBackground = createTitleBackground({ objectId, left, top, color });
+	const backgroundRect = createRect({ objectId, left, top, color });
+
+	editableTitle.set({
+		isSocketObject: true,
+	});
+	sectionTitle.set({
+		isSocketObject: true,
+	});
+	sectionBackground.set({
+		isSocketObject: true,
+	});
+	backgroundRect.set({
+		isSocketObject: true,
+	});
+
+	const section = createSection({
+		objectId,
+		left,
+		top,
+		sectionTitle,
+		titleBackground: sectionBackground,
+		backgroundRect,
+	});
+
+	section.set({
+		isSocketObject: true,
+		scaleX,
+		scaleY,
+	});
+
+	setLimitChar(canvas, section, sectionTitle, sectionBackground);
+	setLimitChar(canvas, section, editableTitle, sectionBackground);
+	setSectionEditEvent(canvas, section, editableTitle, sectionTitle);
+	canvas.add(section);
 };
 
 export const deleteObjectFromServer = (canvas: fabric.Canvas, objectId: string) => {
@@ -77,10 +134,10 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 		...updatedObject,
 	});
 
-	if (object[0].type === ObjectType.postit) {
+	if (object[0].type in SocketObjectType) {
 		const groupObject = object[0] as fabric.Group;
 		groupObject._objects.forEach((object) => {
-			if (object.type === ObjectType.text) {
+			if (object.type === ObjectType.text || object.type === ObjectType.title) {
 				const textObject = object as fabric.Text;
 				textObject.set({
 					text: updatedObject.text || textObject.text,
@@ -97,6 +154,7 @@ export const selectObjectFromServer = (canvas: fabric.Canvas, objectIds: string[
 		return objectIds.includes(object.objectId);
 	});
 
+	console.log('select', objects);
 	if (objects.length === 0) return;
 
 	const groupObjects = objects as fabric.Group[];

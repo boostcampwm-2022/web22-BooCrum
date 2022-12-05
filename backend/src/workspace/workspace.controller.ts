@@ -12,6 +12,8 @@ import {
   ValidationPipe,
   BadRequestException,
   ForbiddenException,
+  UploadedFile,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthorizationGuard } from 'src/auth/guard/session.guard';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
@@ -20,6 +22,8 @@ import { WorkspaceIdDto } from './dto/workspaceId.dto';
 import { WorkspaceMetadataDto } from './dto/workspaceMetadata.dto';
 import { Workspace } from './entity/workspace.entity';
 import { WorkspaceService } from './workspace.service';
+import * as MulterS3 from 'multer-s3';
+import { ThumbnailInterceptor } from 'src/workspace/file-interceptor/thumbnail.interceptor';
 
 @Controller('workspace')
 export class WorkspaceController {
@@ -136,5 +140,11 @@ export class WorkspaceController {
   @Get('/:workspaceId/role/:userId')
   async getWorkspaceAuthority(@Param('workspaceId') workspaceId: string, @Param('userId') userId: string) {
     return await this.workspaceService.getWorkspaceAuthority(workspaceId, userId);
+  }
+
+  @Post('/:workspaceId/thumbnail')
+  @UseInterceptors(ThumbnailInterceptor)
+  async uploadThumbnail(@Param('workspaceId') workspaceId: string, @UploadedFile() file: MulterS3.File) {
+    return await this.workspaceService.uploadThumbnail(workspaceId, file);
   }
 }
