@@ -87,20 +87,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('object:scaling', ({ target: fabricObject }) => {
 			if (isUndefined(fabricObject)) return;
 
-		canvas.current.on('color:modified', ({ target }) => {
-			if (!(target instanceof fabric.Group)) return;
-			if (target.type !== ObjectType.postit && target.type !== ObjectType.section) return;
-
-			const changeObjects = target._objects.filter((obj) => obj.type === ObjectType.rect);
-			changeObjects.forEach((object) => {
-				const message = formatEditColorEventToSocket(object);
-				socket.current?.emit('update_object', message);
-			});
-		});
-
-		canvas.current.on('object:modified', ({ target }) => {
-			if (!target) return;
-
 			if (fabricObject.type in ObjectType) {
 				const message = formatScaleObjectEventToSocket(fabricObject as fabric.Group);
 				socket.current?.emit('scale_object', message);
@@ -114,6 +100,17 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 					const message = formatScaleObjectEventToSocketForGroup(fabricObject, object as fabric.Group);
 					socket.current?.emit('scale_object', message);
 				}
+			});
+		});
+
+		canvas.current.on('color:modified', ({ target }) => {
+			if (!(target instanceof fabric.Group)) return;
+			if (target.type !== ObjectType.postit && target.type !== ObjectType.section) return;
+
+			const changeObjects = target._objects.filter((obj) => obj.type === ObjectType.rect);
+			changeObjects.forEach((object) => {
+				const message = formatEditColorEventToSocket(object);
+				socket.current?.emit('update_object', message);
 			});
 		});
 

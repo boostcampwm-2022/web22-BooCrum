@@ -2,6 +2,15 @@ import { ObjectType, ObjectDataToServer, SocketObjectType } from '@pages/workspa
 
 import { fabric } from 'fabric';
 
+export const formatEditColorEventToSocket = (object: fabric.Object) => {
+	const message: ObjectDataToServer = {
+		objectId: object.objectId,
+		color: object.fill as string,
+	};
+
+	return message;
+};
+
 export const formatObjectDataToServer = (objectGroup: fabric.Group, type: SocketObjectType): ObjectDataToServer => {
 	const message: ObjectDataToServer = {
 		type: type,
