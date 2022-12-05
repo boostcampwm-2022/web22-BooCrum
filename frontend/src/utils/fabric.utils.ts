@@ -120,6 +120,11 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 
 export const initDrawing = (canvas: fabric.Canvas) => {
 	canvas.freeDrawingBrush.width = 5;
+	canvas.on('path:created', (e: any) => {
+		if (!e) return;
+		const path: fabric.Path = e.path;
+		path.type = ObjectType.draw;
+	});
 };
 
 export const addObject = (
@@ -191,5 +196,5 @@ export const setCursorMode = (canvas: fabric.Canvas, cursor: string, mode: Canva
 	canvas.defaultCursor = cursor;
 	canvas.hoverCursor = cursor;
 	canvas.mode = mode;
-	canvas.forEachObject((obj) => (obj.selectable = selectable));
+	canvas.forEachObject((obj) => (obj.selectable = obj.type !== ObjectType.draw ? selectable : false));
 };

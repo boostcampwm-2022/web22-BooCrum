@@ -62,7 +62,7 @@ function useCanvas() {
 				fabricCanvas.freeDrawingBrush.color = cursor.color;
 			} else if (cursor.type === toolItems.ERASER) {
 				// todo canvas.mode에 erase 추가해줘야함
-				setCursorMode(fabricCanvas, 'default', CanvasType.draw, false);
+				setCursorMode(fabricCanvas, 'default', CanvasType.erase, false);
 			}
 			canvas.current.discardActiveObject();
 			canvas.current.requestRenderAll();
