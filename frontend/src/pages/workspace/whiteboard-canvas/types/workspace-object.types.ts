@@ -22,11 +22,10 @@ export interface ObjectDataToServer {
 	fontSize?: number;
 	scaleX?: number;
 	scaleY?: number;
-	dleft?: number;
-	dtop?: number;
 }
 
 export interface ObjectDataFromServer extends ObjectDataToServer {
+	type: SocketObjectType;
 	creator: string;
 	workspaceId: string;
 }
@@ -46,6 +45,15 @@ export const ObjectType = {
 } as const;
 
 export type ObjectType = typeof ObjectType[keyof typeof ObjectType];
+
+// 소켓으로 보내는 object typee들
+export const SocketObjectType = {
+	postit: 'postit',
+	section: 'section',
+	draw: 'draw',
+} as const;
+
+export type SocketObjectType = typeof SocketObjectType[keyof typeof SocketObjectType];
 
 export const CanvasType = {
 	postit: 'postit',

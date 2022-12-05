@@ -65,7 +65,7 @@ function useCanvas() {
 				setCursorMode(fabricCanvas, 'default', CanvasType.draw, false);
 			}
 			canvas.current.discardActiveObject();
-			canvas.current.renderAll();
+			canvas.current.requestRenderAll();
 		}
 	}, [cursor, myInfoInWorkspace]);
 

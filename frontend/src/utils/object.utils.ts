@@ -94,7 +94,7 @@ export const setLimitHeightEvent = (
 		if (!textBox.height || !textBox.fontSize || !background.height) return;
 		while (textBox.getScaledHeight() > background.getScaledHeight() * 0.9 && textBox.fontSize > 12) {
 			textBox.fontSize--;
-			canvas.renderAll();
+			canvas.requestRenderAll();
 		}
 	};
 
@@ -261,7 +261,7 @@ export const setLimitChar = (
 	if (!group) return;
 	title.on('changed', (e) => {
 		background.set({ width: (title.get('width') || 0) + 10 });
-		canvas.renderAll();
+		canvas.requestRenderAll();
 	});
 };
 
