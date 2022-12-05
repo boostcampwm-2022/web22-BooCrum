@@ -68,7 +68,7 @@ export const formatMoveObjectEventToSocketForGroup = (
 	return message;
 };
 
-export const formatScalingObjectEventToSocket = (object: fabric.Object) => {
+export const formatScaleObjectEventToSocket = (object: fabric.Group) => {
 	const message: ObjectDataToServer = {
 		objectId: object.objectId,
 		left: object.left,
@@ -79,32 +79,19 @@ export const formatScalingObjectEventToSocket = (object: fabric.Object) => {
 	return message;
 };
 
-export const formatScalingObjectEventToSocketForGroup = (
-	group: fabric.Object,
-	object: fabric.Object
-): ObjectDataToServer | undefined => {
+export const formatScaleObjectEventToSocketForGroup = (
+	group: fabric.Group,
+	object: fabric.Group
+): ObjectDataToServer => {
 	const groupCenterPoint = group.getCenterPoint();
-	if (
-		object.left === undefined ||
-		object.top === undefined ||
-		object.scaleX === undefined ||
-		object.scaleY === undefined ||
-		group.scaleX === undefined ||
-		group.scaleY === undefined
-	)
-		return;
-
-	const left = groupCenterPoint.x + object.left * group.scaleX;
-	const top = groupCenterPoint.y + object.top * group.scaleY;
-	const scaleX = group.scaleX * object.scaleX;
-	const scaleY = group.scaleY * object.scaleY;
+	const objectDataMessage = formatScaleObjectEventToSocket(object);
 
 	const message: ObjectDataToServer = {
-		objectId: object.objectId,
-		left,
-		top,
-		scaleX,
-		scaleY,
+		...objectDataMessage,
+		left: groupCenterPoint.x + (objectDataMessage.left || 0) * (group.scaleX || 1),
+		top: groupCenterPoint.y + (objectDataMessage.top || 0) * (group.scaleY || 1),
+		scaleX: (group.scaleX || 1) * (objectDataMessage.scaleX || 1),
+		scaleY: (group.scaleY || 1) * (objectDataMessage.scaleY || 1),
 	};
 	return message;
 };

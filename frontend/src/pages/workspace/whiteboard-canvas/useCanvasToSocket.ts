@@ -8,8 +8,8 @@ import {
 	formatEditTextEventToSocket,
 	formatMessageToSocketForGroup,
 	formatMoveObjectEventToSocket,
-	formatScalingObjectEventToSocket,
-	formatScalingObjectEventToSocketForGroup,
+	formatScaleObjectEventToSocket,
+	formatScaleObjectEventToSocketForGroup,
 	formatMoveObjectEventToSocketForGroup,
 } from '@utils/object-to-server';
 import { fabric } from 'fabric';
@@ -68,8 +68,8 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			});
 		});
 
-		canvas.current.on('object:moving', ({ target: fabricObject, transform, e }) => {
-			if (!fabricObject || !transform) return;
+		canvas.current.on('object:moving', ({ target: fabricObject }) => {
+			if (isUndefined(fabricObject)) return;
 
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatMoveObjectEventToSocket(fabricObject as fabric.Group);
@@ -87,20 +87,20 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			});
 		});
 
-		canvas.current.on('object:scaling', ({ target }) => {
-			if (!target) return;
+		canvas.current.on('object:scaling', ({ target: fabricObject }) => {
+			if (isUndefined(fabricObject)) return;
 
-			if (target.type in ObjectType) {
-				const message = formatScalingObjectEventToSocket(target);
+			if (fabricObject.type in ObjectType) {
+				const message = formatScaleObjectEventToSocket(fabricObject as fabric.Group);
 				socket.current?.emit('scale_object', message);
 				return;
 			}
 
-			if (!(target instanceof fabric.Group)) return;
+			if (!(fabricObject instanceof fabric.Group)) return;
 
-			target._objects.forEach((object) => {
-				const message = formatScalingObjectEventToSocketForGroup(target, object);
-				if (message) {
+			fabricObject._objects.forEach((object) => {
+				if (object.type in SocketObjectType) {
+					const message = formatScaleObjectEventToSocketForGroup(fabricObject, object as fabric.Group);
 					socket.current?.emit('scale_object', message);
 				}
 			});
