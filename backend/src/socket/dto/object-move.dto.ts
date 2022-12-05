@@ -5,8 +5,8 @@ export class ObjectMoveDTO {
   objectId: string;
 
   @IsNumber()
-  dleft: number;
+  left: number;
 
   @IsNumber()
-  dtop: number;
+  top: number;
 }
