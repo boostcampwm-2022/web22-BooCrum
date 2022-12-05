@@ -97,12 +97,18 @@ export const formatScaleObjectEventToSocketForGroup = (
 };
 
 export const formatEditTextEventToSocket = (object: fabric.Text): ObjectDataToServer => {
-	// scaling 추가
 	const message: ObjectDataToServer = {
 		objectId: object.objectId,
 		text: object.text,
 		fontSize: object.fontSize,
 	};
 
+	return message;
+};
+
+export const formatSelectEventToSocket = (objects: fabric.Object[]) => {
+	const message = {
+		objectIds: objects.map((object) => object.objectId),
+	};
 	return message;
 };

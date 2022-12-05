@@ -11,9 +11,10 @@ import {
 	formatScaleObjectEventToSocket,
 	formatScaleObjectEventToSocketForGroup,
 	formatMoveObjectEventToSocketForGroup,
+	formatSelectEventToSocket,
 } from '@utils/object-to-server';
 import { fabric } from 'fabric';
-import { isNull, isNullOrUndefined, isUndefined } from '@utils/type.utils';
+import { isNull, isUndefined } from '@utils/type.utils';
 
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
@@ -22,10 +23,6 @@ interface UseCanvasToSocketProps {
 
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 	const { isOpen, menuRef, openMenu, menuPosition } = useEditMenu(canvas);
-
-	const getObjectIds = (objects: fabric.Object[]) => {
-		return objects.map((object) => object.objectId);
-	};
 
 	useEffect(() => {
 		if (isNull(canvas.current)) return;
@@ -106,58 +103,48 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			});
 		});
 
-		canvas.current.on('text:changed', ({ target }) => {
-			if (!target || target.type !== ObjectType.editable) return;
-			const message = formatEditTextEventToSocket(target as fabric.Text);
+		canvas.current.on('text:changed', ({ target: fabricObject }) => {
+			if (isUndefined(fabricObject) || fabricObject.type !== ObjectType.editable) return;
+			const message = formatEditTextEventToSocket(fabricObject as fabric.Text);
 			socket.current?.emit('update_object', message);
 		});
 
 		canvas.current.on('selection:created', ({ selected }) => {
-			if (!selected || selected.length === 0) return;
+			if (isUndefined(selected) || selected.length === 0) return;
 
-			const messege = {
-				objectIds: getObjectIds(selected),
-			};
+			const messege = formatSelectEventToSocket(selected);
 			socket.current?.emit('select_object', messege);
 
 			openMenu();
 		});
 
 		canvas.current.on('selection:updated', ({ selected, deselected }) => {
-			if (!selected || !deselected) return;
-
-			if (deselected.length !== 0) {
-				socket.current?.emit('unselect_object', {
-					objectIds: getObjectIds(deselected),
-				});
+			if (!isUndefined(deselected) && deselected.length !== 0) {
+				const message = formatSelectEventToSocket(deselected);
+				socket.current?.emit('unselect_object', message);
 			}
 
-			if (selected.length !== 0) {
-				socket.current?.emit('select_object', {
-					objectIds: getObjectIds(selected),
-				});
+			if (!isUndefined(selected) && selected.length !== 0) {
+				const message = formatSelectEventToSocket(selected);
+				socket.current?.emit('select_object', message);
 			}
 
 			openMenu();
 		});
 
 		canvas.current.on('selection:cleared', ({ deselected }) => {
-			if (!deselected) return;
-			if (deselected.length !== 0) {
-				socket.current?.emit('unselect_object', {
-					objectIds: getObjectIds(deselected),
-				});
-			}
+			if (isUndefined(deselected) || deselected.length === 0) return;
+			const message = formatSelectEventToSocket(deselected);
+			socket.current?.emit('unselect_object', message);
 		});
 
-		canvas.current.on('mouse:move', (e) => {
-			if (!e.pointer) return;
-			if (!canvas.current) return;
-			const vpt = canvas.current?.viewportTransform;
-			if (!vpt) return;
+		canvas.current.on('mouse:move', ({ e }) => {
+			if (isNull(canvas.current)) return;
+			const vpt = canvas.current.viewportTransform;
+			if (isUndefined(vpt)) return;
 			const zoom = canvas.current.getZoom();
-			const x = (e.e.offsetX - vpt[4]) / zoom;
-			const y = (e.e.offsetY - vpt[5]) / zoom;
+			const x = (e.offsetX - vpt[4]) / zoom;
+			const y = (e.offsetY - vpt[5]) / zoom;
 			const message: MousePointer = {
 				x,
 				y,
