@@ -204,10 +204,8 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       userId: userData.userId,
       objectData: {
         objectId: objectMoveDTO.objectId,
-        dleft: objectMoveDTO.dleft,
-        dtop: objectMoveDTO.dtop,
-        left: objectData.left,
-        top: objectData.top,
+        left: objectMoveDTO.left,
+        top: objectMoveDTO.top,
       },
     });
   }
