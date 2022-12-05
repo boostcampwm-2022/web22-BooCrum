@@ -47,6 +47,15 @@ export const ObjectType = {
 
 export type ObjectType = typeof ObjectType[keyof typeof ObjectType];
 
+// 소켓으로 보내는 object typee들
+export const SocketObjectType = {
+	postit: 'postit',
+	section: 'section',
+	draw: 'draw',
+} as const;
+
+export type SocketObjectType = typeof SocketObjectType[keyof typeof SocketObjectType];
+
 export const CanvasType = {
 	postit: 'postit',
 	section: 'section',

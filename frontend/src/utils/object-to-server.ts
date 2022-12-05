@@ -1,46 +1,10 @@
-import {
-	ObjectType,
-	ObjectDataToServer,
-	ObjectDataFromServer,
-	CanvasObject,
-} from '@pages/workspace/whiteboard-canvas/types';
+import { ObjectType, ObjectDataToServer, SocketObjectType } from '@pages/workspace/whiteboard-canvas/types';
+
 import { fabric } from 'fabric';
-export const formatMessageToSocket = (object: fabric.Object): ObjectDataToServer => {
+
+export const formatObjectDataToServer = (objectGroup: fabric.Group, type: SocketObjectType): ObjectDataToServer => {
 	const message: ObjectDataToServer = {
-		objectId: object.objectId,
-		left: object.left,
-		top: object.top,
-		width: object.width,
-		height: object.height,
-		// color: object.fill as string,
-		scaleX: object.scaleX,
-		scaleY: object.scaleY,
-	};
-
-	return message;
-};
-
-export const formatMessageToSocketForGroup = (group: fabric.Group, object: fabric.Object): ObjectDataToServer => {
-	const groupCenterPoint = group.getCenterPoint();
-	const { left, top, scaleX, scaleY, width, height } = object;
-	const message: ObjectDataToServer = {
-		objectId: object.objectId,
-		left: groupCenterPoint.x + (left || 0) * (group.scaleX || 1),
-		top: groupCenterPoint.y + (top || 0) * (group.scaleY || 1),
-		scaleX: (group.scaleX || 1) * (scaleX || 1),
-		scaleY: (group.scaleY || 1) * (scaleY || 1),
-		width,
-		height,
-		// color: object.fill as string,
-	};
-
-	return message;
-};
-
-export const formatCreatePostitEventToSocket = (objectGroup: fabric.Group): ObjectDataToServer => {
-	// todo fabric.Object -> text 포함된 타입으로 변경 필요
-	const message: ObjectDataToServer = {
-		type: ObjectType.postit,
+		type: type,
 		objectId: objectGroup.objectId,
 		left: objectGroup.left,
 		top: objectGroup.top,
@@ -54,12 +18,26 @@ export const formatCreatePostitEventToSocket = (objectGroup: fabric.Group): Obje
 		if (object.type === ObjectType.rect) {
 			message.color = object.fill as string;
 		}
-		if (object.type === ObjectType.text) {
+		if (object.type === ObjectType.text || object.type === ObjectType.title) {
 			const textObject = object as fabric.Text;
 			message.text = textObject.text;
 			message.fontSize = textObject.fontSize;
 		}
 	});
+	return message;
+};
+
+export const formatMessageToSocketForGroup = (group: fabric.Group, object: fabric.Group): ObjectDataToServer => {
+	const groupCenterPoint = group.getCenterPoint();
+	const objectDataMessage = formatObjectDataToServer(object, object.type as SocketObjectType);
+
+	const message: ObjectDataToServer = {
+		...objectDataMessage,
+		left: groupCenterPoint.x + (objectDataMessage.left || 0) * (group.scaleX || 1),
+		top: groupCenterPoint.y + (objectDataMessage.top || 0) * (group.scaleY || 1),
+		scaleX: (group.scaleX || 1) * (objectDataMessage.scaleX || 1),
+		scaleY: (group.scaleY || 1) * (objectDataMessage.scaleY || 1),
+	};
 
 	return message;
 };
@@ -131,20 +109,4 @@ export const formatEditTextEventToSocket = (object: fabric.Text): ObjectDataToSe
 	};
 
 	return message;
-};
-
-export const formatMessageFromSocket = (objectDataFromServer: ObjectDataFromServer): CanvasObject => {
-	// todo type을 명성님이 만든 객체 class에 맞춰서 사용할지 말지 결정
-	const canvasObject: CanvasObject = {
-		objectId: objectDataFromServer.objectId,
-		left: objectDataFromServer.left,
-		top: objectDataFromServer.top,
-		width: objectDataFromServer.width,
-		height: objectDataFromServer.height,
-		fill: objectDataFromServer.color,
-		text: objectDataFromServer.text,
-		fontSize: objectDataFromServer.fontSize,
-	};
-
-	return canvasObject;
 };

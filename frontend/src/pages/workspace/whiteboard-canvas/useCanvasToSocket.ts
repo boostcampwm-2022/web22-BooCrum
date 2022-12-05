@@ -1,19 +1,18 @@
-import { useRef } from 'react';
 import { Socket } from 'socket.io-client';
 import { ServerToClientEvents, ClientToServerEvents, MousePointer } from './types';
 import { useEffect } from 'react';
 import useEditMenu from './useEditMenu';
-import { ObjectType } from '@pages/workspace/whiteboard-canvas/types';
+import { ObjectType, SocketObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import {
-	formatCreatePostitEventToSocket,
+	formatObjectDataToServer,
 	formatEditTextEventToSocket,
 	formatMessageToSocketForGroup,
 	formatMoveObjectEventToSocket,
 	formatScalingObjectEventToSocket,
 	formatScalingObjectEventToSocketForGroup,
-} from '@utils/socket.utils';
+} from '@utils/object-to-server';
 import { fabric } from 'fabric';
-import { formatMessageToSocket } from '../../../utils/socket.utils';
+import { isNull, isNullOrUndefined, isUndefined } from '@utils/type.utils';
 
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
@@ -28,43 +27,43 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 	};
 
 	useEffect(() => {
-		if (!canvas.current) return;
+		if (isNull(canvas.current)) return;
 
-		canvas.current.on('object:added', (e) => {
-			if (!e.target || !canvas.current) return;
-			const fabricObject = e.target;
-			if (fabricObject.isSocketObject) return;
+		canvas.current.on('object:added', ({ target: fabricObject }) => {
+			if (isUndefined(fabricObject) || fabricObject.isSocketObject) return;
+
 			if (fabricObject.type === ObjectType.postit) {
-				const message = formatCreatePostitEventToSocket(fabricObject as fabric.Group);
+				const message = formatObjectDataToServer(fabricObject as fabric.Group, fabricObject.type);
 				socket.current?.emit('create_object', message);
 			}
 		});
 
-		canvas.current.on('object:modified', ({ target }) => {
-			if (!target) return;
+		canvas.current.on('object:modified', ({ target: fabricObject }) => {
+			if (isUndefined(fabricObject)) return;
 
-			if (target.type in ObjectType) {
-				const message = formatMessageToSocket(target);
+			if (fabricObject.type in SocketObjectType) {
+				const message = formatObjectDataToServer(fabricObject as fabric.Group, fabricObject.type as SocketObjectType);
 				socket.current?.emit('update_object', message);
 				return;
 			}
 
-			if (!(target instanceof fabric.Group)) return;
+			if (!(fabricObject instanceof fabric.Group)) return;
 
-			target._objects.forEach((object) => {
-				const message = formatMessageToSocketForGroup(target, object);
-				socket.current?.emit('update_object', message);
+			fabricObject._objects.forEach((object) => {
+				if (object.type in SocketObjectType) {
+					const message = formatMessageToSocketForGroup(fabricObject, object as fabric.Group);
+					socket.current?.emit('update_object', message);
+				}
 			});
 		});
 
-		canvas.current.on('object:removed', ({ target }) => {
-			if (!target) return;
+		canvas.current.on('object:removed', ({ target: fabricObject }) => {
+			if (isUndefined(fabricObject) || fabricObject.isSocketObject) return;
 
-			if (target.isSocketObject) return;
-			if (target.type === ObjectType.editable) return;
+			if (fabricObject.type === ObjectType.editable) return;
 
 			socket.current?.emit('delete_object', {
-				objectId: target.objectId,
+				objectId: fabricObject.objectId,
 			});
 		});
 
@@ -74,7 +73,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			const dx = (e as MouseEvent).x - (transform as fabric.Transform).ex;
 			const dy = (e as MouseEvent).y - (transform as fabric.Transform).ey;
 
-			if (target.type in ObjectType) {
+			if (target.type in SocketObjectType) {
 				const message = formatMoveObjectEventToSocket({ object: target, dleft: dx, dtop: dy });
 				socket.current?.emit('move_object', message);
 				return;
