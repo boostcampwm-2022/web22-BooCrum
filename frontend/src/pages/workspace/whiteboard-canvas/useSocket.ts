@@ -14,6 +14,7 @@ import {
 	updateObjectFromServer,
 } from '@utils/object-from-server';
 import { myInfoInWorkspaceState } from '@context/user';
+import { isNull } from '@utils/type.utils';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const setMyInfoInWorkspace = useSetRecoilState(myInfoInWorkspaceState);
@@ -30,8 +31,21 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		return myInfoInWorkspaceRef.current?.userId === userId;
 	};
 
+	const createMemberInCanvas = (member: Member) => {
+		const cursorObject = createCursorObject(member);
+		const newMemberInCanvas: MemberInCanvas = {
+			userId: member.userId,
+			color: member.color,
+			cursorObject,
+		};
+		if (isNull(canvas.current)) return;
+		canvas.current.add(cursorObject);
+		membersInCanvas.current.push(newMemberInCanvas);
+	};
+
 	useEffect(() => {
 		socket.current = io(`/workspace/${workspaceId}`);
+
 		socket.current.on('connect', () => {
 			setIsConnected(true);
 			console.log('socket connected');
@@ -48,39 +62,21 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			setMembers(members);
 			members.forEach((member) => {
 				if (isMessageByMe(member.userId) === false) {
-					const cursorObject = createCursorObject(member.color);
-					const newMemberInCanvas: MemberInCanvas = {
-						userId: member.userId,
-						color: member.color,
-						cursorObject,
-					};
-					canvas.current?.add(cursorObject);
-					membersInCanvas.current.push(newMemberInCanvas);
+					createMemberInCanvas(member);
 				}
 			});
+
 			objects.forEach((object) => {
 				if (!canvas.current) return;
-				const creator = members.filter((mem) => {
-					if (mem.userId == object.creator) return true;
-				})[0];
-
-				const obj = { ...object, creator: creator.nickname };
-				createObjectFromServer(canvas.current, obj);
+				createObjectFromServer(canvas.current, object);
 			});
 		});
 
 		socket.current.on('enter_user', (userData) => {
 			if (isMessageByMe(userData.userId)) return;
 			setMembers((prev) => [...prev, userData]);
-			const cursorObject = createCursorObject(userData.color);
 
-			const newMemberInCanvas: MemberInCanvas = {
-				userId: userData.userId,
-				color: userData.color,
-				cursorObject,
-			};
-			canvas.current?.add(cursorObject);
-			membersInCanvas.current.push(newMemberInCanvas);
+			createMemberInCanvas(userData);
 		});
 
 		socket.current.on('leave_user', ({ userId }) => {
@@ -99,16 +95,12 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('move_pointer', (userMousePointer) => {
-			if (!canvas.current) return;
-			if (isMessageByMe(userMousePointer.userId)) return;
+			if (isNull(canvas.current) || isMessageByMe(userMousePointer.userId)) return;
 			moveCursorFromServer(membersInCanvas.current, userMousePointer);
-
-			canvas.current.renderAll();
 		});
 
 		socket.current.on('select_object', ({ userId, objectIds }) => {
-			if (!canvas.current) return;
-			if (isMessageByMe(userId)) return;
+			if (isNull(canvas.current) || isMessageByMe(userId)) return;
 			const member = membersInCanvas.current.filter((memberInCanvas) => memberInCanvas.userId === userId);
 			if (member.length === 0) return;
 
@@ -116,19 +108,17 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('unselect_object', ({ userId, objectIds }) => {
-			if (!canvas.current) return;
-			if (isMessageByMe(userId)) return;
+			if (isNull(canvas.current) || isMessageByMe(userId)) return;
 			unselectObjectFromServer(canvas.current, objectIds);
 		});
 
 		socket.current.on('create_object', (arg) => {
-			if (!canvas.current) return;
-			if (isMessageByMe(arg.creator)) return;
+			if (isNull(canvas.current) || isMessageByMe(arg.creator)) return;
 			createObjectFromServer(canvas.current, arg);
 		});
 
 		socket.current.on('delete_object', ({ objectId }) => {
-			if (!canvas.current) return;
+			if (isNull(canvas.current)) return;
 			const objects = canvas.current.getObjects().filter((object) => {
 				if (object.objectId === objectId) {
 					object.isSocketObject = true;
@@ -136,29 +126,22 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 				}
 				return false;
 			});
-			if (!objects || objects.length === 0) return;
+			if (objects.length === 0) return;
 			canvas.current.remove(...objects);
 		});
 
 		socket.current.on('move_object', ({ userId, objectData }) => {
-			if (!canvas.current) return;
-			if (isMessageByMe(userId)) return;
-			if (!objectData.left || !objectData.dleft) return;
-			objectData.left += objectData.dleft;
-			if (!objectData.top || !objectData.dtop) return;
-			objectData.top += objectData.dtop;
+			if (isNull(canvas.current) || isMessageByMe(userId)) return;
 			updateObjectFromServer(canvas.current, objectData);
 		});
 
 		socket.current.on('scale_object', ({ userId, objectData }) => {
-			if (!canvas.current) return;
-			if (isMessageByMe(userId)) return;
+			if (isNull(canvas.current) || isMessageByMe(userId)) return;
 			updateObjectFromServer(canvas.current, objectData);
 		});
 
 		socket.current.on('update_object', ({ userId, objectData }) => {
-			if (!canvas.current) return;
-			if (isMessageByMe(userId)) return;
+			if (isNull(canvas.current) || isMessageByMe(userId)) return;
 			updateObjectFromServer(canvas.current, objectData);
 		});
 
