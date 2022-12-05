@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { fabric } from 'fabric';
 import { colorChips } from '@data/workspace-object-color';
 import { ObjectType } from './types';
@@ -8,6 +8,7 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 	const [selectedType, setSelectedType] = useState('');
 	const [color, setColor] = useState(colorChips[0]);
+	const [fontSize, setFontSize] = useState(40);
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -25,6 +26,13 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			canvas.current?.off('object:removed', handleRemoveObject);
 		};
 	}, [isOpen]);
+	useEffect(() => {
+		document.addEventListener('keydown', setPostItFontSize);
+
+		return () => {
+			document.removeEventListener('keydown', setPostItFontSize);
+		};
+	}, [fontSize]);
 
 	const openMenu = () => {
 		const currentObject = canvas.current?.getActiveObject() as fabric.Group;
@@ -34,25 +42,31 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		if (!(currentObject instanceof fabric.Group)) return;
 
+		const backgroundRect = currentObject._objects[0] as fabric.Rect;
+
+		if (currentObject.type === ObjectType.postit) {
+			const currentText = currentObject._objects[1] as fabric.Text;
+			setFontSize(currentText.fontSize as number);
+		}
+
 		setSelectedType(currentObject.type);
-		setColor(currentObject._objects[0].fill as string);
+		setColor(backgroundRect.fill as string);
 		setIsOpen(true);
 		setMenuPosition({ x: left, y: top });
 	};
 
 	const handleOutsideClick = (opt: fabric.IEvent) => {
-		if (!canvas.current) return;
-
 		if (
 			isOpen &&
 			menuRef.current &&
 			!menuRef.current.contains(opt.e.target as Node) &&
-			!canvas.current.getActiveObject()
-		)
+			!canvas.current?.getActiveObject()
+		) {
 			setIsOpen(false);
+		}
 	};
 
-	const handleMenuPosition = (opt: fabric.IEvent) => {
+	const handleMenuPosition = () => {
 		if (!isOpen) return;
 		const currentObject = canvas.current?.getActiveObject();
 		const coord = currentObject?.getCoords();
@@ -60,13 +74,15 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		const left = coord ? (coord[0].x + coord[1].x) / 2 - 30 : 0;
 		setMenuPosition({ x: left, y: top });
 	};
-	const handleRemoveObject = (opt: fabric.IEvent) => {
+	const handleRemoveObject = () => {
 		if (!isOpen) return;
 		setIsOpen(false);
 	};
 
 	const setObjectColor = (color: string) => {
 		const currentCanvas = canvas.current as fabric.Canvas;
+		if (!currentCanvas) return;
+
 		const currentGroup = currentCanvas.getActiveObject() as fabric.Group;
 
 		const [backgroundRect, ...currentObjects] = currentGroup._objects;
@@ -81,7 +97,28 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		currentCanvas.requestRenderAll();
 	};
 
-	return { isOpen, menuRef, color, setObjectColor, selectedType, openMenu, menuPosition };
+	const handleFontSize = (e: ChangeEvent<HTMLInputElement>) => {
+		const fontSizeNumber = Number(e.target.value);
+		if (!isNaN(fontSizeNumber) && fontSizeNumber < 70) setFontSize(fontSizeNumber);
+	};
+
+	const setPostItFontSize = (e: KeyboardEvent) => {
+		if (e.key !== 'Enter') return;
+
+		const currentCanvas = canvas.current as fabric.Canvas;
+		if (!currentCanvas) return;
+
+		const currentGroup = currentCanvas.getActiveObject() as fabric.Group;
+		const textObject = currentGroup._objects[1] as fabric.Text;
+		if (!textObject) return;
+
+		textObject.fontSize = fontSize;
+
+		currentCanvas.fire('font:modified', { target: currentGroup });
+		currentCanvas.requestRenderAll();
+	};
+
+	return { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, selectedType, openMenu, menuPosition };
 }
 
 export default useEditMenu;

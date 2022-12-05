@@ -23,7 +23,8 @@ interface UseCanvasToSocketProps {
 }
 
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
-	const { isOpen, menuRef, color, setObjectColor, openMenu, selectedType, menuPosition } = useEditMenu(canvas);
+	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, openMenu, selectedType, menuPosition } =
+		useEditMenu(canvas);
 
 	useEffect(() => {
 		if (isNull(canvas.current)) return;
@@ -115,6 +116,19 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			socket.current?.emit('update_object', message);
 		});
 
+		canvas.current.on('font:modified', ({ target }) => {
+			if (!(target instanceof fabric.Group)) return;
+			if (target.type !== ObjectType.postit) return;
+
+			const changeObjects = target._objects.filter((obj) => obj.type === ObjectType.text);
+			console.log(changeObjects);
+
+			// if (changeObjects.length < 1) return;
+
+			// const message = formatEditColorEventToSocket(changeObjects[0]);
+			// socket.current?.emit('update_object', message);
+		});
+
 		canvas.current.on('text:changed', ({ target: fabricObject }) => {
 			if (isUndefined(fabricObject) || fabricObject.type !== ObjectType.editable) return;
 			const message = formatEditTextEventToSocket(fabricObject as fabric.Text);
@@ -170,6 +184,8 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		menuRef,
 		color,
 		setObjectColor,
+		fontSize,
+		handleFontSize,
 		selectedType,
 		menuPosition,
 	};
