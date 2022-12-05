@@ -31,13 +31,9 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 
 	const backgroundRect = createRect({ objectId, left, top, color });
 	backgroundRect.set({
-		// width,
-		// height,
 		isSocketObject: true,
 	});
 	textBox.set({
-		// width,
-		// height,
 		isSocketObject: true,
 	});
 	nameLabel.set({
@@ -84,11 +80,11 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	if (object[0].type === ObjectType.postit) {
 		const groupObject = object[0] as fabric.Group;
 		groupObject._objects.forEach((object) => {
-			if (object.type === ObjectType.text && updatedObject.text && updatedObject.fontSize) {
+			if (object.type === ObjectType.text) {
 				const textObject = object as fabric.Text;
 				textObject.set({
-					text: updatedObject.text,
-					fontSize: updatedObject.fontSize,
+					text: updatedObject.text || textObject.text,
+					fontSize: updatedObject.fontSize || textObject.fontSize,
 				});
 			}
 		});
