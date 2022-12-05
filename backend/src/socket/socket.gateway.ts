@@ -255,7 +255,8 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async deleteObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
     try {
       const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
-      await this.objectManagementService.deleteObjectInWorkspace(userData.workspaceId, objectId);
+      const res = await this.objectManagementService.deleteObjectInWorkspace(userData.workspaceId, objectId);
+      if (!res) throw new WsException('존재하지 않는 ObjectId');
       socket.nsp.emit('delete_object', { userId: userData.userId, objectId });
     } catch (e) {
       this.logger.error(`Delete Error: ${e.message}`, e.stack);

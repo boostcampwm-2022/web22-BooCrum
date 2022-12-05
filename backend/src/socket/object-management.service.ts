@@ -194,11 +194,11 @@ export class ObjectManagementService {
    * @param workspaceId Object를 제거할 워크스페이스의 ID
    * @param objectId 제거할 Object의 ID
    */
-  async deleteObjectInWorkspace(workspaceId: string, objectId: string): Promise<void> {
+  async deleteObjectInWorkspace(workspaceId: string, objectId: string): Promise<boolean> {
     await this.saveOrRefreshCache(workspaceId);
 
     const objectMapper = this.workspaceObjectDataMap.get(workspaceId);
-    if (!objectMapper?.objects.has(objectId)) return;
+    if (!objectMapper?.objects.has(objectId)) return false;
     const reservedData = objectMapper.objects.get(objectId);
     objectMapper.objects.delete(objectId);
     // DB 반영하자고 굳이 반환이 느려지느니, await 안박고 나중에 처리하도록 두겠다.
@@ -218,5 +218,6 @@ export class ObjectManagementService {
           reason.stack,
         );
       });
+    return true;
   }
 }
