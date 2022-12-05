@@ -9,6 +9,7 @@ import { WorkspaceMetadataDto } from './dto/workspaceMetadata.dto';
 import { WorkspaceMember } from './entity/workspace-member.entity';
 import { Workspace } from './entity/workspace.entity';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
+import * as MulterS3 from 'multer-s3';
 
 @Injectable()
 export class WorkspaceService {
@@ -304,5 +305,27 @@ export class WorkspaceService {
       .getOne();
 
     return !member ? WORKSPACE_ROLE.NOT_FOUND : member.role;
+  }
+
+  /**
+   *
+   * @param workspaceId   썸네일을 저장할 워크스페이스 ID
+   * @param file          썸네일로 저장할 이미지 파일
+   * @returns             썸네일 저장 성공 여부 반환
+   */
+  async uploadThumbnail(workspaceId: string, file: MulterS3.File): Promise<boolean> {
+    const isExistWorkspace = this.getWorkspaceMetadata(workspaceId);
+    if (!isExistWorkspace) return false;
+
+    const thumbnailUrl = file.location;
+    return (
+      (
+        await this.workspaceRepository
+          .createQueryBuilder()
+          .update({ thumbnailUrl })
+          .where('workspace_id = :workspaceId', { workspaceId })
+          .execute()
+      ).affected > 0
+    );
   }
 }
