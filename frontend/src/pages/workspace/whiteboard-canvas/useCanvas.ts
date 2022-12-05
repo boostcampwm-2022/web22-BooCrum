@@ -9,6 +9,7 @@ import {
 	deleteObject,
 	setObjectIndexLeveling,
 	setCursorMode,
+	initDrawing,
 } from '@utils/fabric.utils';
 import { toolItems } from '@data/workspace-tool';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -58,6 +59,7 @@ function useCanvas() {
 			} else {
 				setCursorMode(fabricCanvas, 'default', CanvasType.draw, true);
 				fabricCanvas.isDrawingMode = true;
+				fabricCanvas.freeDrawingBrush.color = cursor.color;
 			}
 			canvas.current.discardActiveObject();
 			canvas.current.renderAll();
@@ -77,6 +79,7 @@ function useCanvas() {
 		});
 
 		initGrid(fabricCanvas, canvasWidth, canvasHeight, grid);
+		initDrawing(fabricCanvas);
 		initZoom(fabricCanvas, setZoom);
 		initDragPanning(fabricCanvas);
 		initWheelPanning(fabricCanvas);

@@ -118,6 +118,10 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 	});
 };
 
+export const initDrawing = (canvas: fabric.Canvas) => {
+	canvas.freeDrawingBrush.width = 5;
+};
+
 export const addObject = (
 	canvas: fabric.Canvas,
 	creator: string,
@@ -173,6 +177,11 @@ export const setObjectIndexLeveling = (canvas: fabric.Canvas) => {
 		const postits = canvas._objects.filter((obj) => obj.type === ObjectType.postit);
 
 		postits.forEach((obj) => {
+			obj.bringToFront();
+		});
+
+		const drawings = canvas._objects.filter((obj) => obj.type === ObjectType.draw);
+		drawings.forEach((obj) => {
 			obj.bringToFront();
 		});
 	});
