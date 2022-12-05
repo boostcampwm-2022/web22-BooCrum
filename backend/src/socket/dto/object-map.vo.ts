@@ -5,7 +5,7 @@ export class ObjectMapVO {
   objectId: string;
 
   @IsString()
-  type: string;
+  type: ObjectType;
 
   @IsNumber()
   left: number;

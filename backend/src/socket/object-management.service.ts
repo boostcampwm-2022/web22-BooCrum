@@ -1,9 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { WorkspaceObjectMapper } from 'src/types/socket';
 import { ObjectMapVO } from './dto/object-map.vo';
-import { ObjectDTO } from './dto/object.dto';
 import { MongooseObjectHandlerService } from '../object-database/mongoose-object-handler.service';
 import { ObjectHandlerService } from '../object-database/object-handler.service';
+import { UpdateObjectDTO } from 'src/object-database/dto/update-object.dto';
+import { CreateObjectDTO } from 'src/object-database/dto/create-object.dto';
 
 @Injectable()
 export class ObjectManagementService {
@@ -123,7 +124,7 @@ export class ObjectManagementService {
    * @param workspaceId Object를 삽입할 워크스페이스의 ID
    * @param objectDto 삽입할 Object에 관한 데이터
    */
-  async insertObjectIntoWorkspace(workspaceId: string, objectDto: ObjectDTO): Promise<void> {
+  async insertObjectIntoWorkspace(workspaceId: string, objectDto: CreateObjectDTO): Promise<void> {
     await this.saveOrRefreshCache(workspaceId);
 
     const objectMapper = this.workspaceObjectDataMap.get(workspaceId);
@@ -154,7 +155,7 @@ export class ObjectManagementService {
    * @param workspaceId Object를 수정할 워크스페이스의 ID
    * @param objectDto 갱신할 Object에 관한 데이터
    */
-  async updateObjectInWorkspace(workspaceId: string, objectDto: ObjectDTO): Promise<void> {
+  async updateObjectInWorkspace(workspaceId: string, objectDto: UpdateObjectDTO): Promise<void> {
     // 업데이트 목적 메서드에 네이밍을 달아준다.
     const updateCacheData = (modified, reserved) => Object.assign(modified, reserved);
 

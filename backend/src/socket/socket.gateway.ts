@@ -16,13 +16,14 @@ import { Request, Response, NextFunction } from 'express';
 import { UserManagementService } from './user-management.service';
 import { DbAccessService } from './db-access.service';
 import { UserMapVO } from './dto/user-map.vo';
-import { ObjectDTO } from './dto/object.dto';
 import { UserDAO } from './dto/user.dao';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 import { ObjectMoveDTO } from './dto/object-move.dto';
 import { ObjectMapVO } from './dto/object-map.vo';
 import { ObjectScaleDTO } from './dto/object-scale.dto';
 import { ObjectManagementService } from './object-management.service';
+import { CreateObjectDTO } from 'src/object-database/dto/create-object.dto';
+import { UpdateObjectDTO } from 'src/object-database/dto/update-object.dto';
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -161,7 +162,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         exceptionFactory: (errors) => new WsException(`잘못된 속성 전달: ${errors.map((e) => e.property).join(', ')}`),
       }),
     )
-    objectData: ObjectDTO,
+    objectData: CreateObjectDTO,
     @ConnectedSocket() socket: Socket,
   ) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
@@ -171,7 +172,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     try {
       if (!objectData.text) objectData.text = '';
       if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) objectData.fontSize = 16;
-      objectData.workspaceId = userData.workspaceId;
       objectData.creator = userData.userId;
 
       // section의 제목의 최대 길이는 50자
@@ -239,15 +239,14 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('update_object')
-  async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
+  async updateObject(@MessageBody() objectData: UpdateObjectDTO, @ConnectedSocket() socket: Socket) {
     try {
       const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
       if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
       // 변경되어서는 안되는 값들은 미리 제거하거나 덮어버린다.
-      delete objectData.creator, delete objectData.type;
+      delete objectData.type;
       if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) delete objectData.fontSize;
-      objectData.workspaceId = userData.workspaceId;
 
       // section의 제목의 최대 길이는 50자
       if (objectData.type === 'section' && objectData.text.length > 50) throw new WsException('섹션 제목 길이 초과');
