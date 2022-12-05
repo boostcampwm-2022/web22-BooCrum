@@ -78,7 +78,7 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		setColor(color);
 
 		currentCanvas.fire('color:modified', { target: currentGroup });
-		currentCanvas.renderAll();
+		currentCanvas.requestRenderAll();
 	};
 
 	return { isOpen, menuRef, color, setObjectColor, selectedType, openMenu, menuPosition };

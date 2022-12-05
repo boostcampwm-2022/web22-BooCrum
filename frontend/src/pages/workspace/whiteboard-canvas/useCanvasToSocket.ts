@@ -108,10 +108,11 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (target.type !== ObjectType.postit && target.type !== ObjectType.section) return;
 
 			const changeObjects = target._objects.filter((obj) => obj.type === ObjectType.rect);
-			changeObjects.forEach((object) => {
-				const message = formatEditColorEventToSocket(object);
-				socket.current?.emit('update_object', message);
-			});
+
+			if (changeObjects.length < 1) return;
+
+			const message = formatEditColorEventToSocket(changeObjects[0]);
+			socket.current?.emit('update_object', message);
 		});
 
 		canvas.current.on('text:changed', ({ target: fabricObject }) => {
