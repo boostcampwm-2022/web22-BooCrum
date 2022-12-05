@@ -13,6 +13,7 @@ import {
 	formatScaleObjectEventToSocketForGroup,
 	formatMoveObjectEventToSocketForGroup,
 	formatSelectEventToSocket,
+	formatEditFontSizeEventToSocket,
 } from '@utils/object-to-server';
 import { fabric } from 'fabric';
 import { isNull, isUndefined } from '@utils/type.utils';
@@ -123,10 +124,10 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			const changeObjects = target._objects.filter((obj) => obj.type === ObjectType.text);
 			console.log(changeObjects);
 
-			// if (changeObjects.length < 1) return;
+			if (changeObjects.length < 1) return;
 
-			// const message = formatEditColorEventToSocket(changeObjects[0]);
-			// socket.current?.emit('update_object', message);
+			const message = formatEditFontSizeEventToSocket(changeObjects[0] as fabric.Text);
+			socket.current?.emit('update_object', message);
 		});
 
 		canvas.current.on('text:changed', ({ target: fabricObject }) => {

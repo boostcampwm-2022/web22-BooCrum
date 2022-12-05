@@ -9,6 +9,8 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [selectedType, setSelectedType] = useState('');
 	const [color, setColor] = useState(colorChips[0]);
 	const [fontSize, setFontSize] = useState(40);
+
+	const fontSizeRef = useRef<number>();
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -19,20 +21,17 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		canvas.current.on('mouse:wheel', handleMenuPosition);
 		canvas.current.on('object:removed', handleRemoveObject);
 
+		document.addEventListener('keydown', setPostItFontSize);
+
 		return () => {
 			canvas.current?.off('mouse:down', handleOutsideClick);
 			canvas.current?.off('object:modified', handleMenuPosition);
 			canvas.current?.off('mouse:wheel', handleMenuPosition);
 			canvas.current?.off('object:removed', handleRemoveObject);
-		};
-	}, [isOpen]);
-	useEffect(() => {
-		document.addEventListener('keydown', setPostItFontSize);
 
-		return () => {
 			document.removeEventListener('keydown', setPostItFontSize);
 		};
-	}, [fontSize]);
+	}, [isOpen]);
 
 	const openMenu = () => {
 		const currentObject = canvas.current?.getActiveObject() as fabric.Group;
@@ -46,6 +45,8 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		if (currentObject.type === ObjectType.postit) {
 			const currentText = currentObject._objects[1] as fabric.Text;
+
+			fontSizeRef.current = currentText.fontSize;
 			setFontSize(currentText.fontSize as number);
 		}
 
@@ -99,7 +100,10 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 	const handleFontSize = (e: ChangeEvent<HTMLInputElement>) => {
 		const fontSizeNumber = Number(e.target.value);
-		if (!isNaN(fontSizeNumber) && fontSizeNumber < 70) setFontSize(fontSizeNumber);
+		if (!isNaN(fontSizeNumber) && fontSizeNumber < 70) {
+			setFontSize(fontSizeNumber);
+			fontSizeRef.current = fontSizeNumber;
+		}
 	};
 
 	const setPostItFontSize = (e: KeyboardEvent) => {
@@ -112,7 +116,7 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		const textObject = currentGroup._objects[1] as fabric.Text;
 		if (!textObject) return;
 
-		textObject.fontSize = fontSize;
+		textObject.fontSize = fontSizeRef.current;
 
 		currentCanvas.fire('font:modified', { target: currentGroup });
 		currentCanvas.requestRenderAll();
