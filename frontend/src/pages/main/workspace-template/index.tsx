@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import plusWorkspace from '@assets/icon/plus-workspace.svg';
 import { Template } from './index.style';
 import { Workspace } from '@api/workspace';
+import { TemplateType } from './index.type';
 
 function WorkspaceTemplate({ template }: { template: TemplateType }) {
 	const navigate = useNavigate();

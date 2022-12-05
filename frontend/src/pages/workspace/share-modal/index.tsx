@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react';
-import { Container, Invite, ParticipantList } from './index.style';
+import { Container, ParticipantList } from './index.style';
 import copyLink from '@assets/icon/copy-link.svg';
-import userProfile from '@assets/icon/user-profile.svg';
 import { Workspace } from '@api/workspace';
 import { ParticipantInfo, ShareModalProps } from './index.type';
 import ToastMessage from '@components/toast-message';
+import MemberRole from '../member-role';
 
 function ShareModal({ id }: ShareModalProps) {
-	const [email, setEmail] = useState('');
 	const [participant, setParticipant] = useState<ParticipantInfo[]>([]);
 	const [openToast, setOpenToast] = useState(false);
 
@@ -32,17 +31,9 @@ function ShareModal({ id }: ShareModalProps) {
 
 	return (
 		<Container>
-			<Invite isValid={email !== ''}>
-				<input className="invite-input" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-				<div className="invite-button">send invite</div>
-			</Invite>
-
 			<ParticipantList>
 				{participant.map((part) => (
-					<div key={part.id} className="participant-box">
-						<img alt="participant profile" src={userProfile} className="participant-profile" />
-						<p className="participant-name">{part.user.nickname}</p>
-					</div>
+					<MemberRole key={part.id} participant={part} />
 				))}
 			</ParticipantList>
 

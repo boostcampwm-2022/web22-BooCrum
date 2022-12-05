@@ -8,9 +8,11 @@ interface UserInfo {
 	registerDate: string;
 }
 
+type Role = 0 | 1 | 2;
+
 export interface ParticipantInfo {
 	id: number;
-	role: number;
+	role: Role;
 	updateDate: string;
 	user: UserInfo;
 }
