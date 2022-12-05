@@ -25,6 +25,7 @@ export interface ObjectDataToServer {
 }
 
 export interface ObjectDataFromServer extends ObjectDataToServer {
+	type: SocketObjectType;
 	creator: string;
 	workspaceId: string;
 }
