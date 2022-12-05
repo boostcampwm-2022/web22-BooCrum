@@ -9,6 +9,7 @@ export class ObjectBucket {
   @Prop({
     type: String,
     unique: true,
+    immutable: true,
     validate: {
       validator: (v: string) => isUUID(v),
       message: 'Workspace의 ID는 항상 UUID여야 합니다.',

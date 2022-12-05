@@ -71,6 +71,7 @@ export class WorkspaceObject implements AbstractWorkspaceObject {
   @Prop({
     type: String,
     required: true,
+    immutable: true,
   })
   creator: string;
 
