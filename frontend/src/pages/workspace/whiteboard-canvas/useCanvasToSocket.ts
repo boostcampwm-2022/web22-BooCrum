@@ -22,7 +22,7 @@ interface UseCanvasToSocketProps {
 }
 
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
-	const { isOpen, menuRef, openMenu, menuPosition } = useEditMenu(canvas);
+	const { isOpen, menuRef, color, setObjectColor, openMenu, selectedType, menuPosition } = useEditMenu(canvas);
 
 	useEffect(() => {
 		if (isNull(canvas.current)) return;
@@ -155,6 +155,9 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 	return {
 		isOpen,
 		menuRef,
+		color,
+		setObjectColor,
+		selectedType,
 		menuPosition,
 	};
 }

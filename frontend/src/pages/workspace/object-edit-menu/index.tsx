@@ -31,7 +31,9 @@ function ObjectEditMenu({ selectedObject, color, setObjectColor }: ObjectEditMen
 				</Rename>
 			);
 		} else {
-			<FontSize selected={selected === selectedType.TYPE} onClick={() => setSelected(selectedType.TYPE)}></FontSize>;
+			return (
+				<FontSize selected={selected === selectedType.TYPE} onClick={() => setSelected(selectedType.TYPE)}></FontSize>
+			);
 		}
 	};
 

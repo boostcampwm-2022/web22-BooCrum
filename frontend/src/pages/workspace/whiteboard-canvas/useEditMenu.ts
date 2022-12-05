@@ -1,9 +1,13 @@
 import { useEffect, useRef, useState } from 'react';
 import { fabric } from 'fabric';
+import { colorChips } from '@data/workspace-object-color';
+import { ObjectType } from './types';
 
 function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
+	const [selectedType, setSelectedType] = useState('');
+	const [color, setColor] = useState(colorChips[0]);
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -23,11 +27,15 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	}, [isOpen]);
 
 	const openMenu = () => {
-		const currentObject = canvas.current?.getActiveObject();
+		const currentObject = canvas.current?.getActiveObject() as fabric.Group;
 		const coord = currentObject?.getCoords();
 		const top = coord ? coord[0].y - 40 : 0;
 		const left = coord ? (coord[0].x + coord[1].x) / 2 - 30 : 0;
 
+		if (currentObject._objects.length < 3) return;
+
+		setSelectedType(currentObject.type);
+		setColor(currentObject._objects[0].fill as string);
 		setIsOpen(true);
 		setMenuPosition({ x: left, y: top });
 	};
@@ -57,7 +65,22 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		setIsOpen(false);
 	};
 
-	return { isOpen, menuRef, openMenu, menuPosition };
+	const setObjectColor = (color: string) => {
+		const currentCanvas = canvas.current as fabric.Canvas;
+		const currentGroup = currentCanvas.getActiveObject() as fabric.Group;
+
+		const [backgroundRect, ...currentObjects] = currentGroup._objects;
+		if (!backgroundRect || currentObjects.length < 2) return;
+
+		if (backgroundRect) backgroundRect.fill = color;
+		if (currentGroup.type === ObjectType.section) currentObjects[0].fill = color;
+
+		setColor(color);
+
+		currentCanvas.renderAll();
+	};
+
+	return { isOpen, menuRef, color, setObjectColor, selectedType, openMenu, menuPosition };
 }
 
 export default useEditMenu;
