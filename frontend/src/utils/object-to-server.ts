@@ -42,18 +42,27 @@ export const formatMessageToSocketForGroup = (group: fabric.Group, object: fabri
 	return message;
 };
 
-export interface MoveObjectEventParmas {
-	object: fabric.Object;
-	dleft: number;
-	dtop: number;
-}
-
-export const formatMoveObjectEventToSocket = ({ object, dleft, dtop }: MoveObjectEventParmas): ObjectDataToServer => {
-	// todo fabric.Object -> text 포함된 타입으로 변경 필요
+export const formatMoveObjectEventToSocket = (objectGroup: fabric.Group): ObjectDataToServer => {
 	const message: ObjectDataToServer = {
-		objectId: object.objectId,
-		dleft,
-		dtop,
+		objectId: objectGroup.objectId,
+		left: objectGroup.left,
+		top: objectGroup.top,
+	};
+
+	return message;
+};
+
+export const formatMoveObjectEventToSocketForGroup = (
+	group: fabric.Group,
+	object: fabric.Group
+): ObjectDataToServer => {
+	const groupCenterPoint = group.getCenterPoint();
+	const objectDataMessage = formatMoveObjectEventToSocket(object);
+
+	const message: ObjectDataToServer = {
+		...objectDataMessage,
+		left: groupCenterPoint.x + (objectDataMessage.left || 0) * (group.scaleX || 1),
+		top: groupCenterPoint.y + (objectDataMessage.top || 0) * (group.scaleY || 1),
 	};
 
 	return message;
