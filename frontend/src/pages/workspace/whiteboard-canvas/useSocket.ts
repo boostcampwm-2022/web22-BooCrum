@@ -102,8 +102,6 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			if (isNull(canvas.current)) return;
 			if (isMessageByMe(userMousePointer.userId)) return;
 			moveCursorFromServer(membersInCanvas.current, userMousePointer);
-
-			canvas.current.renderAll();
 		});
 
 		socket.current.on('select_object', ({ userId, objectIds }) => {
