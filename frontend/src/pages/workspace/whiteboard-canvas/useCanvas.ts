@@ -43,6 +43,7 @@ function useCanvas() {
 		if (!canvas.current) return;
 
 		const fabricCanvas = canvas.current as fabric.Canvas;
+		fabricCanvas.isDrawingMode = false;
 		if (myInfoInWorkspace.role === workspaceRole.GUEST) {
 			setCursorMode(fabricCanvas, 'grab', CanvasType.move, false);
 		} else {
@@ -56,6 +57,7 @@ function useCanvas() {
 				setCursorMode(fabricCanvas, 'default', CanvasType.select, true);
 			} else {
 				setCursorMode(fabricCanvas, 'default', CanvasType.draw, true);
+				fabricCanvas.isDrawingMode = true;
 			}
 			canvas.current.discardActiveObject();
 			canvas.current.renderAll();
