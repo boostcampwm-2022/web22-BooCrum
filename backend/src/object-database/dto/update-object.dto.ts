@@ -44,7 +44,7 @@ export class UpdateObjectDTO implements AbstractPartialWorkspaceObject {
   @IsOptional()
   fontSize: number;
 
-  @IsArray()
+  @IsString()
   @IsOptional()
-  path: number[][];
+  path: string;
 }

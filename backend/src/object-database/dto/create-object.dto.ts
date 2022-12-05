@@ -39,7 +39,7 @@ export class CreateObjectDTO implements AbstractWorkspaceObject {
 
   @IsArray()
   @IsOptional()
-  path: number[][];
+  path: string;
 
   @IsString()
   @IsOptional()

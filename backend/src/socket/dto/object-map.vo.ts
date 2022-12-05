@@ -36,8 +36,9 @@ export class ObjectMapVO {
   @IsOptional()
   fontSize?: number;
 
+  @IsString()
   @IsOptional()
-  path?: number[][];
+  path?: string;
 
   @IsString()
   @IsOptional()

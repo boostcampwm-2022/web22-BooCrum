@@ -12,7 +12,7 @@ declare class AbstractWorkspaceObject {
   color: string;
   text: string;
   fontSize: number;
-  path: number[][];
+  path: string;
   creator: string;
 }
 
@@ -28,6 +28,6 @@ declare class AbstractPartialWorkspaceObject {
   color?: string;
   text?: string;
   fontSize?: number;
-  path?: number[][];
+  path?: string;
   creator?: string;
 }

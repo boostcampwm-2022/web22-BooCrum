@@ -2,10 +2,8 @@ import { Prop, SchemaFactory, Schema } from '@nestjs/mongoose';
 import { isUUID } from 'class-validator';
 import { HydratedDocument } from 'mongoose';
 
-type OptionalParam = 'text' | 'fontSize' | 'point';
-
 @Schema({ _id: false })
-export class WorkspaceObject {
+export class WorkspaceObject implements AbstractWorkspaceObject {
   @Prop({
     type: String,
     validate: {
@@ -89,7 +87,7 @@ export class WorkspaceObject {
   @Prop({
     type: [[Number, Number]],
   })
-  path: number[][];
+  path: string;
 }
 
 export const workspaceObjectSchema = SchemaFactory.createForClass(WorkspaceObject);

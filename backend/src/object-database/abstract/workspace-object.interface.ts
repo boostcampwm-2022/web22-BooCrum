@@ -10,6 +10,6 @@ export interface WorkspaceObjectInterface {
   color: string;
   text?: string;
   fontSize?: number;
-  path?: number[][];
+  path?: string;
   creator: string;
 }
