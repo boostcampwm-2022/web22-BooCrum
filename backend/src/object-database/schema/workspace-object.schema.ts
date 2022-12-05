@@ -85,7 +85,7 @@ export class WorkspaceObject implements AbstractWorkspaceObject {
   fontSize: number;
 
   @Prop({
-    type: [[Number, Number]],
+    type: String,
   })
   path: string;
 }
