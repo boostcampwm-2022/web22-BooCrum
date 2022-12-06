@@ -74,7 +74,7 @@ export const createTextBox = (options: TextBoxOptions) => {
 		isSocketObject: false,
 		selectable: false,
 		evented: false,
-		group: options.group,
+		groupType: options.groupType,
 	});
 
 	return textbox;

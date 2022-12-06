@@ -1,3 +1,4 @@
+import { SocketObjectType } from '@pages/workspace/whiteboard-canvas/types';
 export interface TitleBackgroundOptions {
 	objectId: string;
 	left: number;
@@ -20,7 +21,7 @@ export interface SectionTitleOptions {
 	text?: string;
 	left: number;
 	top: number;
-	groupType?: string;
+	groupType?: SocketObjectType;
 }
 
 export interface PostItOptions {
@@ -39,7 +40,7 @@ export interface TextBoxOptions {
 	fontSize: number;
 	text?: string;
 	editable: boolean;
-	groupType?: string;
+	groupType?: SocketObjectType;
 }
 
 export interface RectOptions {
