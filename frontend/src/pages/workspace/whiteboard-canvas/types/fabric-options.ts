@@ -1,11 +1,11 @@
-interface TitleBackgroundOptions {
+export interface TitleBackgroundOptions {
 	objectId: string;
 	left: number;
 	top: number;
 	color: string;
 }
 
-interface SectionOption {
+export interface SectionOption {
 	objectId: string;
 	left: number;
 	top: number;
@@ -14,15 +14,16 @@ interface SectionOption {
 	backgroundRect: fabric.Rect;
 }
 
-interface SectionTitleOptions {
+export interface SectionTitleOptions {
 	editable: boolean;
 	objectId: string;
 	text?: string;
 	left: number;
 	top: number;
+	groupType?: string;
 }
 
-interface PostItOptions {
+export interface PostItOptions {
 	objectId: string;
 	left: number;
 	top: number;
@@ -31,23 +32,24 @@ interface PostItOptions {
 	backgroundRect: fabric.Rect;
 }
 
-interface TextBoxOptions {
+export interface TextBoxOptions {
 	objectId: string;
 	left: number;
 	top: number;
 	fontSize: number;
 	text?: string;
 	editable: boolean;
+	groupType?: string;
 }
 
-interface RectOptions {
+export interface RectOptions {
 	objectId: string;
 	left: number;
 	top: number;
 	color: string;
 }
 
-interface NameLabelOptions {
+export interface NameLabelOptions {
 	objectId: string;
 	text: string;
 	left: number;
