@@ -6,7 +6,7 @@ import { useRecoilState } from 'recoil';
 import { Socket } from 'socket.io-client';
 import { ClientToServerEvents, MyInfo, ParticipantInfo, RoleInfo, ServerToClientEvents } from './types';
 
-function useCustomEvent(socket: React.MutableRefObject<Socket<ServerToClientEvents, ClientToServerEvents> | null>) {
+function useRoleEvent(socket: React.MutableRefObject<Socket<ServerToClientEvents, ClientToServerEvents> | null>) {
 	const [participants, setParticipants] = useRecoilState<ParticipantInfo[]>(workspaceParticipantsState);
 	const [myInfoInWorkspace, setMyInfoInWorkspace] = useRecoilState<MyInfo>(myInfoInWorkspaceState);
 
@@ -40,8 +40,6 @@ function useCustomEvent(socket: React.MutableRefObject<Socket<ServerToClientEven
 		setParticipants(updatedParticipants);
 		if (userId === myInfoInWorkspace.userId) setMyInfoInWorkspace({ ...myInfoInWorkspace, role: role });
 	};
-
-	return { participants };
 }
 
-export default useCustomEvent;
+export default useRoleEvent;
