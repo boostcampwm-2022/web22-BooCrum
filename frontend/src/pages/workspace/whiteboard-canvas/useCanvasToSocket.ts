@@ -117,11 +117,11 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			socket.current?.emit('update_object', message);
 		});
 
-		canvas.current.on('font:modified', ({ target }) => {
-			if (!(target instanceof fabric.Group)) return;
-			if (target.type !== ObjectType.postit) return;
+		canvas.current.on('font:modified', ({ target: fabricObject }) => {
+			if (!(fabricObject instanceof fabric.Group)) return;
+			if (fabricObject.type !== ObjectType.postit) return;
 
-			const changeObjects = target._objects.filter((obj) => obj.type === ObjectType.text);
+			const changeObjects = fabricObject._objects.filter((obj) => obj.type === ObjectType.text);
 
 			if (changeObjects.length < 1) return;
 

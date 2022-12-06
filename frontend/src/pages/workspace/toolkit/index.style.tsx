@@ -7,7 +7,7 @@ export const Container = styled.div`
 	border-radius: 20px;
 	border: 1px solid ${({ theme }) => theme.gray_1};
 
-	position: absolute;
+	position: fixed;
 	left: calc(50% - 236px);
 	bottom: 100px;
 
