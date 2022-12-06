@@ -50,7 +50,7 @@ export type ObjectType = typeof ObjectType[keyof typeof ObjectType];
 export const SocketObjectType = {
 	postit: 'postit',
 	section: 'section',
-	draw: 'draw',
+	// draw: 'draw',
 } as const;
 
 export type SocketObjectType = typeof SocketObjectType[keyof typeof SocketObjectType];
@@ -62,6 +62,7 @@ export const CanvasType = {
 	select: 'select',
 	draw: 'draw',
 	edit: 'edit',
+	erase: 'erase',
 } as const;
 
 export type CanvasType = typeof CanvasType[keyof typeof CanvasType];

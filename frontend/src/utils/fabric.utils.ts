@@ -118,6 +118,17 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 	});
 };
 
+export const initDrawing = (canvas: fabric.Canvas) => {
+	canvas.freeDrawingBrush.width = 5;
+	canvas.on('path:created', (e: any) => {
+		if (!e) return;
+		const path: fabric.Path = e.path;
+		path.type = ObjectType.draw;
+
+		console.log(toStringPath(path));
+	});
+};
+
 export const addObject = (
 	canvas: fabric.Canvas,
 	creator: string,
@@ -175,6 +186,11 @@ export const setObjectIndexLeveling = (canvas: fabric.Canvas) => {
 		postits.forEach((obj) => {
 			obj.bringToFront();
 		});
+
+		const drawings = canvas._objects.filter((obj) => obj.type === ObjectType.draw);
+		drawings.forEach((obj) => {
+			obj.bringToFront();
+		});
 	});
 };
 
@@ -182,5 +198,11 @@ export const setCursorMode = (canvas: fabric.Canvas, cursor: string, mode: Canva
 	canvas.defaultCursor = cursor;
 	canvas.hoverCursor = cursor;
 	canvas.mode = mode;
-	canvas.forEachObject((obj) => (obj.selectable = selectable));
+	canvas.forEachObject((obj) => (obj.selectable = obj.type !== ObjectType.draw ? selectable : false));
+};
+
+export const toStringPath = (path: fabric.Path) => {
+	const reg = /(?<=d=\")[^\"]*(?=\")/g;
+	const pathString = path.toSVG().match(reg);
+	return pathString ? pathString[0] : null;
 };

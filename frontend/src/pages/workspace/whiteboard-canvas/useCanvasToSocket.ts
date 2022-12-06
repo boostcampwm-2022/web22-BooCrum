@@ -67,7 +67,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 		canvas.current.on('object:moving', ({ target: fabricObject }) => {
 			if (isUndefined(fabricObject)) return;
-
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatMoveObjectEventToSocket(fabricObject as fabric.Group);
 				socket.current?.emit('move_object', message);
