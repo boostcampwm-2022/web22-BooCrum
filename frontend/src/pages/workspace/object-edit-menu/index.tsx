@@ -11,7 +11,7 @@ const selectedType: { [index: string]: number } = {
 	TYPE: 2,
 };
 
-function ObjectEditMenu({ selectedObject, color, setObjectColor }: ObjectEditMenuProps) {
+function ObjectEditMenu({ selectedObject, color, fontSize, setFontSize, setObjectColor }: ObjectEditMenuProps) {
 	const [selected, setSelected] = useState(selectedType.NONE);
 
 	const handleColor = (color: string) => {
@@ -26,7 +26,12 @@ function ObjectEditMenu({ selectedObject, color, setObjectColor }: ObjectEditMen
 	const renderOptionBySelect = () => {
 		if (selectedObject === ObjectType.postit) {
 			return (
-				<FontSize selected={selected === selectedType.TYPE} onClick={() => setSelected(selectedType.TYPE)}></FontSize>
+				<FontSize
+					selected={selected === selectedType.TYPE}
+					onClick={() => setSelected(selectedType.TYPE)}
+					value={fontSize}
+					onChange={setFontSize}
+				/>
 			);
 		} else return <></>;
 	};

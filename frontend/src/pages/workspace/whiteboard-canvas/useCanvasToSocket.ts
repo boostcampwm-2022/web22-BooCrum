@@ -13,6 +13,7 @@ import {
 	formatScaleObjectEventToSocketForGroup,
 	formatMoveObjectEventToSocketForGroup,
 	formatSelectEventToSocket,
+	formatEditFontSizeEventToSocket,
 } from '@utils/object-to-server';
 import { fabric } from 'fabric';
 import { isNull, isUndefined } from '@utils/type.utils';
@@ -23,7 +24,8 @@ interface UseCanvasToSocketProps {
 }
 
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
-	const { isOpen, menuRef, color, setObjectColor, openMenu, selectedType, menuPosition } = useEditMenu(canvas);
+	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, openMenu, selectedType, menuPosition } =
+		useEditMenu(canvas);
 
 	useEffect(() => {
 		if (isNull(canvas.current)) return;
@@ -121,6 +123,18 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			});
 		});
 
+		canvas.current.on('font:modified', ({ target: fabricObject }) => {
+			if (!(fabricObject instanceof fabric.Group)) return;
+			if (fabricObject.type !== ObjectType.postit) return;
+
+			const textObjects = fabricObject._objects.filter((obj) => obj.type === ObjectType.text);
+
+			if (textObjects.length < 1) return;
+
+			const message = formatEditFontSizeEventToSocket(fabricObject, textObjects[0] as fabric.Text);
+			socket.current?.emit('update_object', message);
+		});
+
 		canvas.current.on('text:changed', ({ target: fabricObject }) => {
 			if (isUndefined(fabricObject) || fabricObject.type !== ObjectType.editable) return;
 			const message = formatEditTextEventToSocket(fabricObject as fabric.Text);
@@ -176,6 +190,8 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		menuRef,
 		color,
 		setObjectColor,
+		fontSize,
+		handleFontSize,
 		selectedType,
 		menuPosition,
 	};

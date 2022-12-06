@@ -12,7 +12,8 @@ function WhiteboardCanvas() {
 	const { canvas } = useCanvas();
 	const { socket } = useSocket(canvas);
 
-	const { isOpen, menuRef, color, setObjectColor, selectedType, menuPosition } = useCanvasToSocket({ canvas, socket });
+	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, selectedType, menuPosition } =
+		useCanvasToSocket({ canvas, socket });
 	const myInfoInWorkspace = useRecoilValue(myInfoInWorkspaceState);
 
 	return (
@@ -23,7 +24,13 @@ function WhiteboardCanvas() {
 
 			{myInfoInWorkspace.role !== workspaceRole.GUEST && (
 				<ContextMenu isOpen={isOpen} menuRef={menuRef} posX={menuPosition.x} posY={menuPosition.y}>
-					<ObjectEditMenu selectedObject={selectedType} color={color} setObjectColor={setObjectColor} />
+					<ObjectEditMenu
+						selectedObject={selectedType}
+						color={color}
+						setObjectColor={setObjectColor}
+						fontSize={fontSize}
+						setFontSize={handleFontSize}
+					/>
 				</ContextMenu>
 			)}
 		</>

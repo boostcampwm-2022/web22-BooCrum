@@ -11,7 +11,7 @@ export interface CanvasObject {
 }
 
 export interface ObjectDataToServer {
-	type: ObjectType;
+	type?: SocketObjectType;
 	objectId: string;
 	left?: number;
 	top?: number;

@@ -1,13 +1,16 @@
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { fabric } from 'fabric';
 import { colorChips } from '@data/workspace-object-color';
-import { ObjectType } from './types';
+import { CanvasType, ObjectType } from './types';
 
 function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [isOpen, setIsOpen] = useState(false);
 	const [menuPosition, setMenuPosition] = useState({ x: 0, y: 0 });
 	const [selectedType, setSelectedType] = useState('');
 	const [color, setColor] = useState(colorChips[0]);
+	const [fontSize, setFontSize] = useState(40);
+
+	const fontSizeRef = useRef<number>();
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -18,11 +21,19 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		canvas.current.on('mouse:wheel', handleMenuPosition);
 		canvas.current.on('object:removed', handleRemoveObject);
 
+		document.addEventListener('keydown', setPostItFontSize);
+		document.addEventListener('focusin', setFontEditMode);
+		document.addEventListener('focusout', removeFontEditMode);
+
 		return () => {
 			canvas.current?.off('mouse:down', handleOutsideClick);
 			canvas.current?.off('object:modified', handleMenuPosition);
 			canvas.current?.off('mouse:wheel', handleMenuPosition);
 			canvas.current?.off('object:removed', handleRemoveObject);
+
+			document.removeEventListener('keydown', setPostItFontSize);
+			document.removeEventListener('focusin', setFontEditMode);
+			document.removeEventListener('focusout', removeFontEditMode);
 		};
 	}, [isOpen]);
 
@@ -34,6 +45,13 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		if (!(currentObject instanceof fabric.Group)) return;
 
+		if (currentObject.type === ObjectType.postit) {
+			const currentText = currentObject._objects[1] as fabric.Text;
+
+			fontSizeRef.current = currentText.fontSize;
+			setFontSize(currentText.fontSize as number);
+		}
+
 		const objectColor = findObjectColor(currentObject._objects);
 
 		setSelectedType(currentObject.type);
@@ -43,15 +61,14 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	};
 
 	const handleOutsideClick = (opt: fabric.IEvent) => {
-		if (!canvas.current) return;
-
 		if (
 			isOpen &&
 			menuRef.current &&
 			!menuRef.current.contains(opt.e.target as Node) &&
-			!canvas.current.getActiveObject()
-		)
+			!canvas.current?.getActiveObject()
+		) {
 			setIsOpen(false);
+		}
 	};
 
 	const handleMenuPosition = () => {
@@ -78,6 +95,8 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 	const setObjectColor = (color: string) => {
 		const currentCanvas = canvas.current as fabric.Canvas;
+		if (!currentCanvas) return;
+
 		const currentGroup = currentCanvas.getActiveObject() as fabric.Group;
 
 		setColor(color);
@@ -105,7 +124,45 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		currentCanvas.requestRenderAll();
 	};
 
-	return { isOpen, menuRef, color, setObjectColor, selectedType, openMenu, menuPosition };
+	const setFontEditMode = () => {
+		const currentCanvas = canvas.current as fabric.Canvas;
+		if (!currentCanvas) return;
+
+		currentCanvas.mode = CanvasType.edit;
+	};
+
+	const removeFontEditMode = () => {
+		const currentCanvas = canvas.current as fabric.Canvas;
+		if (!currentCanvas) return;
+
+		currentCanvas.mode = CanvasType.select;
+	};
+
+	const handleFontSize = (e: ChangeEvent<HTMLInputElement>) => {
+		const fontSizeNumber = Number(e.target.value);
+		if (!isNaN(fontSizeNumber) && fontSizeNumber < 70) {
+			setFontSize(fontSizeNumber);
+			fontSizeRef.current = fontSizeNumber;
+		}
+	};
+
+	const setPostItFontSize = (e: KeyboardEvent) => {
+		if (e.key !== 'Enter') return;
+
+		const currentCanvas = canvas.current as fabric.Canvas;
+		if (!currentCanvas) return;
+
+		const currentGroup = currentCanvas.getActiveObject() as fabric.Group;
+		const textObject = currentGroup._objects[1] as fabric.Text;
+		if (!textObject) return;
+
+		textObject.fontSize = fontSizeRef.current;
+
+		currentCanvas.fire('font:modified', { target: currentGroup });
+		currentCanvas.requestRenderAll();
+	};
+
+	return { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, selectedType, openMenu, menuPosition };
 }
 
 export default useEditMenu;
