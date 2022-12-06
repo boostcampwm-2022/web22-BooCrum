@@ -108,6 +108,12 @@ export class DbAccessService {
     }
   }
 
+  /**
+   * 특정 사용자의 최근 갱신 날짜를 최신화합니다.
+   * @param userId 최신화할 User의 ID
+   * @param workspaceId User가 접근한 Workspace의 ID
+   * @returns 갱신 성공 시 true를, 실패 시 false를 반환합니다.
+   */
   async renewUpdateDateOfMember(userId: string, workspaceId: string): Promise<boolean> {
     const queryRunner = this.dataSoruce.createQueryRunner();
     await queryRunner.connect();
@@ -125,6 +131,25 @@ export class DbAccessService {
       WorkspaceMember,
       { user: userFind, workspace: workspaceFind },
       { updateDate: new Date() as any },
+    );
+    await queryRunner.release();
+    return ret.affected > 0;
+  }
+
+  async changeUserRole(userId: string, workspaceId: string, role: number): Promise<boolean> {
+    const queryRunner = this.dataSoruce.createQueryRunner();
+    await queryRunner.connect();
+    const [userFind, workspaceFind] = await Promise.all([
+      queryRunner.manager.findOne(User, { where: { userId } }),
+      queryRunner.manager.findOne(Workspace, { where: { workspaceId } }),
+    ]);
+    if (!userFind) throw new Error('존재하지 않는 유저입니다.');
+    if (!workspaceFind) throw new Error('존재하지 않는 워크스페이스입니다.');
+
+    const ret = await queryRunner.manager.update<WorkspaceMember>(
+      WorkspaceMember,
+      { user: userFind, workspace: workspaceFind },
+      { role },
     );
     await queryRunner.release();
     return ret.affected > 0;

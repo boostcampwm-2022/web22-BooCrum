@@ -27,6 +27,7 @@ import { UpdateObjectDTO } from 'src/object-database/dto/update-object.dto';
 import { ObjectTransformPipe } from './pipe/object-transform.pipe';
 import { ValidationError } from 'class-validator';
 import { UserRoleGuard } from './guard/user-role.guard';
+import { ChangeUserRoleDTO } from './dto/change-role.dto';
 
 const errorMsgFormatter = (errors: ValidationError[]) =>
   new WsException(`잘못된 속성 전달: ${errors.map((e) => e.property).join(', ')}`);
@@ -262,5 +263,27 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       this.logger.error(`Delete Error: ${e.message}`, e.stack);
       throw new WsException(e.message);
     }
+  }
+
+  @SubscribeMessage('change_role')
+  @UseGuards(UserRoleGuard(WORKSPACE_ROLE.OWNER))
+  async changeUserRole(
+    @MessageBody(new ValidationPipe()) { userId, role }: ChangeUserRoleDTO,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const { workspaceId } = this.dataManagementService.findUserDataBySocketId(socket.id);
+    const userData = this.dataManagementService.findUserDataInWorkspaceByUserId(userId, workspaceId);
+
+    // User의 경우 DB에 기록된 Role을 수정한다. Workspace Member로 비등록된 경우 오류를 반환한다.
+    // Guest는 DB에 저장하지 않으므로, Guest는 이 처리를 수행하지 않는다.
+    if (!userData || !userData.isGuest) {
+      const isSuccess = await this.dbAccessService.changeUserRole(userId, workspaceId, role);
+      if (!isSuccess) throw new WsException('Role 갱신 실패: 존재하지 않는 User일 수 있습니다.');
+    }
+
+    // 만약 접속 중인 사용자인 경우 해당 유저의 role 또한 수정한다.
+    if (userData !== null) userData.role = role;
+
+    socket.nsp.emit('change_role', { userId, role });
   }
 }
