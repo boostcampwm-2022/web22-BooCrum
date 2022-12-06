@@ -1,11 +1,12 @@
-import { IsNumber, IsOptional, IsString, IsUUID } from 'class-validator';
+import { IsNumber, IsOptional, IsString, IsUUID, IsNotEmpty, ValidateIf, IsDefined } from 'class-validator';
 
-export class CreateObjectDTO {
+export class CreateObjectDTO implements AbstractWorkspaceObject {
+  @IsUUID()
   @IsString()
   objectId: string;
 
   @IsString()
-  type: string;
+  type: ObjectType;
 
   @IsNumber()
   left: number;
@@ -28,18 +29,19 @@ export class CreateObjectDTO {
   @IsString()
   color: string;
 
+  @ValidateIf((obj) => ['postit', 'section'].indexOf(obj.type) !== -1)
   @IsString()
-  @IsOptional()
   text: string;
 
+  @ValidateIf((obj) => ['postit', 'section'].indexOf(obj.type) !== -1)
   @IsNumber()
-  @IsOptional()
   fontSize: number;
 
+  @ValidateIf((obj) => ['draw'].indexOf(obj.type) !== -1)
   @IsString()
-  creator: string;
+  path: string;
 
-  @IsUUID()
+  @IsString()
   @IsOptional()
-  workspaceId: string;
+  creator: string;
 }

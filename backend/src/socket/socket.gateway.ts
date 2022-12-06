@@ -1,4 +1,4 @@
-import { Logger, ValidationPipe } from '@nestjs/common';
+import { Logger, ValidationPipe, UseGuards } from '@nestjs/common';
 import {
   ConnectedSocket,
   MessageBody,
@@ -16,13 +16,20 @@ import { Request, Response, NextFunction } from 'express';
 import { UserManagementService } from './user-management.service';
 import { DbAccessService } from './db-access.service';
 import { UserMapVO } from './dto/user-map.vo';
-import { ObjectDTO } from './dto/object.dto';
 import { UserDAO } from './dto/user.dao';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 import { ObjectMoveDTO } from './dto/object-move.dto';
 import { ObjectMapVO } from './dto/object-map.vo';
 import { ObjectScaleDTO } from './dto/object-scale.dto';
 import { ObjectManagementService } from './object-management.service';
+import { CreateObjectDTO } from 'src/object-database/dto/create-object.dto';
+import { UpdateObjectDTO } from 'src/object-database/dto/update-object.dto';
+import { ObjectTransformPipe } from './pipe/object-transform.pipe';
+import { ValidationError } from 'class-validator';
+import { UserRoleGuard } from './guard/user-role.guard';
+
+const errorMsgFormatter = (errors: ValidationError[]) =>
+  new WsException(`잘못된 속성 전달: ${errors.map((e) => e.property).join(', ')}`);
 
 //============================================================================================//
 //==================================== Socket.io 서버 정의 ====================================//
@@ -141,56 +148,24 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('select_object')
+  @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
   async selectObject(@MessageBody('objectIds') objectIds: string[], @ConnectedSocket() socket: Socket) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
-    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('select_object', { objectIds, userId: userData.userId });
   }
 
   @SubscribeMessage('unselect_object')
+  @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
   async unselectObject(@MessageBody('objectIds') objectIds: string[], @ConnectedSocket() socket: Socket) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
-    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
     socket.nsp.emit('unselect_object', { objectIds, userId: userData.userId });
   }
 
-  @SubscribeMessage('create_object')
-  async createObject(
-    @MessageBody(
-      new ValidationPipe({
-        exceptionFactory: (errors) => new WsException(`잘못된 속성 전달: ${errors.map((e) => e.property).join(', ')}`),
-      }),
-    )
-    objectData: ObjectDTO,
-    @ConnectedSocket() socket: Socket,
-  ) {
-    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
-    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
-
-    // Optional 값들 중 값을 채워줘야 하는 것은 값을 넣어준다.
-    try {
-      if (!objectData.text) objectData.text = '';
-      if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) objectData.fontSize = 16;
-      objectData.workspaceId = userData.workspaceId;
-      objectData.creator = userData.userId;
-
-      // section의 제목의 최대 길이는 50자
-      if (objectData.type === 'section' && objectData.text.length > 50) throw new WsException('섹션 제목 길이 초과');
-
-      // 생성을 시도하고, 성공하면 이를 전달한다.
-      await this.objectManagementService.insertObjectIntoWorkspace(userData.workspaceId, objectData);
-      socket.nsp.emit('create_object', objectData);
-    } catch (e) {
-      this.logger.error(`Create Error: ${e.message}`, e.stack);
-      throw new WsException(e.message);
-    }
-  }
-
   @SubscribeMessage('move_object')
+  @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
   async moveObject(@MessageBody() objectMoveDTO: ObjectMoveDTO, @ConnectedSocket() socket: Socket) {
     // User 권한 체크
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
-    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
     // 객체 존재 여부 체크 및 조회
     const objectData: ObjectMapVO = await this.objectManagementService.findOneObjectInWorkspace(
@@ -211,10 +186,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('scale_object')
+  @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
   async scaleObject(@MessageBody() objectScaleDTO: ObjectScaleDTO, @ConnectedSocket() socket: Socket) {
     // User 권한 체크
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
-    if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
 
     // 객체 존재 여부 체크 및 조회
     const objectData: ObjectMapVO = await this.objectManagementService.findOneObjectInWorkspace(
@@ -236,22 +211,37 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     });
   }
 
+  @SubscribeMessage('create_object')
+  @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
+  async createObject(
+    @MessageBody(new ValidationPipe({ exceptionFactory: errorMsgFormatter }), new ObjectTransformPipe())
+    objectData: CreateObjectDTO,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    try {
+      objectData.creator = userData.userId;
+
+      // 생성을 시도하고, 성공하면 이를 전달한다.
+      await this.objectManagementService.insertObjectIntoWorkspace(userData.workspaceId, objectData);
+      socket.nsp.emit('create_object', objectData);
+    } catch (e) {
+      this.logger.error(`Create Error: ${e.message}`, e.stack);
+      throw new WsException(e.message);
+    }
+  }
+
   @SubscribeMessage('update_object')
-  async updateObject(@MessageBody() objectData: ObjectDTO, @ConnectedSocket() socket: Socket) {
+  @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
+  async updateObject(
+    @MessageBody(new ValidationPipe({ exceptionFactory: errorMsgFormatter }), new ObjectTransformPipe())
+    objectData: UpdateObjectDTO,
+    @ConnectedSocket() socket: Socket,
+  ) {
     try {
       const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
-      if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
-
-      // 변경되어서는 안되는 값들은 미리 제거하거나 덮어버린다.
-      delete objectData.creator, delete objectData.type;
-      if (isNaN(+objectData.fontSize) || +objectData.fontSize < 0) delete objectData.fontSize;
-      objectData.workspaceId = userData.workspaceId;
-
-      // section의 제목의 최대 길이는 50자
-      if (objectData.type === 'section' && objectData.text.length > 50) throw new WsException('섹션 제목 길이 초과');
 
       // 수정을 시도하고, 성공하면 이를 전달한다.
-
       await this.objectManagementService.updateObjectInWorkspace(userData.workspaceId, objectData);
       socket.nsp.emit('update_object', { userId: userData.userId, objectData });
     } catch (e) {
@@ -261,12 +251,12 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   }
 
   @SubscribeMessage('delete_object')
+  @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
   async deleteObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
     try {
       const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
-      if (userData.role < WORKSPACE_ROLE.EDITOR) throw new WsException('유효하지 않은 권한입니다.'); // 읽기 권한은 배제한다.
-
-      await this.objectManagementService.deleteObjectInWorkspace(userData.workspaceId, objectId);
+      const res = await this.objectManagementService.deleteObjectInWorkspace(userData.workspaceId, objectId);
+      if (!res) throw new WsException('존재하지 않는 ObjectId');
       socket.nsp.emit('delete_object', { userId: userData.userId, objectId });
     } catch (e) {
       this.logger.error(`Delete Error: ${e.message}`, e.stack);
