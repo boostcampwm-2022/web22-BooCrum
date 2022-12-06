@@ -2,10 +2,12 @@ import { ObjectType, ObjectDataToServer, SocketObjectType } from '@pages/workspa
 
 import { fabric } from 'fabric';
 
-export const formatEditColorEventToSocket = (object: fabric.Object) => {
+export const formatEditColorEventToSocket = (objectGroup: fabric.Group) => {
+	const currentObject = objectGroup._objects[0];
 	const message: ObjectDataToServer = {
-		objectId: object.objectId,
-		color: object.fill as string,
+		type: objectGroup.type,
+		objectId: objectGroup.objectId,
+		color: currentObject.fill as string,
 	};
 
 	return message;
@@ -53,6 +55,7 @@ export const formatMessageToSocketForGroup = (group: fabric.Group, object: fabri
 
 export const formatMoveObjectEventToSocket = (objectGroup: fabric.Group): ObjectDataToServer => {
 	const message: ObjectDataToServer = {
+		type: objectGroup.type,
 		objectId: objectGroup.objectId,
 		left: objectGroup.left,
 		top: objectGroup.top,
@@ -79,6 +82,7 @@ export const formatMoveObjectEventToSocketForGroup = (
 
 export const formatScaleObjectEventToSocket = (object: fabric.Group) => {
 	const message: ObjectDataToServer = {
+		type: object.type,
 		objectId: object.objectId,
 		left: object.left,
 		top: object.top,
@@ -107,6 +111,7 @@ export const formatScaleObjectEventToSocketForGroup = (
 
 export const formatEditTextEventToSocket = (object: fabric.Text): ObjectDataToServer => {
 	const message: ObjectDataToServer = {
+		type: object.type,
 		objectId: object.objectId,
 		text: object.text,
 		fontSize: object.fontSize,

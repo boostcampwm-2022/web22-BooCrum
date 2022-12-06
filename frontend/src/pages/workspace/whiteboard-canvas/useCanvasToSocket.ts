@@ -107,7 +107,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (!(fabricObject instanceof fabric.Group)) return;
 
 			if (fabricObject.type === ObjectType.section || fabricObject.type === ObjectType.postit) {
-				const message = formatEditColorEventToSocket(fabricObject._objects[0]);
+				const message = formatEditColorEventToSocket(fabricObject);
 				socket.current?.emit('update_object', message);
 				return;
 			}
@@ -115,7 +115,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			fabricObject._objects.forEach((object) => {
 				if (object.type === ObjectType.section || object.type === ObjectType.postit) {
 					const changeObjects = object as fabric.Group;
-					const message = formatEditColorEventToSocket(changeObjects._objects[0]);
+					const message = formatEditColorEventToSocket(changeObjects);
 					socket.current?.emit('update_object', message);
 				}
 			});
