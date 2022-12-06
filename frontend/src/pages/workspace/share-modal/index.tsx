@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { Container, ParticipantList } from './index.style';
 import copyLink from '@assets/icon/copy-link.svg';
 import { Workspace } from '@api/workspace';
-import { ParticipantInfo, Role, ShareModalProps } from './index.type';
+import { ParticipantInfo, Role, RoleChangeEvent, ShareModalProps } from './index.type';
 import ToastMessage from '@components/toast-message';
 import MemberRole from '../member-role';
 import { useRecoilState } from 'recoil';
@@ -32,7 +32,8 @@ function ShareModal({ id }: ShareModalProps) {
 	};
 
 	const handleRole = (userId: string, role: Role) => {
-		console.log(userId, role);
+		const roleChangeEvent = new CustomEvent<RoleChangeEvent>('role:changed', { detail: { userId, role } });
+		document.dispatchEvent(roleChangeEvent);
 	};
 
 	return (

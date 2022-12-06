@@ -16,3 +16,8 @@ export interface ParticipantInfo {
 	updateDate: string;
 	user: UserInfo;
 }
+
+export interface RoleChangeEvent {
+	userId: string;
+	role: Role;
+}
