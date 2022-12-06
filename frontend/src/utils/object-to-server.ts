@@ -5,7 +5,7 @@ import { fabric } from 'fabric';
 export const formatEditColorEventToSocket = (objectGroup: fabric.Group) => {
 	const currentObject = objectGroup._objects[0];
 	const message: ObjectDataToServer = {
-		type: objectGroup.type,
+		type: objectGroup.type as SocketObjectType,
 		objectId: objectGroup.objectId,
 		color: currentObject.fill as string,
 	};
@@ -15,7 +15,7 @@ export const formatEditColorEventToSocket = (objectGroup: fabric.Group) => {
 
 export const formatEditFontSizeEventToSocket = (objectGroup: fabric.Group, textObjects: fabric.Text) => {
 	const message: ObjectDataToServer = {
-		type: objectGroup.type,
+		type: objectGroup.type as SocketObjectType,
 		objectId: objectGroup.objectId,
 		fontSize: textObjects.fontSize,
 	};
@@ -65,7 +65,7 @@ export const formatMessageToSocketForGroup = (group: fabric.Group, object: fabri
 
 export const formatMoveObjectEventToSocket = (objectGroup: fabric.Group): ObjectDataToServer => {
 	const message: ObjectDataToServer = {
-		type: objectGroup.type,
+		type: objectGroup.type as SocketObjectType,
 		objectId: objectGroup.objectId,
 		left: objectGroup.left,
 		top: objectGroup.top,
@@ -92,7 +92,7 @@ export const formatMoveObjectEventToSocketForGroup = (
 
 export const formatScaleObjectEventToSocket = (object: fabric.Group) => {
 	const message: ObjectDataToServer = {
-		type: object.type,
+		type: object.type as SocketObjectType,
 		objectId: object.objectId,
 		left: object.left,
 		top: object.top,
@@ -121,7 +121,7 @@ export const formatScaleObjectEventToSocketForGroup = (
 
 export const formatEditTextEventToSocket = (object: fabric.Text): ObjectDataToServer => {
 	const message: ObjectDataToServer = {
-		type: object.type,
+		type: object.type as SocketObjectType,
 		objectId: object.objectId,
 		text: object.text,
 		fontSize: object.fontSize,
