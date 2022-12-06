@@ -103,11 +103,11 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			});
 		});
 
-		canvas.current.on('color:modified', ({ target }) => {
-			if (!(target instanceof fabric.Group)) return;
-			if (target.type !== ObjectType.postit && target.type !== ObjectType.section) return;
+		canvas.current.on('color:modified', ({ target: fabricObject }) => {
+			if (!(fabricObject instanceof fabric.Group)) return;
+			if (fabricObject.type !== ObjectType.postit && fabricObject.type !== ObjectType.section) return;
 
-			const changeObjects = target._objects.filter((obj) => obj.type === ObjectType.rect);
+			const changeObjects = fabricObject._objects.filter((obj) => obj.type === ObjectType.rect);
 
 			if (changeObjects.length < 1) return;
 
