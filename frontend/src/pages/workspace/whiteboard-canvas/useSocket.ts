@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, Member, MemberInCanvas, ServerToClientEvents } from './types';
-import { useRecoilState, useSetRecoilState } from 'recoil';
+import { useSetRecoilState } from 'recoil';
 import { membersState } from '@context/workspace';
 import { fabric } from 'fabric';
 import {
@@ -19,7 +19,7 @@ import { isNull } from '@utils/type.utils';
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const setMyInfoInWorkspace = useSetRecoilState(myInfoInWorkspaceState);
 	const myInfoInWorkspaceRef = useRef<Member>();
-	const [members, setMembers] = useRecoilState(membersState);
+	const setMembers = useSetRecoilState(membersState);
 
 	const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
 	const membersInCanvas = useRef<MemberInCanvas[]>([]);

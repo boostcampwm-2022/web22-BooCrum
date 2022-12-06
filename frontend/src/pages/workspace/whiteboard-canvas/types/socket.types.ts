@@ -16,7 +16,7 @@ export interface ServerToClientEvents {
 	update_object: (arg: { userId: string; objectData: ObjectDataFromServer }) => void;
 	move_object: (arg: { userId: string; objectData: ObjectDataFromServer }) => void;
 	scale_object: (arg: { userId: string; objectData: ObjectDataFromServer }) => void;
-	update_role: (arg: { userId: string; role: Role }) => void;
+	change_role: (arg: { userId: string; role: Role }) => void;
 	exception: (arg: any) => void;
 }
 
@@ -28,5 +28,6 @@ export interface ClientToServerEvents {
 	delete_object: (arg: { objectId: string }) => void;
 	update_object: (arg: ObjectDataToServer) => void;
 	move_object: (arg: ObjectDataToServer) => void;
+	change_role: (arg: { userId: string; role: Role }) => void;
 	scale_object: (arg: ObjectDataToServer) => void;
 }

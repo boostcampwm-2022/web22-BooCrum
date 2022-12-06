@@ -21,3 +21,15 @@ export interface ParticipantInfo {
 	updateDate: string;
 	user: UserInfo;
 }
+
+export interface RoleInfo {
+	userId: string;
+	role: Role;
+}
+
+export interface MyInfo {
+	userId: string;
+	nickname: string;
+	color: string;
+	role: Role;
+}
