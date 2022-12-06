@@ -8,6 +8,7 @@ import {
   Delete,
   Patch,
   Body,
+  Query,
   UseGuards,
   ValidationPipe,
   BadRequestException,
@@ -37,11 +38,14 @@ export class WorkspaceController {
   @Post()
   async createWorkspace(
     @Body(new ValidationPipe()) body: WorkspaceCreateRequestDto,
+    @Query('templateId') templateId: string,
     @Session() session: Record<string, any>,
   ): Promise<Workspace> {
     body.ownerId = session.user.userId;
     if (!body.teamId) body.teamId = session.user.userTeamId;
-    return this.workspaceService.createWorkspace(body);
+    const ret = this.workspaceService.createWorkspace(body, templateId);
+
+    return ret;
   }
 
   // 유저가 접근 가능한 Workspace 조회 서비스 기능 테스트 목적 라우트입니다.

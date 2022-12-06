@@ -10,6 +10,10 @@ import { WorkspaceMember } from './entity/workspace-member.entity';
 import { Workspace } from './entity/workspace.entity';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
 import * as MulterS3 from 'multer-s3';
+import { InjectModel } from '@nestjs/mongoose';
+import { Model } from 'mongoose';
+import { TemplateBucket, TemplateBucketDocument } from 'src/object-database/schema/template-bucket.schema';
+import { ObjectBucket, ObjectBucketDocument } from 'src/object-database/schema/object-bucket.schema';
 
 @Injectable()
 export class WorkspaceService {
@@ -19,6 +23,8 @@ export class WorkspaceService {
     @InjectRepository(WorkspaceMember)
     private workspaceMemberRepository: Repository<WorkspaceMember>,
     private dataSource: DataSource,
+    @InjectModel(TemplateBucket.name) private templateBucketModel: Model<TemplateBucketDocument>,
+    @InjectModel(ObjectBucket.name) private objectBucketModel: Model<ObjectBucketDocument>,
   ) {}
 
   async getAuthorityOfUser(workspaceId: string, userId: string): Promise<number> {
@@ -33,12 +39,40 @@ export class WorkspaceService {
     );
   }
 
+  async getTemplateList() {
+    return await this.templateBucketModel
+      .find({}, { templateName: 1, templateId: 1, templateThumbnailUrl: 1, _id: 0 })
+      .exec();
+  }
+
+  private async createObjectDocument(workspaceId: string, templateId?: string) {
+    const newBucket = new this.objectBucketModel();
+    newBucket.workspaceId = workspaceId;
+
+    // Template ID를 기반으로 Object Bucket을 생성한다. 없으면 빈 Bucket을 생성한다.
+    if (templateId) {
+      const templateBucket = await this.templateBucketModel.findOne({ templateId }, { objects: 1 }, { lean: true });
+      if (templateBucket) newBucket.objects = templateBucket.objects;
+    }
+    console.log(templateId, newBucket);
+    await newBucket.save();
+    return true;
+  }
+
+  private async deleteObjectDocument(workspaceId: string): Promise<boolean> {
+    const ret = await this.objectBucketModel.deleteOne({ workspaceId }).exec();
+    return ret.deletedCount > 0;
+  }
+
   /**
    * 워크스페이스를 생성합니다.
    * @param param0 워크스페이스를 생성하는데 필요한 정보들입니다. (신규 워크스페이스를 소유할 팀/유저 ID와 워크스페이스 이름, 설명)
    * @returns 생성한 워크스페이스의 정보를 반환합니다.
    */
-  async createWorkspace({ teamId, ownerId: userId, name, description }: WorkspaceCreateRequestDto): Promise<Workspace> {
+  async createWorkspace(
+    { teamId, ownerId: userId, name, description }: WorkspaceCreateRequestDto,
+    templateId?: string,
+  ): Promise<Workspace> {
     const newWorkspace = new Workspace();
     const workspaceMember = new WorkspaceMember();
 
@@ -46,12 +80,14 @@ export class WorkspaceService {
     await queryRunner.startTransaction();
 
     try {
-      const teamFind = await queryRunner.manager.findOne(Team, {
-        where: { teamId },
-      });
-      const userFind = await queryRunner.manager.findOne(User, {
-        where: { userId },
-      });
+      const [teamFind, userFind] = await Promise.all([
+        await queryRunner.manager.findOne(Team, {
+          where: { teamId },
+        }),
+        await queryRunner.manager.findOne(User, {
+          where: { userId },
+        }),
+      ]);
       if (!teamFind || !userFind) {
         throw new BadRequestException('잘못된 사용자 ID 혹은 팀 ID 입니다.');
       }
@@ -67,6 +103,8 @@ export class WorkspaceService {
 
       const ret = await queryRunner.manager.save(newWorkspace);
       await queryRunner.manager.save(workspaceMember);
+
+      await this.createObjectDocument(ret.workspaceId, templateId);
 
       await queryRunner.commitTransaction();
       await queryRunner.release();
@@ -233,6 +271,8 @@ export class WorkspaceService {
         .execute();
       // 워크스페이스 메타데이터 제거
       await queryRunner.manager.delete(Workspace, { workspaceId });
+
+      await this.deleteObjectDocument(workspaceId);
 
       await queryRunner.commitTransaction();
       await queryRunner.release();
