@@ -70,6 +70,8 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 	});
 	textBox.set({
 		isSocketObject: true,
+		scaleX: 1 / scaleX,
+		scaleY: 1 / scaleY,
 	});
 	nameLabel.set({
 		isSocketObject: true,
