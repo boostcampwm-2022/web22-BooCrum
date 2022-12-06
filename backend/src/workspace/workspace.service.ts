@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
-import { Injectable, BadRequestException } from '@nestjs/common';
+import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Team } from '../team/entity/team.entity';
 import { User } from '../user/entity/user.entity';
@@ -316,8 +316,7 @@ export class WorkspaceService {
   async uploadThumbnail(workspaceId: string, file: MulterS3.File): Promise<boolean> {
     const isExistWorkspace = await this.getWorkspaceMetadata(workspaceId);
     if (!isExistWorkspace) throw new BadRequestException('잘못된 워크스페이스 ID입니다.');
-
-    if (!file) throw new BadRequestException('파일의 경로가 올바르지 않습니다.');
+    if (!file) throw new NotFoundException('파일의 경로가 올바르지 않습니다.');
 
     const thumbnailUrl = file.location;
     return (
