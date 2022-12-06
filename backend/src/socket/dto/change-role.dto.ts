@@ -6,7 +6,7 @@ export class ChangeUserRoleDTO {
   userId: string;
 
   @Min(WORKSPACE_ROLE.VIEWER)
-  @Max(WORKSPACE_ROLE.OWNER)
+  @Max(WORKSPACE_ROLE.EDITOR)
   @IsNumber()
   role: number;
 }
