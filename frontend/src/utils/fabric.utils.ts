@@ -198,6 +198,7 @@ export const setCursorMode = (canvas: fabric.Canvas, cursor: string, mode: Canva
 	canvas.defaultCursor = cursor;
 	canvas.hoverCursor = cursor;
 	canvas.mode = mode;
+	canvas.selection = selectable;
 	canvas.forEachObject((obj) => (obj.selectable = obj.type !== ObjectType.draw ? selectable : false));
 };
 

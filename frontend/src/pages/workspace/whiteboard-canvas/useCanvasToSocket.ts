@@ -122,7 +122,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (target.type !== ObjectType.postit) return;
 
 			const changeObjects = target._objects.filter((obj) => obj.type === ObjectType.text);
-			console.log(changeObjects);
 
 			if (changeObjects.length < 1) return;
 

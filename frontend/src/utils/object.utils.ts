@@ -271,7 +271,13 @@ export const setSectionEditEvent = (
 	editableTitle: fabric.IText,
 	sectionTitle: fabric.IText
 ) => {
+	let prevCanvasMode: CanvasType;
+
 	groupObject.on('mousedblclick', (e) => {
+		if (canvas.mode === CanvasType.move) return;
+
+		prevCanvasMode = canvas.mode;
+
 		sectionTitle.set({ visible: false });
 		canvas.add(editableTitle);
 		canvas.setActiveObject(editableTitle);
@@ -282,6 +288,8 @@ export const setSectionEditEvent = (
 			left: (groupObject?.left || 0) + 10 * (groupObject?.scaleX || 1),
 			top: groupObject.top,
 		});
+
+		canvas.mode = CanvasType.edit;
 	});
 	editableTitle.on('changed', (e) => {
 		const inputText = editableTitle.text;
@@ -290,6 +298,7 @@ export const setSectionEditEvent = (
 	editableTitle.on('editing:exited', (e) => {
 		sectionTitle.set({ visible: true });
 		canvas.remove(editableTitle);
+		canvas.mode = prevCanvasMode;
 	});
 };
 

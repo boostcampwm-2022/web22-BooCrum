@@ -1,7 +1,7 @@
 import { ChangeEvent, useEffect, useRef, useState } from 'react';
 import { fabric } from 'fabric';
 import { colorChips } from '@data/workspace-object-color';
-import { ObjectType } from './types';
+import { CanvasType, ObjectType } from './types';
 
 function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [isOpen, setIsOpen] = useState(false);
@@ -22,6 +22,8 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		canvas.current.on('object:removed', handleRemoveObject);
 
 		document.addEventListener('keydown', setPostItFontSize);
+		document.addEventListener('focusin', setFontEditMode);
+		document.addEventListener('focusout', removeFontEditMode);
 
 		return () => {
 			canvas.current?.off('mouse:down', handleOutsideClick);
@@ -30,6 +32,8 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			canvas.current?.off('object:removed', handleRemoveObject);
 
 			document.removeEventListener('keydown', setPostItFontSize);
+			document.removeEventListener('focusin', setFontEditMode);
+			document.removeEventListener('focusout', removeFontEditMode);
 		};
 	}, [isOpen]);
 
@@ -96,6 +100,20 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		currentCanvas.fire('color:modified', { target: currentGroup });
 		currentCanvas.requestRenderAll();
+	};
+
+	const setFontEditMode = () => {
+		const currentCanvas = canvas.current as fabric.Canvas;
+		if (!currentCanvas) return;
+
+		currentCanvas.mode = CanvasType.edit;
+	};
+
+	const removeFontEditMode = () => {
+		const currentCanvas = canvas.current as fabric.Canvas;
+		if (!currentCanvas) return;
+
+		currentCanvas.mode = CanvasType.select;
 	};
 
 	const handleFontSize = (e: ChangeEvent<HTMLInputElement>) => {
