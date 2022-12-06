@@ -1,6 +1,7 @@
 import { ObjectType, ObjectDataToServer, SocketObjectType } from '@pages/workspace/whiteboard-canvas/types';
 
 import { fabric } from 'fabric';
+import { v4 } from 'uuid';
 
 export const formatEditColorEventToSocket = (objectGroup: fabric.Group) => {
 	const currentObject = objectGroup._objects[0];
@@ -133,4 +134,9 @@ export const formatSelectEventToSocket = (objects: fabric.Object[]) => {
 		objectIds: objects.map((object) => object.objectId),
 	};
 	return message;
+};
+
+export const initDrawObject = (object: fabric.Path) => {
+	object.objectId = v4();
+	object.type = SocketObjectType.draw;
 };

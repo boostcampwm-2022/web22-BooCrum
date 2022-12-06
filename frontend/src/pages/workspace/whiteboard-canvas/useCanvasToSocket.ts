@@ -14,6 +14,7 @@ import {
 	formatMoveObjectEventToSocketForGroup,
 	formatSelectEventToSocket,
 	formatEditFontSizeEventToSocket,
+	initDrawObject,
 } from '@utils/object-to-server';
 import { fabric } from 'fabric';
 import { isNull, isUndefined } from '@utils/type.utils';
@@ -31,7 +32,12 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		if (isNull(canvas.current)) return;
 
 		canvas.current.on('object:added', ({ target: fabricObject }) => {
+			console.log(fabricObject);
 			if (isUndefined(fabricObject) || fabricObject.isSocketObject) return;
+
+			if (fabricObject instanceof fabric.Path) {
+				initDrawObject(fabricObject);
+			}
 
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatObjectDataToServer(fabricObject as fabric.Group, fabricObject.type as SocketObjectType);
@@ -40,6 +46,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		});
 
 		canvas.current.on('object:modified', ({ target: fabricObject }) => {
+			console.log(fabricObject);
 			if (isUndefined(fabricObject)) return;
 
 			if (fabricObject.type in SocketObjectType) {
