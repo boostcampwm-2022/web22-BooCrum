@@ -21,8 +21,6 @@ export const Container = styled.div`
 	.role-setting {
 		display: flex;
 		align-items: center;
-
-		cursor: pointer;
 	}
 
 	.role-selected {
@@ -46,6 +44,8 @@ export const Container = styled.div`
 	.dropdown {
 		width: 10px;
 		margin-left: 8px;
+
+		cursor: pointer;
 	}
 `;
 

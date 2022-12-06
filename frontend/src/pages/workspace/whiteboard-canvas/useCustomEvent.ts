@@ -1,5 +1,6 @@
 import { myInfoInWorkspaceState } from '@context/user';
 import { workspaceParticipantsState } from '@context/workspace';
+import { workspaceRole } from '@data/workspace-role';
 import { useEffect } from 'react';
 import { useRecoilState } from 'recoil';
 import { Socket } from 'socket.io-client';
@@ -15,7 +16,7 @@ function useCustomEvent(socket: React.MutableRefObject<Socket<ServerToClientEven
 		return () => {
 			document.removeEventListener('role:changed', messageToSocket);
 		};
-	}, []);
+	}, [myInfoInWorkspace]);
 	useEffect(() => {
 		socket.current?.on('change_role', messageFromSocket);
 
@@ -25,8 +26,9 @@ function useCustomEvent(socket: React.MutableRefObject<Socket<ServerToClientEven
 	}, [participants]);
 
 	const messageToSocket = (ev: Event) => {
-		const { userId, role } = (ev as CustomEvent).detail;
+		if (myInfoInWorkspace.role !== workspaceRole.OWNER) return;
 
+		const { userId, role } = (ev as CustomEvent).detail;
 		socket.current?.emit('change_role', { userId, role });
 	};
 
