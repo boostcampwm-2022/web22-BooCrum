@@ -32,16 +32,15 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		if (isNull(canvas.current)) return;
 
 		canvas.current.on('object:added', ({ target: fabricObject }) => {
-			console.log(fabricObject);
 			if (isUndefined(fabricObject) || fabricObject.isSocketObject) return;
+			console.log('통과된 놈덜', fabricObject);
 
-			if (fabricObject instanceof fabric.Path) {
-				initDrawObject(fabricObject);
+			if (fabricObject instanceof fabric.Path && fabricObject.type !== ObjectType.cursor) {
+				initDrawObject(fabricObject as fabric.Path);
 			}
 
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatObjectDataToServer(fabricObject);
-				console.log(message);
 				socket.current?.emit('create_object', message);
 			}
 		});
