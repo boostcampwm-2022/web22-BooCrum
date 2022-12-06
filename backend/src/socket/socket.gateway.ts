@@ -268,7 +268,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('change_role')
   @UseGuards(UserRoleGuard(WORKSPACE_ROLE.OWNER))
   async changeUserRole(
-    @MessageBody(new ValidationPipe()) { userId, role }: ChangeUserRoleDTO,
+    @MessageBody(new ValidationPipe({ exceptionFactory: errorMsgFormatter })) { userId, role }: ChangeUserRoleDTO,
     @ConnectedSocket() socket: Socket,
   ) {
     const { workspaceId } = this.dataManagementService.findUserDataBySocketId(socket.id);
