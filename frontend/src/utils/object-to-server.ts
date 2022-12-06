@@ -2,6 +2,7 @@ import { ObjectType, ObjectDataToServer, SocketObjectType } from '@pages/workspa
 
 import { fabric } from 'fabric';
 import { v4 } from 'uuid';
+import { toStringPath } from './fabric.utils';
 
 export const formatEditColorEventToSocket = (objectGroup: fabric.Group) => {
 	const currentObject = objectGroup._objects[0];
@@ -24,34 +25,42 @@ export const formatEditFontSizeEventToSocket = (objectGroup: fabric.Group, textO
 	return message;
 };
 
-export const formatObjectDataToServer = (objectGroup: fabric.Group, type: SocketObjectType): ObjectDataToServer => {
+export const formatObjectDataToServer = (fabricObject: fabric.Object): ObjectDataToServer => {
 	const message: ObjectDataToServer = {
-		type: type,
-		objectId: objectGroup.objectId,
-		left: objectGroup.left,
-		top: objectGroup.top,
-		width: objectGroup.width,
-		height: objectGroup.height,
-		scaleX: objectGroup.scaleX || 1,
-		scaleY: objectGroup.scaleY || 1,
+		type: fabricObject.type as SocketObjectType,
+		objectId: fabricObject.objectId,
+		left: fabricObject.left,
+		top: fabricObject.top,
+		width: fabricObject.width,
+		height: fabricObject.height,
+		scaleX: fabricObject.scaleX || 1,
+		scaleY: fabricObject.scaleY || 1,
 	};
 
-	objectGroup._objects.forEach((object) => {
-		if (object.type === ObjectType.rect) {
-			message.color = object.fill as string;
-		}
-		if (object.type === ObjectType.text || object.type === ObjectType.title) {
-			const textObject = object as fabric.Text;
-			message.text = textObject.text;
-			message.fontSize = textObject.fontSize;
-		}
-	});
+	if (fabricObject instanceof fabric.Path) {
+		message.color = fabricObject.stroke;
+		message.path = toStringPath(fabricObject as fabric.Path);
+	}
+
+	if (fabricObject instanceof fabric.Group) {
+		fabricObject._objects.forEach((object) => {
+			if (object.type === ObjectType.rect) {
+				message.color = object.fill as string;
+			}
+			if (object.type === ObjectType.text || object.type === ObjectType.title) {
+				const textObject = object as fabric.Text;
+				message.text = textObject.text;
+				message.fontSize = textObject.fontSize;
+			}
+		});
+	}
+
 	return message;
 };
 
-export const formatMessageToSocketForGroup = (group: fabric.Group, object: fabric.Group): ObjectDataToServer => {
+export const formatMessageToSocketForGroup = (group: fabric.Group, object: fabric.Object): ObjectDataToServer => {
 	const groupCenterPoint = group.getCenterPoint();
-	const objectDataMessage = formatObjectDataToServer(object, object.type as SocketObjectType);
+	const objectDataMessage = formatObjectDataToServer(object);
 
 	const message: ObjectDataToServer = {
 		...objectDataMessage,
@@ -139,4 +148,5 @@ export const formatSelectEventToSocket = (objects: fabric.Object[]) => {
 export const initDrawObject = (object: fabric.Path) => {
 	object.objectId = v4();
 	object.type = SocketObjectType.draw;
+	object.isSocketObject = false;
 };

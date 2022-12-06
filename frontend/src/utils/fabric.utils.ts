@@ -198,5 +198,5 @@ export const setCursorMode = (canvas: fabric.Canvas, cursor: string, mode: Canva
 export const toStringPath = (path: fabric.Path) => {
 	const reg = /(?<=d=\")[^\"]*(?=\")/g;
 	const pathString = path.toSVG().match(reg);
-	return pathString ? pathString[0] : null;
+	return pathString ? pathString[0] : '';
 };

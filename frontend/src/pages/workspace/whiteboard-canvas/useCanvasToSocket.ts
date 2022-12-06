@@ -40,7 +40,8 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			}
 
 			if (fabricObject.type in SocketObjectType) {
-				const message = formatObjectDataToServer(fabricObject as fabric.Group, fabricObject.type as SocketObjectType);
+				const message = formatObjectDataToServer(fabricObject);
+				console.log(message);
 				socket.current?.emit('create_object', message);
 			}
 		});
@@ -50,7 +51,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (isUndefined(fabricObject)) return;
 
 			if (fabricObject.type in SocketObjectType) {
-				const message = formatObjectDataToServer(fabricObject as fabric.Group, fabricObject.type as SocketObjectType);
+				const message = formatObjectDataToServer(fabricObject);
 				socket.current?.emit('update_object', message);
 				return;
 			}
@@ -59,7 +60,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 			fabricObject._objects.forEach((object) => {
 				if (object.type in SocketObjectType) {
-					const message = formatMessageToSocketForGroup(fabricObject, object as fabric.Group);
+					const message = formatMessageToSocketForGroup(fabricObject, object);
 					socket.current?.emit('update_object', message);
 				}
 			});

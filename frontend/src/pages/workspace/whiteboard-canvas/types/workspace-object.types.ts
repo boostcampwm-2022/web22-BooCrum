@@ -22,6 +22,7 @@ export interface ObjectDataToServer {
 	fontSize?: number;
 	scaleX?: number;
 	scaleY?: number;
+	path?: string;
 }
 
 export interface ObjectDataFromServer extends ObjectDataToServer {
