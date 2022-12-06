@@ -126,6 +126,7 @@ export const initDrawing = (canvas: fabric.Canvas) => {
 		path.set({ perPixelTargetFind: true });
 		path.on('mousedown', () => {
 			if (canvas.mode !== CanvasType.erase) return;
+			path.isSocketObject = false;
 			canvas.remove(path);
 		});
 	});
