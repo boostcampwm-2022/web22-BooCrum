@@ -30,6 +30,28 @@ export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 	if (newObject.type === SocketObjectType.section) {
 		createSectionFromServer(canvas, newObject);
 	}
+
+	if (newObject.type === SocketObjectType.draw) {
+		createDrawFromServer(canvas, newObject);
+	}
+};
+
+export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
+	const drawObject = new fabric.Path(newObject.path, {
+		type: newObject.type,
+		objectId: newObject.objectId,
+		isSocketObject: true,
+		left: newObject.left,
+		top: newObject.top,
+		width: newObject.width,
+		height: newObject.height,
+		scaleX: newObject.scaleX,
+		scaleY: newObject.scaleY,
+		stroke: newObject.color,
+		strokeWidth: canvas.freeDrawingBrush.width,
+		fill: undefined,
+	});
+	canvas.add(drawObject);
 };
 
 export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
