@@ -14,6 +14,7 @@ import {
 	formatMoveObjectEventToSocketForGroup,
 	formatSelectEventToSocket,
 	formatEditFontSizeEventToSocket,
+	initDrawObject,
 } from '@utils/object-to-server';
 import { fabric } from 'fabric';
 import { isNull, isUndefined } from '@utils/type.utils';
@@ -32,18 +33,24 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 		canvas.current.on('object:added', ({ target: fabricObject }) => {
 			if (isUndefined(fabricObject) || fabricObject.isSocketObject) return;
+			console.log('통과된 놈덜', fabricObject);
+
+			if (fabricObject instanceof fabric.Path && fabricObject.type !== ObjectType.cursor) {
+				initDrawObject(fabricObject as fabric.Path);
+			}
 
 			if (fabricObject.type in SocketObjectType) {
-				const message = formatObjectDataToServer(fabricObject as fabric.Group, fabricObject.type as SocketObjectType);
+				const message = formatObjectDataToServer(fabricObject);
 				socket.current?.emit('create_object', message);
 			}
 		});
 
 		canvas.current.on('object:modified', ({ target: fabricObject }) => {
+			console.log(fabricObject);
 			if (isUndefined(fabricObject)) return;
 
 			if (fabricObject.type in SocketObjectType) {
-				const message = formatObjectDataToServer(fabricObject as fabric.Group, fabricObject.type as SocketObjectType);
+				const message = formatObjectDataToServer(fabricObject);
 				socket.current?.emit('update_object', message);
 				return;
 			}
@@ -52,7 +59,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 			fabricObject._objects.forEach((object) => {
 				if (object.type in SocketObjectType) {
-					const message = formatMessageToSocketForGroup(fabricObject, object as fabric.Group);
+					const message = formatMessageToSocketForGroup(fabricObject, object);
 					socket.current?.emit('update_object', message);
 				}
 			});

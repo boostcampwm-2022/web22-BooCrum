@@ -9,6 +9,7 @@ import {
 	Role,
 } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
+import { v4 } from 'uuid';
 import {
 	createNameLabel,
 	createPostIt,
@@ -32,6 +33,28 @@ export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 	if (newObject.type === SocketObjectType.section) {
 		createSectionFromServer(canvas, newObject, role);
 	}
+
+	if (newObject.type === SocketObjectType.draw) {
+		createDrawFromServer(canvas, newObject);
+	}
+};
+
+export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
+	const drawObject = new fabric.Path(newObject.path, {
+		type: newObject.type,
+		objectId: newObject.objectId,
+		isSocketObject: true,
+		left: newObject.left,
+		top: newObject.top,
+		width: newObject.width,
+		height: newObject.height,
+		scaleX: newObject.scaleX,
+		scaleY: newObject.scaleY,
+		stroke: newObject.color,
+		strokeWidth: canvas.freeDrawingBrush.width,
+		fill: undefined,
+	});
+	canvas.add(drawObject);
 };
 
 export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
@@ -141,11 +164,20 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	});
 
 	if (object.length === 0) return;
+
+	if (object[0].type === SocketObjectType.draw) {
+		const { path, ...updateProperty } = updatedObject;
+		object[0].set({
+			...updateProperty,
+		});
+		return;
+	}
+
 	object[0].set({
 		...updatedObject,
 	});
 
-	if (object[0].type in SocketObjectType) {
+	if (object[0] instanceof fabric.Group) {
 		const groupObject = object[0] as fabric.Group;
 		groupObject._objects.forEach((object) => {
 			if (object.type === ObjectType.text || object.type === ObjectType.title) {
@@ -163,24 +195,23 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 };
 
 export const selectObjectFromServer = (canvas: fabric.Canvas, objectIds: string[], color: string) => {
-	console.log(objectIds);
 	const objects: fabric.Object[] = canvas.getObjects().filter((object) => {
 		return objectIds.includes(object.objectId);
 	});
 
-	console.log('select', objects);
 	if (objects.length === 0) return;
 
-	const groupObjects = objects as fabric.Group[];
-	groupObjects.forEach((groupObject) => {
-		groupObject._objects.forEach((object) => {
-			if (object.type === ObjectType.rect) {
-				object.set({
-					stroke: color,
-					strokeWidth: 3,
-				});
-			}
-		});
+	objects.forEach((object) => {
+		if (object instanceof fabric.Group) {
+			object._objects.forEach((_object) => {
+				if (_object.type === ObjectType.rect) {
+					_object.set({
+						stroke: color,
+						strokeWidth: 3,
+					});
+				}
+			});
+		}
 	});
 };
 
@@ -191,16 +222,17 @@ export const unselectObjectFromServer = (canvas: fabric.Canvas, objectIds: strin
 
 	if (objects.length === 0) return;
 
-	const groupObjects = objects as fabric.Group[];
-	groupObjects.forEach((groupObject) => {
-		groupObject._objects.forEach((object) => {
-			if (object.type === ObjectType.rect) {
-				object.set({
-					stroke: '',
-					strokeWidth: 0,
-				});
-			}
-		});
+	objects.forEach((object) => {
+		if (object instanceof fabric.Group) {
+			object._objects.forEach((_object) => {
+				if (_object.type === ObjectType.rect) {
+					_object.set({
+						stroke: '',
+						strokeWidth: 0,
+					});
+				}
+			});
+		}
 	});
 };
 
@@ -208,6 +240,13 @@ export const createCursorObject = (member: Member) => {
 	const cursorObject = new fabric.Path(
 		'M10.9231 16.0296C11.0985 16.4505 10.9299 18.0447 10 18.4142C9.07008 18.7837 7.88197 18.4142 7.88197 18.4142L5.72605 14.1024L2 17.8284V1L13.4142 12.4142H9.16151C9.37022 12.8144 10.7003 15.4948 10.9231 16.0296Z'
 	);
-	cursorObject.set({ fill: member.color, selectable: false, hoverCursor: 'normal' });
+	cursorObject.set({
+		type: ObjectType.cursor,
+		objectId: v4(),
+		fill: member.color,
+		selectable: false,
+		hoverCursor: 'normal',
+		isSocketObject: true,
+	});
 	return cursorObject;
 };

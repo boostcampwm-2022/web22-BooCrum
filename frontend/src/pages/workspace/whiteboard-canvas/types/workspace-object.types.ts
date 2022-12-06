@@ -22,6 +22,7 @@ export interface ObjectDataToServer {
 	fontSize?: number;
 	scaleX?: number;
 	scaleY?: number;
+	path?: string;
 }
 
 export interface ObjectDataFromServer extends ObjectDataToServer {
@@ -50,7 +51,7 @@ export type ObjectType = typeof ObjectType[keyof typeof ObjectType];
 export const SocketObjectType = {
 	postit: 'postit',
 	section: 'section',
-	// draw: 'draw',
+	draw: 'draw',
 } as const;
 
 export type SocketObjectType = typeof SocketObjectType[keyof typeof SocketObjectType];
