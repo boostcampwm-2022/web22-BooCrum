@@ -148,14 +148,6 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 				backgroundRect.set({ fill: updatedObject.color });
 			}
 		});
-	} else if (object[0].type === ObjectType.section) {
-		const groupObject = object[0] as fabric.Group;
-		groupObject._objects.forEach((object) => {
-			if (object.type === ObjectType.rect && updatedObject.color) {
-				const backgroundRect = object as fabric.Rect;
-				backgroundRect.set({ fill: updatedObject.color });
-			}
-		});
 	}
 };
 

@@ -127,11 +127,11 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (!(fabricObject instanceof fabric.Group)) return;
 			if (fabricObject.type !== ObjectType.postit) return;
 
-			const changeObjects = fabricObject._objects.filter((obj) => obj.type === ObjectType.text);
+			const textObjects = fabricObject._objects.filter((obj) => obj.type === ObjectType.text);
 
-			if (changeObjects.length < 1) return;
+			if (textObjects.length < 1) return;
 
-			const message = formatEditFontSizeEventToSocket(changeObjects[0] as fabric.Text);
+			const message = formatEditFontSizeEventToSocket(fabricObject, textObjects[0] as fabric.Text);
 			socket.current?.emit('update_object', message);
 		});
 
