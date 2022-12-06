@@ -1,3 +1,4 @@
+import { workspaceRole } from '@data/workspace-role';
 import {
 	ObjectDataFromServer,
 	MemberInCanvas,
@@ -5,6 +6,7 @@ import {
 	ObjectType,
 	Member,
 	SocketObjectType,
+	Role,
 } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 import {
@@ -22,17 +24,17 @@ import {
 	setSectionEditEvent,
 } from './object.utils';
 
-export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
+export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
 	if (newObject.type === SocketObjectType.postit) {
-		createPostitFromServer(canvas, newObject);
+		createPostitFromServer(canvas, newObject, role);
 	}
 
 	if (newObject.type === SocketObjectType.section) {
-		createSectionFromServer(canvas, newObject);
+		createSectionFromServer(canvas, newObject, role);
 	}
 };
 
-export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
+export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
 	const { objectId, left, top, fontSize, color, text, width, height, creator, scaleX, scaleY } = newObject;
 	if (!left || !top || !fontSize || !color || !text || !width || !height || !scaleX || !scaleY) return;
 	const nameLabel = createNameLabel({ objectId, text: creator, left, top });
@@ -50,7 +52,8 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 		isSocketObject: true,
 	});
 
-	const postit = createPostIt({ objectId, left, top, textBox, nameLabel, backgroundRect });
+	const selectable = role !== workspaceRole.GUEST;
+	const postit = createPostIt({ objectId, left, top, textBox, nameLabel, backgroundRect, selectable });
 
 	editableTextBox.set({
 		isSocketObject: true,
@@ -70,7 +73,7 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 	canvas.add(postit);
 };
 
-export const createSectionFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
+export const createSectionFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
 	const { objectId, left, top, fontSize, color, scaleX, scaleY, text } = newObject;
 	if (!left || !top || !fontSize || !color || !scaleX || !scaleY || !text) return;
 
@@ -89,6 +92,7 @@ export const createSectionFromServer = (canvas: fabric.Canvas, newObject: Object
 		isSocketObject: true,
 	});
 
+	const selectable = role !== workspaceRole.GUEST;
 	const section = createSection({
 		objectId,
 		left,
@@ -96,6 +100,7 @@ export const createSectionFromServer = (canvas: fabric.Canvas, newObject: Object
 		sectionTitle,
 		titleBackground: sectionBackground,
 		backgroundRect,
+		selectable,
 	});
 
 	editableTitle.set({

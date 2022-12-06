@@ -7,6 +7,7 @@ import { useRecoilValue } from 'recoil';
 import useCanvasToSocket from './useCanvasToSocket';
 import { myInfoInWorkspaceState } from '@context/user';
 import { workspaceRole } from '@data/workspace-role';
+import useRoleEvent from './useRoleEvent';
 
 function WhiteboardCanvas() {
 	const { canvas } = useCanvas();
@@ -14,6 +15,7 @@ function WhiteboardCanvas() {
 
 	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, selectedType, menuPosition } =
 		useCanvasToSocket({ canvas, socket });
+	useRoleEvent(socket);
 	const myInfoInWorkspace = useRecoilValue(myInfoInWorkspaceState);
 
 	return (

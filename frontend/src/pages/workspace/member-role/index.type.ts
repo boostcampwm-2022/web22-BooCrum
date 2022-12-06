@@ -1,7 +1,3 @@
-export interface ShareModalProps {
-	id: string;
-}
-
 interface UserInfo {
 	userId: string;
 	nickname: string;
@@ -17,7 +13,7 @@ export interface ParticipantInfo {
 	user: UserInfo;
 }
 
-export interface RoleChangeEvent {
-	userId: string;
-	role: Role;
+export interface MemberRoleProps {
+	participant: ParticipantInfo;
+	handleRole: (userId: string, role: Role) => void;
 }

@@ -1,3 +1,9 @@
+interface TemplateType {
+	id: number;
+	title: string;
+	preview: string;
+}
+
 export const templates: TemplateType[] = [
 	{
 		id: 1,

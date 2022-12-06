@@ -13,6 +13,7 @@ export interface SectionOption {
 	sectionTitle: fabric.IText;
 	titleBackground: fabric.Rect;
 	backgroundRect: fabric.Rect;
+	selectable: boolean;
 }
 
 export interface SectionTitleOptions {
@@ -31,6 +32,7 @@ export interface PostItOptions {
 	textBox: fabric.Textbox;
 	nameLabel: fabric.Text;
 	backgroundRect: fabric.Rect;
+	selectable: boolean;
 }
 
 export interface TextBoxOptions {

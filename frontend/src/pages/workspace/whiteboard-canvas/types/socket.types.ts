@@ -1,6 +1,6 @@
 import { Member, UserMousePointer, MousePointer } from './workspace-member.types';
 import { ObjectDataFromServer, ObjectDataToServer } from './workspace-object.types';
-import { AllWorkspaceData } from './workspace.types';
+import { AllWorkspaceData, Role } from './workspace.types';
 
 export interface ServerToClientEvents {
 	connect: () => void;
@@ -16,6 +16,7 @@ export interface ServerToClientEvents {
 	update_object: (arg: { userId: string; objectData: ObjectDataFromServer }) => void;
 	move_object: (arg: { userId: string; objectData: ObjectDataFromServer }) => void;
 	scale_object: (arg: { userId: string; objectData: ObjectDataFromServer }) => void;
+	change_role: (arg: { userId: string; role: Role }) => void;
 	exception: (arg: any) => void;
 }
 
@@ -27,5 +28,6 @@ export interface ClientToServerEvents {
 	delete_object: (arg: { objectId: string }) => void;
 	update_object: (arg: ObjectDataToServer) => void;
 	move_object: (arg: ObjectDataToServer) => void;
+	change_role: (arg: { userId: string; role: Role }) => void;
 	scale_object: (arg: ObjectDataToServer) => void;
 }

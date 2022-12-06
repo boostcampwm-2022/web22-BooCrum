@@ -88,6 +88,7 @@ export const createPostIt = (options: PostItOptions) => {
 		top: options.top,
 		objectCaching: false,
 		isSocketObject: false,
+		selectable: options.selectable,
 	});
 
 	postit.set({ left: options.left, top: options.top });
@@ -192,6 +193,7 @@ export const addPostIt = (
 		textBox: textBox,
 		nameLabel: nameLabel,
 		backgroundRect: backgroundRect,
+		selectable: true,
 	});
 
 	const editableTextBox = createTextBox({
@@ -240,6 +242,7 @@ export const createSection = (options: SectionOption) => {
 		left: options.left,
 		top: options.top,
 		objectCaching: false,
+		selectable: options.selectable,
 	});
 	return section;
 };
@@ -333,6 +336,7 @@ export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: st
 		sectionTitle,
 		titleBackground: sectionBackground,
 		backgroundRect,
+		selectable: true,
 	});
 
 	const editableTitle = createSectionTitle({

@@ -1,20 +1,21 @@
 import { useEffect, useState } from 'react';
-import { Container, Invite, ParticipantList } from './index.style';
+import { Container, ParticipantList } from './index.style';
 import copyLink from '@assets/icon/copy-link.svg';
-import userProfile from '@assets/icon/user-profile.svg';
 import { Workspace } from '@api/workspace';
-import { ParticipantInfo, ShareModalProps } from './index.type';
+import { ParticipantInfo, Role, RoleChangeEvent, ShareModalProps } from './index.type';
 import ToastMessage from '@components/toast-message';
+import MemberRole from '../member-role';
+import { useRecoilState } from 'recoil';
+import { workspaceParticipantsState } from '@context/workspace';
 
 function ShareModal({ id }: ShareModalProps) {
-	const [email, setEmail] = useState('');
-	const [participant, setParticipant] = useState<ParticipantInfo[]>([]);
+	const [participants, setParticipants] = useRecoilState<ParticipantInfo[]>(workspaceParticipantsState);
 	const [openToast, setOpenToast] = useState(false);
 
 	useEffect(() => {
 		async function getParticipant() {
 			const result = await Workspace.getWorkspaceParticipant(id);
-			setParticipant(result);
+			setParticipants(result);
 		}
 
 		getParticipant();
@@ -30,19 +31,16 @@ function ShareModal({ id }: ShareModalProps) {
 		}, 3000);
 	};
 
+	const handleRole = (userId: string, role: Role) => {
+		const roleChangeEvent = new CustomEvent<RoleChangeEvent>('role:changed', { detail: { userId, role } });
+		document.dispatchEvent(roleChangeEvent);
+	};
+
 	return (
 		<Container>
-			<Invite isValid={email !== ''}>
-				<input className="invite-input" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} />
-				<div className="invite-button">send invite</div>
-			</Invite>
-
 			<ParticipantList>
-				{participant.map((part) => (
-					<div key={part.id} className="participant-box">
-						<img alt="participant profile" src={userProfile} className="participant-profile" />
-						<p className="participant-name">{part.user.nickname}</p>
-					</div>
+				{participants.map((part) => (
+					<MemberRole key={part.id} participant={part} handleRole={handleRole} />
 				))}
 			</ParticipantList>
 
