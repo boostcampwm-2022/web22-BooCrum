@@ -119,7 +119,7 @@ export const formatScaleObjectEventToSocketForGroup = (
 
 export const formatEditTextEventToSocket = (object: fabric.Text): ObjectDataToServer => {
 	const message: ObjectDataToServer = {
-		type: object.type as SocketObjectType,
+		type: object.groupType as SocketObjectType,
 		objectId: object.objectId,
 		text: object.text,
 		fontSize: object.fontSize,

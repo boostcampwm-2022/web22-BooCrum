@@ -1,6 +1,15 @@
 import { fabric } from 'fabric';
-import { CanvasType, ObjectType } from '@pages/workspace/whiteboard-canvas/types';
+import { CanvasType, ObjectType, SocketObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import { v4 } from 'uuid';
+import {
+	NameLabelOptions,
+	PostItOptions,
+	RectOptions,
+	SectionOption,
+	SectionTitleOptions,
+	TextBoxOptions,
+	TitleBackgroundOptions,
+} from '@pages/workspace/whiteboard-canvas/types/fabric-options';
 
 export const setEditMenu = (object: fabric.Object) => {
 	const width = object?.width || 0;
@@ -65,6 +74,7 @@ export const createTextBox = (options: TextBoxOptions) => {
 		isSocketObject: false,
 		selectable: false,
 		evented: false,
+		groupType: options.groupType,
 	});
 
 	return textbox;
@@ -174,7 +184,6 @@ export const addPostIt = (
 	const id = v4();
 	const nameLabel = createNameLabel({ objectId: id, text: creator, left: x, top: y });
 	const textBox = createTextBox({ objectId: id, left: x, top: y, fontSize: fontSize, editable: false });
-	const editableTextBox = createTextBox({ objectId: id, left: x, top: y, fontSize: 40, editable: true });
 	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
 	const postit = createPostIt({
 		objectId: id,
@@ -183,6 +192,15 @@ export const addPostIt = (
 		textBox: textBox,
 		nameLabel: nameLabel,
 		backgroundRect: backgroundRect,
+	});
+
+	const editableTextBox = createTextBox({
+		objectId: id,
+		left: x,
+		top: y,
+		fontSize: 40,
+		editable: true,
+		groupType: SocketObjectType.postit,
 	});
 
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
@@ -208,6 +226,7 @@ export const createSectionTitle = (options: SectionTitleOptions) => {
 		fontSize: defaultFontSize,
 		isSocketObject: false,
 		objectCaching: false,
+		groupType: options.groupType,
 	});
 
 	return title;
@@ -304,7 +323,6 @@ export const setSectionEditEvent = (
 
 export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: string) => {
 	const id = v4();
-	const editableTitle = createSectionTitle({ objectId: id, text: 'SECTION', left: x, top: y + 25, editable: true });
 	const sectionTitle = createSectionTitle({ objectId: id, text: 'SECTION', left: x, top: y, editable: false });
 	const sectionBackground = createTitleBackground({ objectId: id, left: x, top: y, color: fill });
 	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
@@ -315,6 +333,15 @@ export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: st
 		sectionTitle,
 		titleBackground: sectionBackground,
 		backgroundRect,
+	});
+
+	const editableTitle = createSectionTitle({
+		objectId: id,
+		text: 'SECTION',
+		left: x,
+		top: y + 25,
+		editable: true,
+		groupType: SocketObjectType.section,
 	});
 
 	setLimitChar(canvas, section, sectionTitle, sectionBackground);
