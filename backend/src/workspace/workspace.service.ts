@@ -314,8 +314,10 @@ export class WorkspaceService {
    * @returns             썸네일 저장 성공 여부 반환
    */
   async uploadThumbnail(workspaceId: string, file: MulterS3.File): Promise<boolean> {
-    const isExistWorkspace = this.getWorkspaceMetadata(workspaceId);
-    if (!isExistWorkspace) return false;
+    const isExistWorkspace = await this.getWorkspaceMetadata(workspaceId);
+    if (!isExistWorkspace) throw new BadRequestException('잘못된 워크스페이스 ID입니다.');
+
+    if (!file) throw new BadRequestException('파일의 경로가 올바르지 않습니다.');
 
     const thumbnailUrl = file.location;
     return (
