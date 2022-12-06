@@ -1,6 +1,7 @@
 import { colorChips } from '@data/workspace-object-color';
 import { toolItems } from '@data/workspace-tool';
 import { Member } from '@pages/workspace/whiteboard-canvas/types';
+import { ParticipantInfo } from '@pages/workspace/member-role/index.type';
 import { atom } from 'recoil';
 
 export const cursorState = atom({
@@ -15,5 +16,10 @@ export const zoomState = atom({
 
 export const membersState = atom<Member[]>({
 	key: 'members',
+	default: [],
+});
+
+export const workspaceParticipantsState = atom<ParticipantInfo[]>({
+	key: 'participants',
 	default: [],
 });

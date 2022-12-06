@@ -2,18 +2,20 @@ import { useEffect, useState } from 'react';
 import { Container, ParticipantList } from './index.style';
 import copyLink from '@assets/icon/copy-link.svg';
 import { Workspace } from '@api/workspace';
-import { ParticipantInfo, ShareModalProps } from './index.type';
+import { ParticipantInfo, Role, ShareModalProps } from './index.type';
 import ToastMessage from '@components/toast-message';
 import MemberRole from '../member-role';
+import { useRecoilState } from 'recoil';
+import { workspaceParticipantsState } from '@context/workspace';
 
 function ShareModal({ id }: ShareModalProps) {
-	const [participant, setParticipant] = useState<ParticipantInfo[]>([]);
+	const [participants, setParticipants] = useRecoilState<ParticipantInfo[]>(workspaceParticipantsState);
 	const [openToast, setOpenToast] = useState(false);
 
 	useEffect(() => {
 		async function getParticipant() {
 			const result = await Workspace.getWorkspaceParticipant(id);
-			setParticipant(result);
+			setParticipants(result);
 		}
 
 		getParticipant();
@@ -29,11 +31,15 @@ function ShareModal({ id }: ShareModalProps) {
 		}, 3000);
 	};
 
+	const handleRole = (userId: string, role: Role) => {
+		console.log(userId, role);
+	};
+
 	return (
 		<Container>
 			<ParticipantList>
-				{participant.map((part) => (
-					<MemberRole key={part.id} participant={part} />
+				{participants.map((part) => (
+					<MemberRole key={part.id} participant={part} handleRole={handleRole} />
 				))}
 			</ParticipantList>
 
