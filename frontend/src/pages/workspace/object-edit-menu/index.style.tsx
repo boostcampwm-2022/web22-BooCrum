@@ -1,13 +1,9 @@
 import styled from 'styled-components';
 
 export const Container = styled.div`
-	width: 80px;
 	height: 32px;
-
 	position: relative;
-
 	display: flex;
-	padding: 0px 10px;
 
 	border-radius: 4px;
 
@@ -19,9 +15,7 @@ export const ColorSelect = styled.div<{ color: string }>`
 	align-items: center;
 
 	cursor: pointer;
-
-	padding-right: 6px;
-	border-right: 1px solid ${({ theme }) => theme.gray_3};
+	padding: 0 6px 0 10px;
 
 	.selected-color {
 		background: ${({ color }) => color};
@@ -34,29 +28,19 @@ export const ColorSelect = styled.div<{ color: string }>`
 	}
 `;
 
-export const Rename = styled.div<{ selected: boolean }>`
-	background: ${({ selected, theme }) => (selected ? theme.blue_2 : 'transparent')};
-
-	margin-left: 6px;
-	padding: 0 4px;
-
-	display: flex;
-	align-items: center;
-
-	cursor: pointer;
-`;
-
 export const FontSize = styled.input<{ selected: boolean }>`
 	background: ${({ theme }) => theme.gray_4};
-	width: 100%;
+	width: 40px;
 
-	margin-left: 6px;
+	padding: 0 10px 0 6px;
+	border: none;
+	border-radius: 4px;
+	border-left: 1px solid ${({ theme }) => theme.gray_3};
 
 	font-size: 12px;
 	color: ${({ theme }) => theme.white};
 
 	outline: none;
-	border: none;
 `;
 
 export const ColorChip = styled.div`

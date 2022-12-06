@@ -5,6 +5,7 @@ import useEditMenu from './useEditMenu';
 import { ObjectType, SocketObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import {
 	formatObjectDataToServer,
+	formatEditColorEventToSocket,
 	formatEditTextEventToSocket,
 	formatMessageToSocketForGroup,
 	formatMoveObjectEventToSocket,
@@ -22,7 +23,7 @@ interface UseCanvasToSocketProps {
 }
 
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
-	const { isOpen, menuRef, openMenu, menuPosition } = useEditMenu(canvas);
+	const { isOpen, menuRef, color, setObjectColor, openMenu, selectedType, menuPosition } = useEditMenu(canvas);
 
 	useEffect(() => {
 		if (isNull(canvas.current)) return;
@@ -102,6 +103,24 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			});
 		});
 
+		canvas.current.on('color:modified', ({ target: fabricObject }) => {
+			if (!(fabricObject instanceof fabric.Group)) return;
+
+			if (fabricObject.type === ObjectType.section || fabricObject.type === ObjectType.postit) {
+				const message = formatEditColorEventToSocket(fabricObject);
+				socket.current?.emit('update_object', message);
+				return;
+			}
+
+			fabricObject._objects.forEach((object) => {
+				if (object.type === ObjectType.section || object.type === ObjectType.postit) {
+					const changeObjects = object as fabric.Group;
+					const message = formatEditColorEventToSocket(changeObjects);
+					socket.current?.emit('update_object', message);
+				}
+			});
+		});
+
 		canvas.current.on('text:changed', ({ target: fabricObject }) => {
 			if (isUndefined(fabricObject) || fabricObject.type !== ObjectType.editable) return;
 			const message = formatEditTextEventToSocket(fabricObject as fabric.Text);
@@ -155,6 +174,9 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 	return {
 		isOpen,
 		menuRef,
+		color,
+		setObjectColor,
+		selectedType,
 		menuPosition,
 	};
 }
