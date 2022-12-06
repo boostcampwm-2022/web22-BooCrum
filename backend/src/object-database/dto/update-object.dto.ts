@@ -1,8 +1,12 @@
 import { IsNumber, IsOptional, IsString } from 'class-validator';
 
-export class UpdateObjectDTO {
+export class UpdateObjectDTO implements AbstractPartialWorkspaceObject {
   @IsString()
   objectId: string;
+
+  @IsString()
+  @IsOptional()
+  type: ObjectType;
 
   @IsNumber()
   @IsOptional()
@@ -13,9 +17,11 @@ export class UpdateObjectDTO {
   top: number;
 
   @IsNumber()
+  @IsOptional()
   width: number;
 
   @IsNumber()
+  @IsOptional()
   height: number;
 
   @IsNumber()
@@ -37,4 +43,8 @@ export class UpdateObjectDTO {
   @IsNumber()
   @IsOptional()
   fontSize: number;
+
+  @IsString()
+  @IsOptional()
+  path: string;
 }

@@ -5,7 +5,7 @@ export class ObjectMapVO {
   objectId: string;
 
   @IsString()
-  type: string;
+  type: ObjectType;
 
   @IsNumber()
   left: number;
@@ -30,11 +30,15 @@ export class ObjectMapVO {
 
   @IsString()
   @IsOptional()
-  text: string;
+  text?: string;
 
   @IsNumber()
   @IsOptional()
-  fontSize: number;
+  fontSize?: number;
+
+  @IsString()
+  @IsOptional()
+  path?: string;
 
   @IsString()
   @IsOptional()
