@@ -65,7 +65,6 @@ export const formatMessageToSocketForGroup = (group: fabric.Group, object: fabri
 
 export const formatMoveObjectEventToSocket = (objectGroup: fabric.Group): ObjectDataToServer => {
 	const message: ObjectDataToServer = {
-		type: objectGroup.type as SocketObjectType,
 		objectId: objectGroup.objectId,
 		left: objectGroup.left,
 		top: objectGroup.top,
@@ -92,7 +91,6 @@ export const formatMoveObjectEventToSocketForGroup = (
 
 export const formatScaleObjectEventToSocket = (object: fabric.Group) => {
 	const message: ObjectDataToServer = {
-		type: object.type as SocketObjectType,
 		objectId: object.objectId,
 		left: object.left,
 		top: object.top,
