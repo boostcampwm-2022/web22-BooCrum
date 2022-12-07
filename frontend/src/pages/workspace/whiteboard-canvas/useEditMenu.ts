@@ -147,7 +147,7 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	};
 
 	const setPostItFontSize = (e: KeyboardEvent) => {
-		if (e.key !== 'Enter') return;
+		if (e.key !== 'Enter' || !isOpen) return;
 
 		const currentCanvas = canvas.current as fabric.Canvas;
 		if (!currentCanvas) return;
