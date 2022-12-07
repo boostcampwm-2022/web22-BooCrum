@@ -105,7 +105,7 @@ export const setLimitHeightEvent = (
 		if (!textBox.height || !textBox.fontSize || !background.height) return;
 		while (textBox.getScaledHeight() > background.getScaledHeight() * 0.9 && textBox.fontSize > 12) {
 			textBox.fontSize--;
-			canvas.requestRenderAll();
+			canvas.renderAll();
 		}
 	};
 
