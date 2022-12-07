@@ -1,6 +1,6 @@
 import styled from 'styled-components';
 
-export const Template = styled.div<{ isEmpty: boolean }>`
+export const Template = styled.div`
 	cursor: pointer;
 
 	:hover {

@@ -1,3 +1,4 @@
+import { TemplateType } from '@pages/main/workspace-template-list/index.type';
 import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 import {
 	ParticipantInfo,
@@ -24,13 +25,14 @@ const workspaceRequests = {
 };
 
 export const Workspace = {
-	postWorkspace: (body: PostWorkspaceBody): Promise<WorkspaceData> =>
-		workspaceRequests.post<WorkspaceData, PostWorkspaceBody>('', body),
+	postWorkspace: (templateId: string, body: PostWorkspaceBody): Promise<WorkspaceData> =>
+		workspaceRequests.post<WorkspaceData, PostWorkspaceBody>(`${templateId ? `?templateId=${templateId}` : ''}`, body),
 	patchWorkspace: (workspaceId: string, body: PatchWorkspaceBody): Promise<WorkspaceData> =>
 		workspaceRequests.patch<WorkspaceData, PatchWorkspaceBody>(`/${workspaceId}/info/metadata`, body),
 	getWorkspaceMetadata: (workspaceId: string): Promise<WorkspaceMetaData> =>
-		workspaceRequests.get(`${workspaceId}/info/metadata`),
+		workspaceRequests.get(`/${workspaceId}/info/metadata`),
 	deleteWorkspace: (workspaceId: string): Promise<number> => workspaceRequests.delete(`/${workspaceId}`),
 	getWorkspaceParticipant: (workspaceId: string): Promise<ParticipantInfo[]> =>
 		workspaceRequests.get<ParticipantInfo[]>(`/${workspaceId}/info/participant`),
+	getTemplates: (): Promise<TemplateType[]> => workspaceRequests.get(`/template`),
 };
