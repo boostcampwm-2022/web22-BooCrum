@@ -33,7 +33,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 		canvas.current.on('object:added', ({ target: fabricObject }) => {
 			if (isUndefined(fabricObject) || fabricObject.isSocketObject) return;
-			console.log('통과된 놈덜', fabricObject);
 
 			if (fabricObject instanceof fabric.Path && fabricObject.type !== ObjectType.cursor) {
 				initDrawObject(fabricObject as fabric.Path);
@@ -46,7 +45,6 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		});
 
 		canvas.current.on('object:modified', ({ target: fabricObject }) => {
-			console.log(fabricObject);
 			if (isUndefined(fabricObject)) return;
 
 			if (fabricObject.type in SocketObjectType) {
