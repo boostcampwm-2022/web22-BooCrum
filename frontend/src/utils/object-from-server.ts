@@ -52,6 +52,8 @@ export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDat
 		scaleY: newObject.scaleY,
 		stroke: newObject.color,
 		strokeWidth: canvas.freeDrawingBrush.width,
+		strokeLineCap: 'round',
+		strokeLineJoin: 'round',
 		fill: undefined,
 	});
 	canvas.add(drawObject);
