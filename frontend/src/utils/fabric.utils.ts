@@ -120,6 +120,16 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 
 export const initDrawing = (canvas: fabric.Canvas) => {
 	canvas.freeDrawingBrush.width = 5;
+	canvas.on('object:added', (e) => {
+		if (!(e.target instanceof fabric.Path) || e.target.type === ObjectType.cursor) return;
+		const path = e.target;
+		path.set({ perPixelTargetFind: true });
+		path.on('mousedown', () => {
+			if (canvas.mode !== CanvasType.erase || path.type !== ObjectType.draw) return;
+			path.isSocketObject = false;
+			canvas.remove(path);
+		});
+	});
 };
 
 export const addObject = (
