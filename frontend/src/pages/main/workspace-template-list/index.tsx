@@ -26,8 +26,8 @@ function WorkspaceTemplates() {
 	return (
 		<Container>
 			<p className="title">Create a workspace</p>
-			<WorkspaceTemplate template={newBoard} />
 			<div className="template-list">
+				<WorkspaceTemplate template={newBoard} />
 				{templates.map((template) => (
 					<WorkspaceTemplate key={template.templateId} template={template} />
 				))}
