@@ -41,8 +41,7 @@ export const initGrid = (canvas: fabric.Canvas, patternSize: number, gridSize: n
 		source: backgroundCanvas.toDataURL(),
 	});
 
-	canvas.backgroundColor = backgroundPattern;
-	canvas.requestRenderAll();
+	canvas.setBackgroundColor(backgroundPattern, () => canvas.renderAll());
 };
 
 export const initZoom = (
