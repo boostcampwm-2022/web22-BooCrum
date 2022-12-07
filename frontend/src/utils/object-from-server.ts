@@ -61,7 +61,8 @@ export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDat
 
 export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
 	const { objectId, left, top, fontSize, color, text, width, height, creator, scaleX, scaleY } = newObject;
-	if (!left || !top || !fontSize || !color || !text || !width || !height || !scaleX || !scaleY) return;
+
+	if (!left || !top || !fontSize || !color || text === undefined || !width || !height || !scaleX || !scaleY) return;
 	const nameLabel = createNameLabel({ objectId, text: creator, left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
 	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
@@ -102,7 +103,7 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 
 export const createSectionFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
 	const { objectId, left, top, fontSize, color, scaleX, scaleY, text } = newObject;
-	if (!left || !top || !fontSize || !color || !scaleX || !scaleY || !text) return;
+	if (!left || !top || !fontSize || !color || !scaleX || !scaleY || !text === undefined) return;
 
 	const editableTitle = createSectionTitle({ objectId, text: text, left, top: top + 25, editable: true });
 	const sectionTitle = createSectionTitle({ objectId, text: text, left, top, editable: false });

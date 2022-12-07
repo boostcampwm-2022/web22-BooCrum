@@ -62,7 +62,7 @@ export const createTextBox = (options: TextBoxOptions) => {
 	const defaultWidth = 300 * 0.9;
 	const defaultText = 'Text...';
 
-	const textbox = new fabric.Textbox(options.text || defaultText, {
+	const textbox = new fabric.Textbox(options.text === undefined ? defaultText : options.text, {
 		type: options.editable ? ObjectType.editable : ObjectType.text,
 		top: defaultTop,
 		left: defaultLeft,
@@ -219,8 +219,9 @@ export const createSectionTitle = (options: SectionTitleOptions) => {
 	const defaultLeft = options.left + 10;
 	const defaultTop = options.top - 25;
 	const defaultFontSize = 15;
+	const defaultText = 'SECTION';
 
-	const title = new fabric.IText(options.text || 'SECTION', {
+	const title = new fabric.IText(options.text === undefined ? defaultText : options.text, {
 		type: options.editable ? ObjectType.editable : ObjectType.title,
 		objectId: options.objectId,
 		top: defaultTop,
