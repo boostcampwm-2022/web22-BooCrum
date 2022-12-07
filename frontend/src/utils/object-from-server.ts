@@ -132,7 +132,6 @@ export const createSectionFromServer = (canvas: fabric.Canvas, newObject: Object
 
 	editableTitle.set({
 		isSocketObject: true,
-		group: section,
 		groupType: SocketObjectType.section,
 	});
 
@@ -145,7 +144,9 @@ export const createSectionFromServer = (canvas: fabric.Canvas, newObject: Object
 	setLimitChar(canvas, section, sectionTitle, sectionBackground);
 	setLimitChar(canvas, section, editableTitle, sectionBackground);
 	setSectionEditEvent(canvas, section, editableTitle, sectionTitle);
+
 	canvas.add(section);
+	sectionTitle.fire('changed');
 };
 
 export const deleteObjectFromServer = (canvas: fabric.Canvas, objectId: string) => {

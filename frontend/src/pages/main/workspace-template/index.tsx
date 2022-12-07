@@ -8,20 +8,20 @@ function WorkspaceTemplate({ template }: { template: TemplateType }) {
 	const navigate = useNavigate();
 
 	const handleWorkspaceRouting = async () => {
-		const workspace = await Workspace.postWorkspace({});
+		const workspace = await Workspace.postWorkspace(!template.isNewTemplate ? template.templateId : '', {});
 		navigate(`/workspace/${workspace.workspaceId}`);
 	};
 
 	return (
-		<Template isEmpty={template.preview === ''} onClick={handleWorkspaceRouting}>
+		<Template onClick={handleWorkspaceRouting}>
 			<div className="template-card">
-				{template.preview ? (
-					<img className="preview" alt={template.title} src={template.preview} />
+				{template.templateThumbnailUrl ? (
+					<img className="preview" alt={template.templateName} src={template.templateThumbnailUrl} />
 				) : (
 					<img className="new-icon" alt="create new board" src={plusWorkspace} />
 				)}
 			</div>
-			<p className="template-title">{template.title}</p>
+			<p className="template-title">{template.templateName}</p>
 		</Template>
 	);
 }
