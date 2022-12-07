@@ -6,15 +6,16 @@ import { v4 } from 'uuid';
 import { addPostIt, addSection } from './object.utils';
 import { toolItems } from '@data/workspace-tool';
 
-export const initGrid = (canvas: fabric.Canvas, width: number, height: number, gridSize: number) => {
-	const backgroundCanvas = new fabric.Canvas('', {
+export const initGrid = (canvas: fabric.Canvas, patternSize: number, gridSize: number) => {
+	const backgroundCanvas = new fabric.StaticCanvas(null, {
 		mode: canvas.mode,
-		height: height * 4,
-		width: width * 4,
+		height: patternSize,
+		width: patternSize,
 		backgroundColor: '#f1f1f1',
 	});
-	for (let i = 0; i <= (4 * width) / gridSize; i++) {
-		const lineY = new fabric.Line([i * gridSize, 0, i * gridSize, height * 4], {
+
+	for (let i = 0; i <= patternSize / gridSize; i++) {
+		const lineY = new fabric.Line([i * gridSize, 0, i * gridSize, patternSize], {
 			objectId: v4(),
 			type: 'line',
 			stroke: '#ccc',
@@ -24,8 +25,8 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 
 		backgroundCanvas.add(lineY);
 	}
-	for (let i = 0; i <= (4 * height) / gridSize; i++) {
-		const lineX = new fabric.Line([0, i * gridSize, width * 4, i * gridSize], {
+	for (let i = 0; i <= patternSize / gridSize; i++) {
+		const lineX = new fabric.Line([0, i * gridSize, patternSize, i * gridSize], {
 			objectId: v4(),
 			type: 'line',
 			stroke: '#ccc',
@@ -36,15 +37,12 @@ export const initGrid = (canvas: fabric.Canvas, width: number, height: number, g
 		backgroundCanvas.add(lineX);
 	}
 
-	fabric.Image.fromURL(backgroundCanvas.toDataURL(), (img) => {
-		canvas.setBackgroundImage(img, () => canvas.renderAll.bind(canvas), {
-			objectId: v4(),
-			type: ObjectType.line,
-			left: -width,
-			top: -height,
-			isSocketObject: false,
-		});
+	const backgroundPattern = new fabric.Pattern({
+		source: backgroundCanvas.toDataURL(),
 	});
+
+	canvas.backgroundColor = backgroundPattern;
+	canvas.requestRenderAll();
 };
 
 export const initZoom = (

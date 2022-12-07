@@ -20,7 +20,7 @@ function WorkspaceTemplates() {
 			setTemplates(result);
 		}
 
-		getTemplates;
+		getTemplates();
 	}, []);
 
 	return (
