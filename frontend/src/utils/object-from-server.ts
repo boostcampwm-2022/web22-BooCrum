@@ -178,7 +178,6 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 		});
 		return;
 	}
-
 	object[0].set({
 		...updatedObject,
 	});
@@ -198,6 +197,7 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 			}
 		});
 	}
+	canvas.requestRenderAll();
 };
 
 export const selectObjectFromServer = (canvas: fabric.Canvas, objectIds: string[], color: string) => {
