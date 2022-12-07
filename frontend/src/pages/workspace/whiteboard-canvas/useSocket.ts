@@ -24,6 +24,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const socket = useRef<Socket<ServerToClientEvents, ClientToServerEvents> | null>(null);
 	const membersInCanvas = useRef<MemberInCanvas[]>([]);
 	const [isConnected, setIsConnected] = useState(false);
+	const [isEndInit, setIsEndInit] = useState(false);
 
 	const { workspaceId } = useParams();
 
@@ -71,6 +72,8 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 				const role = myInfoInWorkspaceRef.current?.role as Role;
 				createObjectFromServer(canvas.current, object, role);
 			});
+
+			setIsEndInit(true);
 		});
 
 		socket.current.on('enter_user', (userData) => {
@@ -156,6 +159,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 	return {
 		isConnected,
+		isEndInit,
 		socket,
 		membersInCanvas,
 	};
