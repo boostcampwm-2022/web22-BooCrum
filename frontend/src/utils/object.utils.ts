@@ -33,6 +33,8 @@ export const createNameLabel = (options: NameLabelOptions) => {
 		fontSize: defaultFontSize,
 		objectCaching: false,
 		isSocketObject: false,
+		lockMovementX: true,
+		lockMovementY: true,
 	});
 
 	return nameLabelText;
@@ -76,6 +78,8 @@ export const createTextBox = (options: TextBoxOptions) => {
 		selectable: false,
 		evented: false,
 		groupType: options.groupType,
+		lockMovementX: true,
+		lockMovementY: true,
 	});
 
 	return textbox;
@@ -231,6 +235,8 @@ export const createSectionTitle = (options: SectionTitleOptions) => {
 		isSocketObject: false,
 		objectCaching: false,
 		groupType: options.groupType,
+		lockMovementX: true,
+		lockMovementY: true,
 	});
 
 	return title;
