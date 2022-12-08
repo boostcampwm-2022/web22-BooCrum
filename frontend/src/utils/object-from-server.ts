@@ -68,7 +68,7 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 	const nameLabel = createNameLabel({ objectId, text: creator, left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
 	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
-	const backgroundRect = createRect({ objectId, left, top, color });
+	const backgroundRect = createRect(ObjectType.postit, { objectId, left, top, color });
 
 	backgroundRect.set({
 		isSocketObject: true,
@@ -110,7 +110,7 @@ export const createSectionFromServer = (canvas: fabric.Canvas, newObject: Object
 	const editableTitle = createSectionTitle({ objectId, text: text, left, top: top + 25, editable: true });
 	const sectionTitle = createSectionTitle({ objectId, text: text, left, top, editable: false });
 	const sectionBackground = createTitleBackground({ objectId, left, top, color });
-	const backgroundRect = createRect({ objectId, left, top, color });
+	const backgroundRect = createRect(ObjectType.section, { objectId, left, top, color });
 
 	sectionTitle.set({
 		isSocketObject: true,

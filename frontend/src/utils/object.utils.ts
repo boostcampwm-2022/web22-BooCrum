@@ -20,6 +20,15 @@ export const setEditMenu = (object: fabric.Object) => {
 	return [left, top];
 };
 
+const setShadow = () => {
+	return new fabric.Shadow({
+		color: 'gray',
+		blur: 7,
+		offsetX: 1,
+		offsetY: 1,
+	});
+};
+
 export const createNameLabel = (options: NameLabelOptions) => {
 	const defaultLeft = options.left + 300 * 0.05;
 	const defaultTop = options.top + 275;
@@ -38,7 +47,7 @@ export const createNameLabel = (options: NameLabelOptions) => {
 	return nameLabelText;
 };
 
-export const createRect = (options: RectOptions) => {
+export const createRect = (type: ObjectType, options: RectOptions) => {
 	const defaultWidth = 300;
 	const defaultHeight = 300;
 
@@ -53,6 +62,15 @@ export const createRect = (options: RectOptions) => {
 		objectCaching: false,
 		isSocketObject: false,
 	});
+
+	if (type === ObjectType.postit) rect.set({ shadow: setShadow() });
+	else if (type === ObjectType.section) {
+		rect.set({
+			opacity: 0.8,
+			rx: 5,
+			ry: 5,
+		});
+	}
 
 	return rect;
 };
@@ -187,7 +205,7 @@ export const addPostIt = (
 	const id = v4();
 	const nameLabel = createNameLabel({ objectId: id, text: creator, left: x, top: y });
 	const textBox = createTextBox({ objectId: id, left: x, top: y, fontSize: fontSize, editable: false });
-	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
+	const backgroundRect = createRect(ObjectType.postit, { objectId: id, left: x, top: y, color: fill });
 	const postit = createPostIt({
 		objectId: id,
 		left: x,
@@ -332,7 +350,7 @@ export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: st
 	const id = v4();
 	const sectionTitle = createSectionTitle({ objectId: id, text: 'SECTION', left: x, top: y, editable: false });
 	const sectionBackground = createTitleBackground({ objectId: id, left: x, top: y, color: fill });
-	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
+	const backgroundRect = createRect(ObjectType.section, { objectId: id, left: x, top: y, color: fill });
 	const section = createSection({
 		objectId: id,
 		left: x,
