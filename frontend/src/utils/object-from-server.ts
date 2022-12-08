@@ -122,8 +122,6 @@ export const createPostitFromServer = async (
 		scaleY,
 	});
 
-	console.log(postit);
-
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
 	setLimitHeightEvent(canvas, editableTextBox, postit);
 	setPostItEditEvent(canvas, postit, editableTextBox, textBox);
