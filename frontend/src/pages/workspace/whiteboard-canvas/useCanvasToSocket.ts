@@ -18,6 +18,9 @@ import {
 } from '@utils/object-to-server';
 import { fabric } from 'fabric';
 import { isNull, isUndefined } from '@utils/type.utils';
+import { createThumbnailImage } from '@utils/fabric.utils';
+import { Workspace } from '@api/workspace';
+import { useParams } from 'react-router-dom';
 
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
@@ -27,6 +30,7 @@ interface UseCanvasToSocketProps {
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, openMenu, selectedType, menuPosition } =
 		useEditMenu(canvas);
+	const { workspaceId } = useParams();
 
 	useEffect(() => {
 		if (isNull(canvas.current)) return;
@@ -48,6 +52,15 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		canvas.current.on('object:modified', ({ target: fabricObject }) => {
 			console.log(fabricObject);
 			if (isUndefined(fabricObject)) return;
+
+			if (!canvas.current || !workspaceId) return;
+			console.log(workspaceId);
+
+			const thumbnailImage = createThumbnailImage(canvas.current);
+
+			Workspace.postThumbnail(workspaceId, {
+				file: thumbnailImage,
+			});
 
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatObjectDataToServer(fabricObject);
@@ -190,6 +203,13 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			};
 			socket.current?.emit('move_pointer', message);
 		});
+		return () => {
+			if (socket.current) {
+				console.log('asdasd');
+				console.log(canvas.current);
+				socket.current?.emit('update_object', { objectId: 'asdasdas' });
+			}
+		};
 	}, []);
 
 	return {
