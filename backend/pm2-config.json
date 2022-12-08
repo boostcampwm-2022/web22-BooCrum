@@ -1,0 +1,13 @@
+{
+  "apps": [
+    {
+      "name": "BooCrum",
+      "script": "./dist/main.js",
+      "env": {
+        "NODE_ENV": "production"
+      },
+      "exec_mode": "cluster",
+      "instances": 2
+    }
+  ]
+}
