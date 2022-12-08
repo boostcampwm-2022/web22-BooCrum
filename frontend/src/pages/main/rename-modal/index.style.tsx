@@ -8,6 +8,7 @@ export const RenameModalLayout = styled.div`
 		padding: 0.3em;
 		font-size: 16px;
 		outline: none;
+		margin-left: 1em;
 	}
 	button {
 		position: absolute;
@@ -19,5 +20,6 @@ export const RenameModalLayout = styled.div`
 		font-weight: 600;
 		padding: 1em;
 		border-radius: 30px;
+		cursor: pointer;
 	}
 `;
