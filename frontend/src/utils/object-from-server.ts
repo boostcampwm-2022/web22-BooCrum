@@ -199,6 +199,8 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 				textObject.set({
 					text: updatedObject.text || textObject.text,
 					fontSize: updatedObject.fontSize || textObject.fontSize,
+					scaleX: 1 / (groupObject.scaleX || 1),
+					scaleY: 1 / (groupObject.scaleY || 1),
 				});
 			} else if (object.type === ObjectType.rect && updatedObject.color) {
 				const backgroundRect = object as fabric.Rect;
