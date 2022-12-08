@@ -6,9 +6,16 @@ import penTool from '@assets/image/pen.png';
 import eraserTool from '@assets/image/eraser.png';
 import { ColorChip, Container, Tool } from './index.style';
 import { colorChips } from '@data/workspace-object-color';
+import { useEffect } from 'react';
 
 function PenTypeBox() {
 	const [cursor, setCursor] = useRecoilState(cursorState);
+
+	useEffect(() => {
+		colorChips.forEach((c) => {
+			console.log(cursor, c, cursor.color === c);
+		});
+	}, []);
 
 	const handleCursorType = (type: number) => {
 		setCursor({ ...cursor, type });
@@ -31,7 +38,12 @@ function PenTypeBox() {
 			</Tool>
 			{isSelectedCursor(cursor.type, toolItems.PEN) &&
 				colorChips.map((color) => (
-					<ColorChip key={color} color={color} onClick={() => handleCursorColor(color)}></ColorChip>
+					<ColorChip
+						key={color}
+						color={color}
+						selected={color === cursor.color}
+						onClick={() => handleCursorColor(color)}
+					></ColorChip>
 				))}
 		</Container>
 	);
