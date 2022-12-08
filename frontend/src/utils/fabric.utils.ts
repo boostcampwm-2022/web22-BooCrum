@@ -151,13 +151,12 @@ export const addObject = (
 		const x = (evt.clientX - vpt[4]) / vpt[3];
 		const y = (evt.clientY - vpt[5]) / vpt[3];
 		if (canvas.mode === CanvasType.section && !canvas.getActiveObject()) {
-			addSection(canvas, x, y, colorChips[8]);
+			addSection(canvas, x, y, colorChips[3]);
 			setCursor((prev) => {
 				return { ...prev, type: toolItems.SELECT };
 			});
 		} else if (canvas.mode === CanvasType.postit && !canvas.getActiveObject()) {
-			//todo 색 정보 받아와야함
-			addPostIt(canvas, x, y, 40, colorChips[0], creator);
+			addPostIt(canvas, x, y, 40, colorChips[6], creator);
 			setCursor((prev) => {
 				return { ...prev, type: toolItems.SELECT };
 			});
