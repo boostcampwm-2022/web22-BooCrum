@@ -26,9 +26,10 @@ interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
 	socket: React.MutableRefObject<Socket<ServerToClientEvents, ClientToServerEvents> | null>;
 	cursorWorker: React.MutableRefObject<Worker | undefined>;
+	objectWorker: React.MutableRefObject<Worker | undefined>;
 }
 
-function useCanvasToSocket({ canvas, socket, cursorWorker }: UseCanvasToSocketProps) {
+function useCanvasToSocket({ canvas, socket, cursorWorker, objectWorker }: UseCanvasToSocketProps) {
 	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, openMenu, selectedType, menuPosition } =
 		useEditMenu(canvas);
 	const { workspaceId } = useParams();
@@ -95,7 +96,8 @@ function useCanvasToSocket({ canvas, socket, cursorWorker }: UseCanvasToSocketPr
 			if (isUndefined(fabricObject)) return;
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatMoveObjectEventToSocket(fabricObject as fabric.Group);
-				socket.current?.emit('move_object', message);
+				objectWorker.current?.postMessage(message);
+				// socket.current?.emit('move_object', message);
 				return;
 			}
 
@@ -104,7 +106,8 @@ function useCanvasToSocket({ canvas, socket, cursorWorker }: UseCanvasToSocketPr
 			fabricObject._objects.forEach((object) => {
 				if (object.type in SocketObjectType) {
 					const message = formatMoveObjectEventToSocketForGroup(fabricObject, object as fabric.Group);
-					socket.current?.emit('move_object', message);
+					objectWorker.current?.postMessage(message);
+					// socket.current?.emit('move_object', message);
 				}
 			});
 		});
@@ -114,7 +117,8 @@ function useCanvasToSocket({ canvas, socket, cursorWorker }: UseCanvasToSocketPr
 
 			if (fabricObject.type in ObjectType) {
 				const message = formatScaleObjectEventToSocket(fabricObject as fabric.Group);
-				socket.current?.emit('scale_object', message);
+				objectWorker.current?.postMessage(message);
+				// socket.current?.emit('scale_object', message);
 				return;
 			}
 
@@ -123,7 +127,8 @@ function useCanvasToSocket({ canvas, socket, cursorWorker }: UseCanvasToSocketPr
 			fabricObject._objects.forEach((object) => {
 				if (object.type in SocketObjectType) {
 					const message = formatScaleObjectEventToSocketForGroup(fabricObject, object as fabric.Group);
-					socket.current?.emit('scale_object', message);
+					objectWorker.current?.postMessage(message);
+					// socket.current?.emit('scale_object', message);
 				}
 			});
 		});

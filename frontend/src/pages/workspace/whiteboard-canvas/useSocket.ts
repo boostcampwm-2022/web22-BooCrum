@@ -146,6 +146,11 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			updateObjectFromServer(canvas.current, objectData);
 		});
 
+		socket.current.on('updating_object', ({ userId, objectData }) => {
+			if (isNull(canvas.current) || isMessageByMe(userId)) return;
+			updateObjectFromServer(canvas.current, objectData);
+		});
+
 		socket.current.on('update_object', ({ userId, objectData }) => {
 			if (isNull(canvas.current) || isMessageByMe(userId)) return;
 			updateObjectFromServer(canvas.current, objectData);
