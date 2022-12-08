@@ -73,6 +73,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 				createObjectFromServer(canvas.current, object, role);
 			});
 
+			canvas.current?.requestRenderAll();
 			setIsEndInit(true);
 		});
 
