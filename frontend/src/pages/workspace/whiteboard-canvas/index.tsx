@@ -10,13 +10,17 @@ import { workspaceRole } from '@data/workspace-role';
 import useRoleEvent from './useRoleEvent';
 import ExportModal from '../export-modal';
 import Loading from '@components/loading';
+import ObjectWorker from 'worker/object.worker';
+import CursorWorker from 'worker/cursor.worker';
+import useCursorWorker from './useCursorWorker';
 
 function WhiteboardCanvas() {
 	const { canvas } = useCanvas();
 	const { socket, isEndInit } = useSocket(canvas);
+	const { worker: cursorWorker } = useCursorWorker(CursorWorker, socket);
 
 	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, selectedType, menuPosition } =
-		useCanvasToSocket({ canvas, socket });
+		useCanvasToSocket({ canvas, socket, cursorWorker });
 	useRoleEvent(socket);
 	const myInfoInWorkspace = useRecoilValue(myInfoInWorkspaceState);
 
