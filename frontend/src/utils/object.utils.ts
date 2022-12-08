@@ -90,6 +90,7 @@ export const createPostIt = (options: PostItOptions) => {
 		objectCaching: false,
 		isSocketObject: false,
 		selectable: options.selectable,
+		lockRotation: true,
 	});
 
 	postit.set({ left: options.left, top: options.top });
@@ -245,6 +246,7 @@ export const createSection = (options: SectionOption) => {
 		top: options.top,
 		objectCaching: false,
 		selectable: options.selectable,
+		lockRotation: true,
 	});
 	return section;
 };

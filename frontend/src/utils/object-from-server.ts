@@ -56,6 +56,7 @@ export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDat
 		strokeLineCap: 'round',
 		strokeLineJoin: 'round',
 		fill: undefined,
+		lockRotation: true,
 	});
 	canvas.add(drawObject);
 };
