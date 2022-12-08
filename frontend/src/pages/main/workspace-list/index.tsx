@@ -14,7 +14,6 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 
 	async function setWorkspaceList() {
 		const result = await User.getWorkspace();
-		console.log(result);
 		const sortedWorkspace = sortWorkspace(result);
 		setWorkspaces(sortedWorkspace);
 	}
