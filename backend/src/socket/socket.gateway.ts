@@ -286,4 +286,19 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     socket.nsp.emit('change_role', { userId, role });
   }
+
+  @SubscribeMessage('updating_object')
+  @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
+  async updatingObject(
+    @MessageBody(new ValidationPipe({ exceptionFactory: errorMsgFormatter }), new ObjectTransformPipe())
+    objectData: UpdateObjectDTO,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    socket.nsp.emit('updating_object', { userId: userData.userId, objectData });
+
+    this.logger.log(
+      `workspaceId: ${socket.nsp.name.substring(11)} / eventName: updating_object / userId: ${userData.userId}`,
+    );
+  }
 }
