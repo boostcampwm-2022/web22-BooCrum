@@ -28,6 +28,7 @@ import { ObjectTransformPipe } from './pipe/object-transform.pipe';
 import { ValidationError } from 'class-validator';
 import { UserRoleGuard } from './guard/user-role.guard';
 import { ChangeUserRoleDTO } from './dto/change-role.dto';
+import { ObjectUpdatingPipe } from './pipe/object-updating.pipe';
 
 const errorMsgFormatter = (errors: ValidationError[]) =>
   new WsException(`잘못된 속성 전달: ${errors.map((e) => e.property).join(', ')}`);
@@ -285,5 +286,20 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (userData !== null) userData.role = role;
 
     socket.nsp.emit('change_role', { userId, role });
+  }
+
+  @SubscribeMessage('updating_object')
+  @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
+  async updatingObject(
+    @MessageBody(new ValidationPipe({ exceptionFactory: errorMsgFormatter }), new ObjectUpdatingPipe())
+    objectData: UpdateObjectDTO,
+    @ConnectedSocket() socket: Socket,
+  ) {
+    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    socket.nsp.emit('updating_object', { userId: userData.userId, objectData });
+
+    this.logger.log(
+      `workspaceId: ${socket.nsp.name.substring(11)} / eventName: updating_object / userId: ${userData.userId}`,
+    );
   }
 }
