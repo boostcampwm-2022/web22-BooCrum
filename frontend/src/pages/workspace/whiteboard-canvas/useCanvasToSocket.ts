@@ -32,12 +32,20 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		useEditMenu(canvas);
 	const { workspaceId } = useParams();
 
+	const updateThumbnail = () => {
+		if (!canvas.current || !workspaceId) return;
+		const thumbnailImage = createThumbnailImage(canvas.current);
+
+		Workspace.postThumbnail(workspaceId, {
+			file: thumbnailImage,
+		});
+	};
+
 	useEffect(() => {
 		if (isNull(canvas.current)) return;
 
 		canvas.current.on('object:added', ({ target: fabricObject }) => {
 			if (isUndefined(fabricObject) || fabricObject.isSocketObject) return;
-			console.log('통과된 놈덜', fabricObject);
 
 			if (fabricObject instanceof fabric.Path && fabricObject.type !== ObjectType.cursor) {
 				initDrawObject(fabricObject as fabric.Path);
@@ -46,25 +54,17 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatObjectDataToServer(fabricObject);
 				socket.current?.emit('create_object', message);
+				updateThumbnail();
 			}
 		});
 
 		canvas.current.on('object:modified', ({ target: fabricObject }) => {
-			console.log(fabricObject);
 			if (isUndefined(fabricObject)) return;
-
-			if (!canvas.current || !workspaceId) return;
-			console.log(workspaceId);
-
-			const thumbnailImage = createThumbnailImage(canvas.current);
-
-			Workspace.postThumbnail(workspaceId, {
-				file: thumbnailImage,
-			});
 
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatObjectDataToServer(fabricObject);
 				socket.current?.emit('update_object', message);
+				updateThumbnail();
 				return;
 			}
 
@@ -76,6 +76,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 					socket.current?.emit('update_object', message);
 				}
 			});
+			updateThumbnail();
 		});
 
 		canvas.current.on('object:removed', ({ target: fabricObject }) => {
@@ -86,6 +87,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			socket.current?.emit('delete_object', {
 				objectId: fabricObject.objectId,
 			});
+			updateThumbnail();
 		});
 
 		canvas.current.on('object:moving', ({ target: fabricObject }) => {
