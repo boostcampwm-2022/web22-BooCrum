@@ -70,7 +70,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			objects.forEach((object) => {
 				if (!canvas.current) return;
 				const role = myInfoInWorkspaceRef.current?.role as Role;
-				createObjectFromServer(canvas.current, object, role);
+				createObjectFromServer(canvas.current, object, role, workspaceId);
 			});
 
 			setIsEndInit(true);
@@ -119,7 +119,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('create_object', (arg) => {
 			if (isNull(canvas.current) || isMessageByMe(arg.creator)) return;
 			const role = myInfoInWorkspaceRef.current?.role as Role;
-			createObjectFromServer(canvas.current, arg, role);
+			createObjectFromServer(canvas.current, arg, role, workspaceId);
 		});
 
 		socket.current.on('delete_object', ({ objectId }) => {
