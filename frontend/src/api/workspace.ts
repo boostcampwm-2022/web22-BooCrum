@@ -3,6 +3,7 @@ import axios, { AxiosResponse, AxiosRequestConfig } from 'axios';
 import {
 	ParticipantInfo,
 	PatchWorkspaceBody,
+	PostThumbnailBody,
 	PostWorkspaceBody,
 	WorkspaceData,
 	WorkspaceMetaData,
@@ -20,6 +21,14 @@ const responseStatus = (response: AxiosResponse) => response.status;
 const workspaceRequests = {
 	get: <T>(url: string, option?: AxiosRequestConfig) => instance.get<T>(url, option).then(responseBody),
 	post: <T, B>(url: string, body: B) => instance.post<T>(url, body).then(responseBody),
+	postFormData: <T, B>(url: string, body: B) =>
+		instance
+			.post<T>(url, body, {
+				headers: {
+					'Content-Type': 'multipart/form-data',
+				},
+			})
+			.then(responseBody),
 	patch: <T, B>(url: string, body: B) => instance.patch<T>(url, body).then(responseBody),
 	delete: (url: string) => instance.delete<number>(url).then(responseStatus),
 };
@@ -35,4 +44,6 @@ export const Workspace = {
 	getWorkspaceParticipant: (workspaceId: string): Promise<ParticipantInfo[]> =>
 		workspaceRequests.get<ParticipantInfo[]>(`/${workspaceId}/info/participant`),
 	getTemplates: (): Promise<TemplateType[]> => workspaceRequests.get(`/template`),
+	postThumbnail: (workspaceId: string, body: PostThumbnailBody): Promise<boolean> =>
+		workspaceRequests.postFormData<boolean, PostThumbnailBody>(`/${workspaceId}/thumbnail`, body),
 };

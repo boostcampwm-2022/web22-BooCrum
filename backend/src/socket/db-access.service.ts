@@ -117,6 +117,7 @@ export class DbAccessService {
   async renewUpdateDateOfMember(userId: string, workspaceId: string): Promise<boolean> {
     const queryRunner = this.dataSoruce.createQueryRunner();
     await queryRunner.connect();
+
     const [userFind, workspaceFind] = await Promise.all([
       queryRunner.manager.findOne(User, { where: { userId } }),
       queryRunner.manager.findOne(Workspace, { where: { workspaceId } }),
@@ -127,13 +128,28 @@ export class DbAccessService {
       where: { user: userFind, workspace: workspaceFind },
     });
     if (!memberFind) throw new Error('워크스페이스에 존재하지 않는 멤버입니다.');
-    const ret = await queryRunner.manager.update<WorkspaceMember>(
-      WorkspaceMember,
-      { user: userFind, workspace: workspaceFind },
-      { updateDate: new Date() as any },
-    );
-    await queryRunner.release();
-    return ret.affected > 0;
+
+    try {
+      await queryRunner.startTransaction();
+
+      const ret = await Promise.all([
+        queryRunner.manager.update<WorkspaceMember>(
+          WorkspaceMember,
+          { user: userFind, workspace: workspaceFind },
+          { updateDate: new Date() as any },
+        ),
+        queryRunner.manager.update<Workspace>(Workspace, { workspaceId }, { updateDate: new Date() as any }),
+      ]);
+
+      if (ret[0].affected === 0 || ret[1].affected === 0) throw new Error('갱신 실패');
+      await queryRunner.commitTransaction();
+      return true;
+    } catch (e) {
+      await queryRunner.rollbackTransaction();
+      throw e;
+    } finally {
+      await queryRunner.release();
+    }
   }
 
   async changeUserRole(userId: string, workspaceId: string, role: number): Promise<boolean> {
