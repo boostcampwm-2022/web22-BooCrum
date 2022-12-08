@@ -6,6 +6,10 @@ import { v4 } from 'uuid';
 import { addPostIt, addSection } from './object.utils';
 import { toolItems } from '@data/workspace-tool';
 
+export const canvasResize = (canvas: fabric.Canvas) => {
+	canvas.setDimensions({ width: window.innerWidth, height: window.innerHeight });
+};
+
 export const initGrid = (canvas: fabric.Canvas, patternSize: number, gridSize: number) => {
 	const backgroundCanvas = new fabric.StaticCanvas(null, {
 		mode: canvas.mode,
@@ -120,7 +124,7 @@ export const initDrawing = (canvas: fabric.Canvas) => {
 	canvas.on('object:added', (e) => {
 		if (!(e.target instanceof fabric.Path) || e.target.type === ObjectType.cursor) return;
 		const path = e.target;
-		path.set({ perPixelTargetFind: true });
+		path.set({ perPixelTargetFind: true, lockRotation: true });
 		path.on('mousedown', () => {
 			if (canvas.mode !== CanvasType.erase || path.type !== ObjectType.draw) return;
 			path.isSocketObject = false;
@@ -169,6 +173,7 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 				obj.isSocketObject = false;
 				canvas.remove(obj);
 			});
+			canvas.discardActiveObject();
 			document.removeEventListener('keydown', objectDeleteHandler);
 		}
 	};
