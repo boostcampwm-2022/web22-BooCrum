@@ -3,6 +3,8 @@ import { WsException } from '@nestjs/websockets';
 import { CreateObjectDTO } from 'src/object-database/dto/create-object.dto';
 import { UpdateObjectDTO } from 'src/object-database/dto/update-object.dto';
 
+const isNullOrUndefined = (v: any): boolean => v === null || v === undefined;
+
 /**
  * Validation Pipe를 거친 Object Dto에 대해 추가적인 수정을 가합니다.
  */
@@ -19,7 +21,7 @@ export class ObjectTransformPipe implements PipeTransform {
     return this.tranformEntryPoint(value);
   }
 
-  private tranformEntryPoint(obj: AbstractWorkspaceObject) {
+  private tranformEntryPoint(obj: AbstractPartialWorkspaceObject) {
     delete obj.creator;
     switch (obj.type) {
       case 'postit':
@@ -33,25 +35,27 @@ export class ObjectTransformPipe implements PipeTransform {
     }
   }
 
-  private postitTransformer(obj: AbstractWorkspaceObject) {
+  private postitTransformer(obj: AbstractPartialWorkspaceObject) {
     // 없애야 할 데이터를 제거한다.
     delete obj.path;
-    if (obj.fontSize <= 0) throw new WsException('Font 크기는 0 이하가 될 수 없습니다.');
+    if (!isNullOrUndefined(obj.fontSize) && obj.fontSize <= 0)
+      throw new WsException('Font 크기는 0 이하가 될 수 없습니다.');
 
     return obj;
   }
 
-  private sectionTransformer(obj: AbstractWorkspaceObject) {
+  private sectionTransformer(obj: AbstractPartialWorkspaceObject) {
     // 없애야 할 데이터를 제거한다.
     delete obj.path;
 
     // 데이터를 제어합니다.
-    if (obj.fontSize <= 0) throw new WsException('Font 크기는 0 이하가 될 수 없습니다.');
-    if (obj.text.length > 50) obj.text = obj.text.slice(0, 50); // 오류 대신 50자로 잘라버린다.
+    if (!isNullOrUndefined(obj.fontSize) && obj.fontSize <= 0)
+      throw new WsException('Font 크기는 0 이하가 될 수 없습니다.');
+    if (!isNullOrUndefined(obj.text) && obj.text.length > 50) obj.text = obj.text.slice(0, 50); // 오류 대신 50자로 잘라버린다.
     return obj;
   }
 
-  private drawTransformer(obj: AbstractWorkspaceObject) {
+  private drawTransformer(obj: AbstractPartialWorkspaceObject) {
     // 없애야 할 데이터를 제거한다.
     delete obj.text;
     delete obj.fontSize;

@@ -29,7 +29,7 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 	function sortWorkspace(workspaceList: WorkspaceCardType[]): WorkspaceCardType[] {
 		if (!hasOrder) {
 			return workspaceList.sort((a, b) => {
-				return compareStringByMillisecond(a.workspace.registerDate, b.workspace.registerDate);
+				return compareStringByMillisecond(a.workspace.updateDate, b.workspace.updateDate);
 			});
 		}
 		return workspaceList.sort((a, b) => {

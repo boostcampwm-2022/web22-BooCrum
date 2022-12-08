@@ -71,6 +71,7 @@ function useCanvas() {
 
 	const initCanvas = () => {
 		const grid = 50;
+		const pattern = 100;
 		const canvasWidth = window.innerWidth;
 		const canvasHeight = window.innerHeight;
 
@@ -81,7 +82,7 @@ function useCanvas() {
 			backgroundColor: '#f1f1f1',
 		});
 
-		initGrid(fabricCanvas, canvasWidth, canvasHeight, grid);
+		initGrid(fabricCanvas, pattern, grid);
 		initDrawing(fabricCanvas);
 		initZoom(fabricCanvas, setZoom);
 		initDragPanning(fabricCanvas);

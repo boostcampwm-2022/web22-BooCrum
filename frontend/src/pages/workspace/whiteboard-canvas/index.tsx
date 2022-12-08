@@ -1,4 +1,4 @@
-import { WhiteboardCanvasLayout } from './index.style';
+import { LoadingContainer, WhiteboardCanvasLayout } from './index.style';
 import useCanvas from './useCanvas';
 import useSocket from './useSocket';
 import ContextMenu from '@components/context-menu';
@@ -9,10 +9,11 @@ import { myInfoInWorkspaceState } from '@context/user';
 import { workspaceRole } from '@data/workspace-role';
 import useRoleEvent from './useRoleEvent';
 import ExportModal from '../export-modal';
+import Loading from '@components/loading';
 
 function WhiteboardCanvas() {
 	const { canvas } = useCanvas();
-	const { socket } = useSocket(canvas);
+	const { socket, isEndInit } = useSocket(canvas);
 
 	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, selectedType, menuPosition } =
 		useCanvasToSocket({ canvas, socket });
@@ -37,6 +38,12 @@ function WhiteboardCanvas() {
 				</ContextMenu>
 			)}
 			<ExportModal canvas={canvas} />
+
+			{!isEndInit && (
+				<LoadingContainer>
+					<Loading />
+				</LoadingContainer>
+			)}
 		</>
 	);
 }
