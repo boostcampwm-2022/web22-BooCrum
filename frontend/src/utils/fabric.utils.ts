@@ -173,6 +173,7 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 				obj.isSocketObject = false;
 				canvas.remove(obj);
 			});
+			canvas.discardActiveObject();
 			document.removeEventListener('keydown', objectDeleteHandler);
 		}
 	};
