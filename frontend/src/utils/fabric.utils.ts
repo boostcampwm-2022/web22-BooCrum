@@ -6,6 +6,10 @@ import { v4 } from 'uuid';
 import { addPostIt, addSection } from './object.utils';
 import { toolItems } from '@data/workspace-tool';
 
+export const canvasResize = (canvas: fabric.Canvas) => {
+	canvas.setDimensions({ width: window.innerWidth, height: window.innerHeight });
+};
+
 export const initGrid = (canvas: fabric.Canvas, patternSize: number, gridSize: number) => {
 	const backgroundCanvas = new fabric.StaticCanvas(null, {
 		mode: canvas.mode,

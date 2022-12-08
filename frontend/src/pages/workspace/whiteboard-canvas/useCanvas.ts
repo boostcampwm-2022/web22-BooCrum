@@ -10,6 +10,7 @@ import {
 	setObjectIndexLeveling,
 	setCursorMode,
 	initDrawing,
+	canvasResize,
 } from '@utils/fabric.utils';
 import { toolItems } from '@data/workspace-tool';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -32,10 +33,13 @@ function useCanvas() {
 
 	useEffect(() => {
 		canvas.current = initCanvas();
+		window.addEventListener('resize', canvasResizeThrottler);
+
 		return () => {
 			if (canvas.current) {
 				canvas.current.dispose();
 				canvas.current = null;
+				window.removeEventListener('resize', canvasResizeThrottler);
 			}
 		};
 	}, []);
@@ -68,6 +72,16 @@ function useCanvas() {
 			canvas.current.requestRenderAll();
 		}
 	}, [cursor, myInfoInWorkspace]);
+
+	const canvasResizeThrottler = () => {
+		let timer = null;
+		if (!timer) {
+			timer = setTimeout(() => {
+				timer = null;
+				canvasResize(canvas.current as fabric.Canvas);
+			}, 100);
+		}
+	};
 
 	const initCanvas = () => {
 		const grid = 50;

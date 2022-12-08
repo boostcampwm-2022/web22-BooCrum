@@ -5,6 +5,11 @@ export const WhiteboardCanvasLayout = styled.div`
 	left: 0;
 	top: 0;
 	z-index: 0;
+
+	width: 100vw;
+	height: 100vh;
+
+	background: #f1f1f1;
 `;
 
 export const LoadingContainer = styled.div`
