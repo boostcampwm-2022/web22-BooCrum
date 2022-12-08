@@ -10,6 +10,7 @@ import {
 	TextBoxOptions,
 	TitleBackgroundOptions,
 } from '@pages/workspace/whiteboard-canvas/types/fabric-options';
+import { isUndefined } from './type.utils';
 
 export const setEditMenu = (object: fabric.Object) => {
 	const width = object?.width || 0;
@@ -62,7 +63,7 @@ export const createTextBox = (options: TextBoxOptions) => {
 	const defaultWidth = 300 * 0.9;
 	const defaultText = 'Text...';
 
-	const textbox = new fabric.Textbox(options.text === undefined ? defaultText : options.text, {
+	const textbox = new fabric.Textbox(isUndefined(options.text) ? defaultText : options.text, {
 		type: options.editable ? ObjectType.editable : ObjectType.text,
 		top: defaultTop,
 		left: defaultLeft,
@@ -221,7 +222,7 @@ export const createSectionTitle = (options: SectionTitleOptions) => {
 	const defaultFontSize = 15;
 	const defaultText = 'SECTION';
 
-	const title = new fabric.IText(options.text === undefined ? defaultText : options.text, {
+	const title = new fabric.IText(isUndefined(options.text) ? defaultText : options.text, {
 		type: options.editable ? ObjectType.editable : ObjectType.title,
 		objectId: options.objectId,
 		top: defaultTop,
