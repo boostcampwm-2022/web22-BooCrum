@@ -24,7 +24,6 @@ function useCursorWorker(
 		}: {
 			data: { mouse: MousePointer; queueLength: number };
 		}) => {
-			console.log(queueLength);
 			socket.current?.emit('move_pointer', mouse);
 		};
 

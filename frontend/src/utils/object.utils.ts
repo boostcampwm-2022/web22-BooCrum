@@ -40,8 +40,11 @@ export const createNameLabel = (options: NameLabelOptions) => {
 		top: defaultTop,
 		left: defaultLeft,
 		fontSize: defaultFontSize,
+		fontFamily: 'Arial, sans-serif',
 		objectCaching: false,
 		isSocketObject: false,
+		lockMovementX: true,
+		lockMovementY: true,
 	});
 
 	return nameLabelText;
@@ -90,10 +93,13 @@ export const createTextBox = (options: TextBoxOptions) => {
 		objectCaching: false,
 		splitByGrapheme: true,
 		fontSize: options.fontSize,
+		fontFamily: 'Arial, sans-serif',
 		isSocketObject: false,
 		selectable: false,
 		evented: false,
 		groupType: options.groupType,
+		lockMovementX: true,
+		lockMovementY: true,
 	});
 
 	return textbox;
@@ -148,7 +154,6 @@ export const setPostItEditEvent = (
 		textBox.set({ visible: false });
 		canvas.add(editableTextBox);
 		canvas.setActiveObject(editableTextBox);
-		console.log(textBox.fontSize, groupObject.getScaledWidth());
 		editableTextBox.set({
 			text: textBox.text,
 			left: (groupObject?.left || 0) + groupObject.getScaledWidth() * 0.05,
@@ -232,6 +237,7 @@ export const addPostIt = (
 	setLimitHeightEvent(canvas, editableTextBox, postit);
 	setPreventResizeEvent(id, canvas, textBox, postit);
 	setPostItEditEvent(canvas, postit, editableTextBox, textBox);
+	setPreventRemainCursor(canvas, editableTextBox);
 
 	canvas.add(postit);
 };
@@ -250,9 +256,12 @@ export const createSectionTitle = (options: SectionTitleOptions) => {
 		top: defaultTop,
 		left: defaultLeft,
 		fontSize: defaultFontSize,
+		fontFamily: 'Arial, sans-serif',
 		isSocketObject: false,
 		objectCaching: false,
 		groupType: options.groupType,
+		lockMovementX: true,
+		lockMovementY: true,
 	});
 
 	return title;
@@ -377,5 +386,15 @@ export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: st
 	setLimitChar(canvas, section, sectionTitle, sectionBackground);
 	setLimitChar(canvas, section, editableTitle, sectionBackground);
 	setSectionEditEvent(canvas, section, editableTitle, sectionTitle);
+	setPreventRemainCursor(canvas, editableTitle);
+
 	canvas.add(section);
+};
+
+export const setPreventRemainCursor = (canvas: fabric.Canvas, editableText: fabric.Textbox | fabric.IText) => {
+	canvas.on('mouse:wheel', () => {
+		if (editableText.type === ObjectType.editable) {
+			editableText.initDelayedCursor();
+		}
+	});
 };
