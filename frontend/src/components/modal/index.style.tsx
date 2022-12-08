@@ -34,7 +34,7 @@ export const ModalBackground = styled.div<{ width: number; height: number }>`
 		border-bottom: 1px solid ${({ theme }) => theme.gray_1};
 	}
 
-	.title {
+	.modal-title {
 		font-size: 20px;
 		font-weight: 500;
 		line-height: 27px;

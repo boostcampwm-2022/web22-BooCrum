@@ -8,6 +8,7 @@ import useCanvasToSocket from './useCanvasToSocket';
 import { myInfoInWorkspaceState } from '@context/user';
 import { workspaceRole } from '@data/workspace-role';
 import useRoleEvent from './useRoleEvent';
+import ExportModal from '../export-modal';
 import Loading from '@components/loading';
 
 function WhiteboardCanvas() {
@@ -36,6 +37,7 @@ function WhiteboardCanvas() {
 					/>
 				</ContextMenu>
 			)}
+			<ExportModal canvas={canvas} />
 
 			{!isEndInit && (
 				<LoadingContainer>

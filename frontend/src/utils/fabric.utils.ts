@@ -207,3 +207,34 @@ export const toStringPath = (path: fabric.Path) => {
 	const pathString = path.toSVG().match(reg);
 	return pathString ? pathString[0] : '';
 };
+
+export const calcCanvasFullWidthAndHeight = (canvas: fabric.Canvas) => {
+	const coords: { left?: number; right?: number; top?: number; bottom?: number } = {
+		left: undefined,
+		right: undefined,
+		top: undefined,
+		bottom: undefined,
+	};
+	canvas._objects.forEach((object) => {
+		if (object.aCoords) {
+			const {
+				tl: { x: left, y: top },
+				br: { x: right, y: bottom },
+			} = object.aCoords;
+
+			if (coords.left === undefined || coords.left > left) {
+				coords.left = left;
+			}
+			if (coords.right === undefined || coords.right < right) {
+				coords.right = right;
+			}
+			if (coords.top === undefined || coords.top > top) {
+				coords.top = top;
+			}
+			if (coords.bottom === undefined || coords.bottom < bottom) {
+				coords.bottom = bottom;
+			}
+		}
+	});
+	return coords;
+};

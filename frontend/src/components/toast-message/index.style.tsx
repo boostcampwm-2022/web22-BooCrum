@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
-export const Container = styled.div`
-	background: rgba(16, 16, 16, 0.3);
+export const Container = styled.div<{ bold: boolean }>`
+	background: ${({ bold }) => (bold ? 'black' : 'rgba(16, 16, 16, 0.3)')};
 	color: ${({ theme }) => theme.white};
 
 	padding: 12px 16px;

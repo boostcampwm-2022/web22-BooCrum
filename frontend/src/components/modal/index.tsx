@@ -8,7 +8,7 @@ function Modal({ isOpen, closeModal, modalRef, width, height, title, children }:
 		<ModalBackground width={width} height={height}>
 			<div className="modal-layout" ref={modalRef}>
 				<div className="header">
-					<h1 className="title">{title}</h1>
+					<h1 className="modal-title">{title}</h1>
 					<img alt="close modal" src={closeIcon} className="modal-close" onClick={closeModal} />
 				</div>
 
