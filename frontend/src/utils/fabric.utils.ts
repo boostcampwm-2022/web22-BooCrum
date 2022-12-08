@@ -238,3 +238,36 @@ export const calcCanvasFullWidthAndHeight = (canvas: fabric.Canvas) => {
 	});
 	return coords;
 };
+
+export const createThumbnailImage = (canvas: fabric.Canvas) => {
+	const coords = calcCanvasFullWidthAndHeight(canvas);
+	let dataUrl;
+	if (!coords.left || !coords.right || !coords.top || !coords.bottom) {
+		dataUrl = canvas.toDataURL({ quality: 0.1, format: 'jpeg' });
+	} else {
+		dataUrl = canvas.toDataURL({
+			left: coords.left - 20,
+			top: coords.top - 20,
+			width: coords.right - coords.left + 40,
+			height: coords.bottom - coords.top + 40,
+			quality: 0.1,
+			format: 'jpeg',
+		});
+	}
+
+	return dataUrlToFile(dataUrl, 'thumbnail');
+};
+
+export const dataUrlToFile = (dataUrl: string, fileName: string) => {
+	const arr = dataUrl.split(',');
+
+	const blobBin = atob(arr[1]);
+	const array = [];
+
+	for (let i = 0; i < blobBin.length; i++) {
+		array.push(blobBin.charCodeAt(i));
+	}
+
+	const file = new File([new Uint8Array(array)], fileName, { type: 'image/jpeg' });
+	return file;
+};

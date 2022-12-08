@@ -18,6 +18,9 @@ import {
 } from '@utils/object-to-server';
 import { fabric } from 'fabric';
 import { isNull, isUndefined } from '@utils/type.utils';
+import { createThumbnailImage } from '@utils/fabric.utils';
+import { Workspace } from '@api/workspace';
+import { useParams } from 'react-router-dom';
 
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
@@ -27,6 +30,16 @@ interface UseCanvasToSocketProps {
 function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, openMenu, selectedType, menuPosition } =
 		useEditMenu(canvas);
+	const { workspaceId } = useParams();
+
+	const updateThumbnail = () => {
+		if (!canvas.current || !workspaceId) return;
+		const thumbnailImage = createThumbnailImage(canvas.current);
+
+		Workspace.postThumbnail(workspaceId, {
+			file: thumbnailImage,
+		});
+	};
 
 	useEffect(() => {
 		if (isNull(canvas.current)) return;
@@ -41,6 +54,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatObjectDataToServer(fabricObject);
 				socket.current?.emit('create_object', message);
+				updateThumbnail();
 			}
 		});
 
@@ -50,6 +64,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatObjectDataToServer(fabricObject);
 				socket.current?.emit('update_object', message);
+				updateThumbnail();
 				return;
 			}
 
@@ -61,6 +76,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 					socket.current?.emit('update_object', message);
 				}
 			});
+			updateThumbnail();
 		});
 
 		canvas.current.on('object:removed', ({ target: fabricObject }) => {
@@ -71,6 +87,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			socket.current?.emit('delete_object', {
 				objectId: fabricObject.objectId,
 			});
+			updateThumbnail();
 		});
 
 		canvas.current.on('object:moving', ({ target: fabricObject }) => {
@@ -188,6 +205,13 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			};
 			socket.current?.emit('move_pointer', message);
 		});
+		return () => {
+			if (socket.current) {
+				console.log('asdasd');
+				console.log(canvas.current);
+				socket.current?.emit('update_object', { objectId: 'asdasdas' });
+			}
+		};
 	}, []);
 
 	return {

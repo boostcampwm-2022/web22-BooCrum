@@ -21,7 +21,7 @@ function WorkspaceCard({ workspaceId, role, title, timestamp, imgSrc, setWorkspa
 	return (
 		<div>
 			<CardLayout onContextMenu={openContextMenu} onClick={handleRouting}>
-				<img className="card-thumbnail" src={imgSrc}></img>
+				<img className="card-thumbnail" src={imgSrc || undefined}></img>
 				<div className="card-info">
 					<div className="card-title">{title}</div>
 					<div className="card-timestamp">{timestamp}</div>
