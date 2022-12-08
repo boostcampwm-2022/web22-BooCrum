@@ -3,14 +3,20 @@ import { UserMapVO } from './dto/user-map.vo';
 import { Socket } from 'socket.io';
 import { DbAccessService } from './db-access.service';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
+import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import Redis from 'ioredis';
 
 @Injectable()
 export class UserManagementService {
-  private socketUserDataMap = new Map<string, UserMapVO>(); // socketId -> userMapVO
-  private workspaceUserDataMap = new Map<string, UserMapVO[]>(); // workspaceId -> userMapVO[]
+  // private socketUserDataMap = new Map<string, UserMapVO>(); // socketId -> userMapVO
+  // private workspaceUserDataMap = new Map<string, UserMapVO[]>(); // workspaceId -> userMapVO[]
   private logger: Logger = new Logger('UserDataService');
 
-  constructor(private dbAccessService: DbAccessService) {}
+  constructor(
+    @InjectRedis('SocketUser') private readonly socketUserDataMap: Redis,
+    @InjectRedis('WorkspaceUser') private readonly workspaceUserDataMap: Redis,
+    private dbAccessService: DbAccessService,
+  ) {}
 
   /**
    * 소켓과 워크스페이스 ID를 이용하여 UserMapVO로 포맷팅한다.
@@ -42,12 +48,12 @@ export class UserManagementService {
    * @param workspaceId 탐색하고자 하는 Workspace의 ID
    * @returns 현재 접속 중인 User일 경우 UserMapVO 객체를 전달한다. 아닐 경우 null을 전달한다.
    */
-  findUserDataInWorkspaceByUserId(userId: string, workspaceId: string): UserMapVO {
-    if (!userId || !this.workspaceUserDataMap.has(workspaceId)) return null;
+  async findUserDataInWorkspaceByUserId(userId: string, workspaceId: string): Promise<UserMapVO> {
+    if (!userId || !(await this.workspaceUserDataMap.exists(workspaceId))) return null;
     return (
-      this.workspaceUserDataMap
-        .get(workspaceId)
-        .filter((vo) => vo.userId === userId)
+      (await this.workspaceUserDataMap.lrange(workspaceId, 0, -1))
+        .map((value) => JSON.parse(value))
+        .filter((vo: UserMapVO) => vo.userId === userId)
         .at(0) ?? null
     );
   }
@@ -57,9 +63,10 @@ export class UserManagementService {
    * @param socketId 탐색하길 원하는 Socket의 ID
    * @returns 연결된 데이터 혹은 비연결 시 null
    */
-  findUserDataBySocketId(socketId: string): UserMapVO {
-    if (!socketId || !this.socketUserDataMap.has(socketId)) return null;
-    return this.socketUserDataMap.get(socketId);
+  async findUserDataBySocketId(socketId: string): Promise<UserMapVO> {
+    if (!socketId || !(await this.socketUserDataMap.exists(socketId))) return null;
+    const res: UserMapVO = JSON.parse(await this.socketUserDataMap.get(socketId));
+    return res;
   }
 
   /**
@@ -81,7 +88,7 @@ export class UserManagementService {
   async findOrAddUserData(client: Socket, workspaceId: string): Promise<UserMapVO> {
     const userId = client.request.session.user?.userId;
     // 이미 워크스페이스에 참여 중인 User인 경우 Socket만 갱신한다.
-    let userData = this.findUserDataInWorkspaceByUserId(userId, workspaceId);
+    let userData = await this.findUserDataInWorkspaceByUserId(userId, workspaceId);
     if (userData) {
       userData.count++;
       this.socketUserDataMap.set(client.id, userData);

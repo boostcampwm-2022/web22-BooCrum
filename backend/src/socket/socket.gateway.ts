@@ -272,7 +272,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     @ConnectedSocket() socket: Socket,
   ) {
     const { workspaceId } = this.dataManagementService.findUserDataBySocketId(socket.id);
-    const userData = this.dataManagementService.findUserDataInWorkspaceByUserId(userId, workspaceId);
+    const userData = await this.dataManagementService.findUserDataInWorkspaceByUserId(userId, workspaceId);
 
     // User의 경우 DB에 기록된 Role을 수정한다. Workspace Member로 비등록된 경우 오류를 반환한다.
     // Guest는 DB에 저장하지 않으므로, Guest는 이 처리를 수행하지 않는다.
