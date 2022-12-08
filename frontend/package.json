@@ -9,6 +9,7 @@
     "@testing-library/user-event": "^13.5.0",
     "@types/fabric": "https://registry.npmjs.org/@seonghunyang/boocrum-types/-/boocrum-types-0.0.8.tgz",
     "@types/jest": "^27.5.2",
+    "@types/lz-string": "^1.3.34",
     "@types/node": "^16.18.3",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",
@@ -62,6 +63,7 @@
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.31.10",
+    "lz-string": "^1.4.4",
     "prettier": "^2.7.1"
   },
   "proxy": "https://boocrum.run"

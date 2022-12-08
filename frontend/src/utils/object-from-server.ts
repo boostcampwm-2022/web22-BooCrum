@@ -1,4 +1,5 @@
 import { workspaceRole } from '@data/workspace-role';
+import { Workspace } from '@api/workspace';
 import {
 	ObjectDataFromServer,
 	MemberInCanvas,
@@ -9,6 +10,7 @@ import {
 	Role,
 } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
+import LZString from 'lz-string';
 import { v4 } from 'uuid';
 import {
 	createNameLabel,
@@ -24,11 +26,16 @@ import {
 	setPreventResizeEvent,
 	setSectionEditEvent,
 } from './object.utils';
-import { isUndefined } from './type.utils';
+import { isNull, isUndefined } from './type.utils';
 
-export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
+export const createObjectFromServer = (
+	canvas: fabric.Canvas,
+	newObject: ObjectDataFromServer,
+	role: Role,
+	workspaceId: string | undefined
+) => {
 	if (newObject.type === SocketObjectType.postit) {
-		createPostitFromServer(canvas, newObject, role);
+		createPostitFromServer(canvas, newObject, role, workspaceId);
 	}
 
 	if (newObject.type === SocketObjectType.section) {
@@ -41,7 +48,14 @@ export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 };
 
 export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
-	const drawObject = new fabric.Path(newObject.path, {
+	let decodedPath;
+	if (isUndefined(newObject.path)) return;
+	// 이전에 생성된 path들은 decompress 하지 않는다.
+	if (newObject.path[0] !== 'M') decodedPath = LZString.decompress(newObject.path || '');
+	else decodedPath = newObject.path;
+
+	if (isNull(decodedPath)) return;
+	const drawObject = new fabric.Path(decodedPath, {
 		type: newObject.type,
 		objectId: newObject.objectId,
 		isSocketObject: true,
@@ -61,11 +75,21 @@ export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDat
 	canvas.add(drawObject);
 };
 
-export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
+export const createPostitFromServer = async (
+	canvas: fabric.Canvas,
+	newObject: ObjectDataFromServer,
+	role: Role,
+	workspaceId: string | undefined
+) => {
 	const { objectId, left, top, fontSize, color, text, width, height, creator, scaleX, scaleY } = newObject;
 	if (!left || !top || !fontSize || !color || isUndefined(text) || !width || !height || !scaleX || !scaleY) return;
 
-	const nameLabel = createNameLabel({ objectId, text: creator, left, top });
+	const participants = await Workspace.getWorkspaceParticipant(workspaceId || '');
+	const user = participants.filter((part) => {
+		if (part.user.userId === creator) return true;
+	});
+
+	const nameLabel = createNameLabel({ objectId, text: user.length ? user[0].user.nickname : '', left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
 	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
 	const backgroundRect = createRect(ObjectType.postit, { objectId, left, top, color });
@@ -77,6 +101,7 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 		isSocketObject: true,
 		scaleX: 1 / scaleX,
 		scaleY: 1 / scaleY,
+		width: width * scaleX * 0.9,
 	});
 	nameLabel.set({
 		isSocketObject: true,
@@ -179,6 +204,9 @@ const updateObject = (object: fabric.Object, updatedObject: ObjectDataFromServer
 				textObject.set({
 					text: updatedObject.text || textObject.text,
 					fontSize: updatedObject.fontSize || textObject.fontSize,
+					scaleX: 1 / (groupObject.scaleX || 1),
+					scaleY: 1 / (groupObject.scaleY || 1),
+					width: groupObject.getScaledWidth() * 0.9,
 				});
 			} else if (obj.type === ObjectType.rect && updatedObject.color) {
 				const backgroundRect = obj as fabric.Rect;
@@ -192,7 +220,6 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	const object: fabric.Object[] = canvas.getObjects().filter((object) => {
 		return object.objectId === updatedObject.objectId;
 	});
-
 	if (object.length === 0) return;
 
 	if (object[0].type === SocketObjectType.draw) {
