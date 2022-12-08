@@ -5,7 +5,7 @@ export const Container = styled.div`
 	height: 100%;
 	padding: 0 67px;
 	display: flex;
-	align-items: center;
+	align-items: flex-start;
 
 	.hero-image {
 		width: 100%;
