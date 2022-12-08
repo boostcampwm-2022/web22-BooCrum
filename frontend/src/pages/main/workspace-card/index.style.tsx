@@ -11,7 +11,10 @@ export const CardLayout = styled.div`
 	.card-thumbnail {
 		display: block;
 		height: 200px;
+		width: 100%;
 		background-color: #d8d8d8;
+		object-fit: cover;
+		object-position: left;
 	}
 	.card-info {
 		padding: 0.5rem;

@@ -1,10 +1,14 @@
 import { colorChips } from '@data/workspace-object-color';
-import { ObjectType, CanvasType } from '@pages/workspace/whiteboard-canvas/types';
+import { ObjectType, CanvasType, SocketObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
 import { addPostIt, addSection } from './object.utils';
 import { toolItems } from '@data/workspace-tool';
+
+export const canvasResize = (canvas: fabric.Canvas) => {
+	canvas.setDimensions({ width: window.innerWidth, height: window.innerHeight });
+};
 
 export const initGrid = (canvas: fabric.Canvas, patternSize: number, gridSize: number) => {
 	const backgroundCanvas = new fabric.StaticCanvas(null, {
@@ -120,7 +124,7 @@ export const initDrawing = (canvas: fabric.Canvas) => {
 	canvas.on('object:added', (e) => {
 		if (!(e.target instanceof fabric.Path) || e.target.type === ObjectType.cursor) return;
 		const path = e.target;
-		path.set({ perPixelTargetFind: true });
+		path.set({ perPixelTargetFind: true, lockRotation: true });
 		path.on('mousedown', () => {
 			if (canvas.mode !== CanvasType.erase || path.type !== ObjectType.draw) return;
 			path.isSocketObject = false;
@@ -147,13 +151,12 @@ export const addObject = (
 		const x = (evt.clientX - vpt[4]) / vpt[3];
 		const y = (evt.clientY - vpt[5]) / vpt[3];
 		if (canvas.mode === CanvasType.section && !canvas.getActiveObject()) {
-			addSection(canvas, x, y, colorChips[8]);
+			addSection(canvas, x, y, colorChips[3]);
 			setCursor((prev) => {
 				return { ...prev, type: toolItems.SELECT };
 			});
 		} else if (canvas.mode === CanvasType.postit && !canvas.getActiveObject()) {
-			//todo 색 정보 받아와야함
-			addPostIt(canvas, x, y, 40, colorChips[0], creator);
+			addPostIt(canvas, x, y, 40, colorChips[6], creator);
 			setCursor((prev) => {
 				return { ...prev, type: toolItems.SELECT };
 			});
@@ -169,6 +172,7 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 				obj.isSocketObject = false;
 				canvas.remove(obj);
 			});
+			canvas.discardActiveObject();
 			document.removeEventListener('keydown', objectDeleteHandler);
 		}
 	};
@@ -199,7 +203,9 @@ export const setCursorMode = (canvas: fabric.Canvas, cursor: string, mode: Canva
 	canvas.hoverCursor = cursor;
 	canvas.mode = mode;
 	canvas.selection = selectable;
-	canvas.forEachObject((obj) => (obj.selectable = selectable));
+	canvas.forEachObject((obj) =>
+		obj.type === ObjectType.cursor ? (obj.selectable = false) : (obj.selectable = selectable)
+	);
 };
 
 export const toStringPath = (path: fabric.Path) => {
@@ -216,7 +222,8 @@ export const calcCanvasFullWidthAndHeight = (canvas: fabric.Canvas) => {
 		bottom: undefined,
 	};
 	canvas._objects.forEach((object) => {
-		if (object.aCoords) {
+		if (object.type in SocketObjectType && object.aCoords) {
+			console.log(object);
 			const {
 				tl: { x: left, y: top },
 				br: { x: right, y: bottom },
@@ -237,4 +244,37 @@ export const calcCanvasFullWidthAndHeight = (canvas: fabric.Canvas) => {
 		}
 	});
 	return coords;
+};
+
+export const createThumbnailImage = (canvas: fabric.Canvas) => {
+	const coords = calcCanvasFullWidthAndHeight(canvas);
+	let dataUrl;
+	if (!coords.left || !coords.right || !coords.top || !coords.bottom) {
+		dataUrl = canvas.toDataURL({ quality: 0.1, format: 'jpeg' });
+	} else {
+		dataUrl = canvas.toDataURL({
+			left: coords.left - 20,
+			top: coords.top - 20,
+			width: coords.right - coords.left + 40,
+			height: coords.bottom - coords.top + 40,
+			quality: 0.1,
+			format: 'jpeg',
+		});
+	}
+
+	return dataUrlToFile(dataUrl, 'thumbnail');
+};
+
+export const dataUrlToFile = (dataUrl: string, fileName: string) => {
+	const arr = dataUrl.split(',');
+
+	const blobBin = atob(arr[1]);
+	const array = [];
+
+	for (let i = 0; i < blobBin.length; i++) {
+		array.push(blobBin.charCodeAt(i));
+	}
+
+	const file = new File([new Uint8Array(array)], fileName, { type: 'image/jpeg' });
+	return file;
 };

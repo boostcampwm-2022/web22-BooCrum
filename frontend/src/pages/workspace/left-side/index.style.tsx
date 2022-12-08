@@ -5,6 +5,8 @@ export const Container = styled.div`
 	display: flex;
 
 	margin-left: 22px;
+	align-items: center;
+	vertical-align: center;
 
 	.logo {
 		font-size: 32px;

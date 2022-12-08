@@ -20,6 +20,15 @@ export const setEditMenu = (object: fabric.Object) => {
 	return [left, top];
 };
 
+const setShadow = () => {
+	return new fabric.Shadow({
+		color: 'gray',
+		blur: 7,
+		offsetX: 1,
+		offsetY: 1,
+	});
+};
+
 export const createNameLabel = (options: NameLabelOptions) => {
 	const defaultLeft = options.left + 300 * 0.05;
 	const defaultTop = options.top + 275;
@@ -31,14 +40,17 @@ export const createNameLabel = (options: NameLabelOptions) => {
 		top: defaultTop,
 		left: defaultLeft,
 		fontSize: defaultFontSize,
+		fontFamily: 'Arial, sans-serif',
 		objectCaching: false,
 		isSocketObject: false,
+		lockMovementX: true,
+		lockMovementY: true,
 	});
 
 	return nameLabelText;
 };
 
-export const createRect = (options: RectOptions) => {
+export const createRect = (type: ObjectType, options: RectOptions) => {
 	const defaultWidth = 300;
 	const defaultHeight = 300;
 
@@ -53,6 +65,15 @@ export const createRect = (options: RectOptions) => {
 		objectCaching: false,
 		isSocketObject: false,
 	});
+
+	if (type === ObjectType.postit) rect.set({ shadow: setShadow() });
+	else if (type === ObjectType.section) {
+		rect.set({
+			opacity: 0.8,
+			rx: 5,
+			ry: 5,
+		});
+	}
 
 	return rect;
 };
@@ -72,10 +93,13 @@ export const createTextBox = (options: TextBoxOptions) => {
 		objectCaching: false,
 		splitByGrapheme: true,
 		fontSize: options.fontSize,
+		fontFamily: 'Arial, sans-serif',
 		isSocketObject: false,
 		selectable: false,
 		evented: false,
 		groupType: options.groupType,
+		lockMovementX: true,
+		lockMovementY: true,
 	});
 
 	return textbox;
@@ -90,6 +114,8 @@ export const createPostIt = (options: PostItOptions) => {
 		objectCaching: false,
 		isSocketObject: false,
 		selectable: options.selectable,
+		lockRotation: true,
+		lockScalingFlip: true,
 	});
 
 	postit.set({ left: options.left, top: options.top });
@@ -128,14 +154,15 @@ export const setPostItEditEvent = (
 		textBox.set({ visible: false });
 		canvas.add(editableTextBox);
 		canvas.setActiveObject(editableTextBox);
-		editableTextBox.enterEditing();
 		editableTextBox.set({
+			text: textBox.text,
 			left: (groupObject?.left || 0) + groupObject.getScaledWidth() * 0.05,
 			top: (groupObject?.top || 0) + groupObject.getScaledHeight() * 0.05,
 			width: groupObject.getScaledWidth() * 0.9,
 			fontSize: textBox.fontSize,
 			evented: true,
 		});
+		editableTextBox.enterEditing();
 		canvas.mode = CanvasType.edit;
 		editableTextBox.fire('changed');
 	});
@@ -147,7 +174,7 @@ export const setPostItEditEvent = (
 
 	editableTextBox.on('editing:exited', (e) => {
 		canvas.remove(editableTextBox);
-		textBox.set({ visible: true });
+		textBox.set({ visible: true, fontSize: editableTextBox.fontSize });
 		canvas.mode = prevCanvasMode;
 		textBox.fire('changed');
 	});
@@ -186,7 +213,7 @@ export const addPostIt = (
 	const id = v4();
 	const nameLabel = createNameLabel({ objectId: id, text: creator, left: x, top: y });
 	const textBox = createTextBox({ objectId: id, left: x, top: y, fontSize: fontSize, editable: false });
-	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
+	const backgroundRect = createRect(ObjectType.postit, { objectId: id, left: x, top: y, color: fill });
 	const postit = createPostIt({
 		objectId: id,
 		left: x,
@@ -210,6 +237,7 @@ export const addPostIt = (
 	setLimitHeightEvent(canvas, editableTextBox, postit);
 	setPreventResizeEvent(id, canvas, textBox, postit);
 	setPostItEditEvent(canvas, postit, editableTextBox, textBox);
+	setPreventRemainCursor(canvas, editableTextBox);
 
 	canvas.add(postit);
 };
@@ -228,9 +256,12 @@ export const createSectionTitle = (options: SectionTitleOptions) => {
 		top: defaultTop,
 		left: defaultLeft,
 		fontSize: defaultFontSize,
+		fontFamily: 'Arial, sans-serif',
 		isSocketObject: false,
 		objectCaching: false,
 		groupType: options.groupType,
+		lockMovementX: true,
+		lockMovementY: true,
 	});
 
 	return title;
@@ -245,6 +276,8 @@ export const createSection = (options: SectionOption) => {
 		top: options.top,
 		objectCaching: false,
 		selectable: options.selectable,
+		lockRotation: true,
+		lockScalingFlip: true,
 	});
 	return section;
 };
@@ -330,7 +363,7 @@ export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: st
 	const id = v4();
 	const sectionTitle = createSectionTitle({ objectId: id, text: 'SECTION', left: x, top: y, editable: false });
 	const sectionBackground = createTitleBackground({ objectId: id, left: x, top: y, color: fill });
-	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
+	const backgroundRect = createRect(ObjectType.section, { objectId: id, left: x, top: y, color: fill });
 	const section = createSection({
 		objectId: id,
 		left: x,
@@ -353,5 +386,15 @@ export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: st
 	setLimitChar(canvas, section, sectionTitle, sectionBackground);
 	setLimitChar(canvas, section, editableTitle, sectionBackground);
 	setSectionEditEvent(canvas, section, editableTitle, sectionTitle);
+	setPreventRemainCursor(canvas, editableTitle);
+
 	canvas.add(section);
+};
+
+export const setPreventRemainCursor = (canvas: fabric.Canvas, editableText: fabric.Textbox | fabric.IText) => {
+	canvas.on('mouse:wheel', () => {
+		if (editableText.type === ObjectType.editable) {
+			editableText.initDelayedCursor();
+		}
+	});
 };
