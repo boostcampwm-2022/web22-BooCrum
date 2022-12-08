@@ -169,7 +169,7 @@ export const setPostItEditEvent = (
 
 	editableTextBox.on('editing:exited', (e) => {
 		canvas.remove(editableTextBox);
-		textBox.set({ visible: true });
+		textBox.set({ visible: true, fontSize: editableTextBox.fontSize });
 		canvas.mode = prevCanvasMode;
 		textBox.fire('changed');
 	});
