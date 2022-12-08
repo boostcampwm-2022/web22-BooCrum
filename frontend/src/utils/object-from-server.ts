@@ -63,8 +63,8 @@ export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDat
 
 export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
 	const { objectId, left, top, fontSize, color, text, width, height, creator, scaleX, scaleY } = newObject;
-
 	if (!left || !top || !fontSize || !color || isUndefined(text) || !width || !height || !scaleX || !scaleY) return;
+
 	const nameLabel = createNameLabel({ objectId, text: creator, left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
 	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
@@ -95,6 +95,8 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 		scaleX,
 		scaleY,
 	});
+
+	console.log(postit);
 
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
 	setLimitHeightEvent(canvas, editableTextBox, postit);
@@ -166,6 +168,26 @@ export const moveCursorFromServer = (membersInCanvas: MemberInCanvas[], userMous
 	memberInCanvasById[0].cursorObject.bringToFront();
 };
 
+const updateObject = (object: fabric.Object, updatedObject: ObjectDataFromServer) => {
+	object.set({ ...updatedObject });
+
+	if (object instanceof fabric.Group) {
+		const groupObject = object as fabric.Group;
+		groupObject._objects.forEach((obj) => {
+			if (obj.type === ObjectType.text || obj.type === ObjectType.title) {
+				const textObject = obj as fabric.Text;
+				textObject.set({
+					text: updatedObject.text || textObject.text,
+					fontSize: updatedObject.fontSize || textObject.fontSize,
+				});
+			} else if (obj.type === ObjectType.rect && updatedObject.color) {
+				const backgroundRect = obj as fabric.Rect;
+				backgroundRect.set({ fill: updatedObject.color });
+			}
+		});
+	}
+};
+
 export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: ObjectDataFromServer) => {
 	const object: fabric.Object[] = canvas.getObjects().filter((object) => {
 		return object.objectId === updatedObject.objectId;
@@ -182,35 +204,33 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	}
 
 	const { type, ...updatedProperty } = updatedObject;
-	object.forEach((obj) => {
-		if (obj.type === ObjectType.editable) {
-			obj.set({
-				...updatedProperty,
-				left: updatedProperty.left ? updatedProperty.left + 10 : obj.left,
-				top: updatedProperty.top ? updatedProperty.top + 10 : obj.top,
-				width: updatedProperty.width ? updatedProperty.width - 20 : obj.width,
-			});
-		} else {
-			obj.set({ ...updatedObject });
+
+	if (object[0].type === ObjectType.editable) {
+		const [editableText, rectObject] = object;
+		let left = editableText.left,
+			top = editableText.top;
+		const width = rectObject.getScaledWidth() * 0.9;
+
+		if (rectObject.type === ObjectType.postit) {
+			left = updatedProperty.left ? updatedProperty.left + rectObject.getScaledWidth() * 0.05 : left;
+			top = updatedProperty.top ? updatedProperty.top + rectObject.getScaledHeight() * 0.05 : top;
+		} else if (rectObject.type === ObjectType.section) {
+			left = updatedProperty.left ? updatedProperty.left + rectObject.getScaledWidth() * 0.05 : left;
 		}
 
-		if (obj instanceof fabric.Group) {
-			const groupObject = obj as fabric.Group;
-			groupObject._objects.forEach((object) => {
-				if (object.type === ObjectType.text || object.type === ObjectType.title) {
-					console.log(object);
-					const textObject = object as fabric.Text;
-					textObject.set({
-						text: updatedObject.text || textObject.text,
-						fontSize: updatedObject.fontSize || textObject.fontSize,
-					});
-				} else if (object.type === ObjectType.rect && updatedObject.color) {
-					const backgroundRect = object as fabric.Rect;
-					backgroundRect.set({ fill: updatedObject.color });
-				}
-			});
-		}
-	});
+		editableText.set({
+			...updatedProperty,
+			left,
+			top,
+			width,
+		});
+
+		rectObject.set({ ...updatedObject });
+	} else {
+		object.forEach((obj) => {
+			updateObject(obj, updatedObject);
+		});
+	}
 };
 
 export const selectObjectFromServer = (canvas: fabric.Canvas, objectIds: string[], color: string) => {
