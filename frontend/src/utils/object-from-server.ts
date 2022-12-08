@@ -23,6 +23,7 @@ import {
 	setLimitChar,
 	setLimitHeightEvent,
 	setPostItEditEvent,
+	setPreventRemainCursor,
 	setPreventResizeEvent,
 	setSectionEditEvent,
 } from './object.utils';
@@ -127,6 +128,7 @@ export const createPostitFromServer = async (
 	setLimitHeightEvent(canvas, editableTextBox, postit);
 	setPostItEditEvent(canvas, postit, editableTextBox, textBox);
 	setPreventResizeEvent(objectId, canvas, textBox, postit);
+	setPreventRemainCursor(canvas, editableTextBox);
 	canvas.add(postit);
 };
 
@@ -174,6 +176,7 @@ export const createSectionFromServer = (canvas: fabric.Canvas, newObject: Object
 	setLimitChar(canvas, section, sectionTitle, sectionBackground);
 	setLimitChar(canvas, section, editableTitle, sectionBackground);
 	setSectionEditEvent(canvas, section, editableTitle, sectionTitle);
+	setPreventRemainCursor(canvas, editableTitle);
 
 	canvas.add(section);
 	sectionTitle.fire('changed');
