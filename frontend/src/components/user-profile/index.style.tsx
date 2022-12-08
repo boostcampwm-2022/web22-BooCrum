@@ -17,6 +17,8 @@ export const ProfileItem = styled.div`
 	align-items: center;
 	height: 60px;
 
+	cursor: pointer;
+
 	border-bottom: 1px solid #d8d8d8;
 	:last-child {
 		border: none;
