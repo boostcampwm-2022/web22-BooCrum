@@ -122,8 +122,6 @@ export const createPostitFromServer = async (
 		scaleY,
 	});
 
-	console.log(postit);
-
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
 	setLimitHeightEvent(canvas, editableTextBox, postit);
 	setPostItEditEvent(canvas, postit, editableTextBox, textBox);
@@ -202,14 +200,20 @@ const updateObject = (object: fabric.Object, updatedObject: ObjectDataFromServer
 	if (object instanceof fabric.Group) {
 		const groupObject = object as fabric.Group;
 		groupObject._objects.forEach((obj) => {
-			if (obj.type === ObjectType.text || obj.type === ObjectType.title) {
+			if (obj.type === ObjectType.text) {
 				const textObject = obj as fabric.Text;
 				textObject.set({
-					text: updatedObject.text || textObject.text,
+					text: updatedObject.text === undefined ? textObject.text : updatedObject.text,
 					fontSize: updatedObject.fontSize || textObject.fontSize,
 					scaleX: 1 / (groupObject.scaleX || 1),
 					scaleY: 1 / (groupObject.scaleY || 1),
 					width: groupObject.getScaledWidth() * 0.9,
+				});
+			} else if (obj.type === ObjectType.title) {
+				const textObject = obj as fabric.Text;
+				textObject.set({
+					text: updatedObject.text === undefined ? textObject.text : updatedObject.text,
+					fontSize: updatedObject.fontSize || textObject.fontSize,
 				});
 			} else if (obj.type === ObjectType.rect && updatedObject.color) {
 				const backgroundRect = obj as fabric.Rect;
@@ -256,6 +260,7 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 
 		rectObject.set({ ...updatedObject });
 	} else {
+		console.log(object);
 		object.forEach((obj) => {
 			updateObject(obj, updatedObject);
 		});
