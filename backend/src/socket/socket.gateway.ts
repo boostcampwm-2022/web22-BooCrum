@@ -113,6 +113,8 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
           `멤버 최종 updateDate 갱신 실패 (워크스페이스 ID: ${userMapVO.workspaceId}, 유저 ID: ${userMapVO.userId})`,
         );
     }
+
+    this.logger.log(`workspaceId: ${workspaceId} / eventName: handleConnection / userId: ${userMapVO.userId}`);
   }
 
   /**
@@ -136,6 +138,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
             `멤버 최종 updateDate 갱신 실패 (워크스페이스 ID: ${userData.workspaceId}, 유저 ID: ${userData.userId})`,
           );
       }
+
+      this.logger.log(
+        `workspaceId: ${userData.workspaceId} / eventName: handleDisConnection / userId: ${userData.userId}`,
+      );
     } catch (e) {
       this.logger.error(`Disconnect Error: ${e.message}`, e.stack);
       throw new WsException(e.message);
@@ -146,6 +152,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async moveMousePointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     socket.nsp.emit('move_pointer', { x, y, userId: userData.userId });
+
+    this.logger.log(
+      `workspaceId: ${socket.nsp.name.substring(11)} / eventName: move_pointer / userId: ${userData.userId}`,
+    );
   }
 
   @SubscribeMessage('select_object')
@@ -153,6 +163,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async selectObject(@MessageBody('objectIds') objectIds: string[], @ConnectedSocket() socket: Socket) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     socket.nsp.emit('select_object', { objectIds, userId: userData.userId });
+
+    this.logger.log(
+      `workspaceId: ${socket.nsp.name.substring(11)} / eventName: select_object / userId: ${userData.userId}`,
+    );
   }
 
   @SubscribeMessage('unselect_object')
@@ -160,6 +174,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   async unselectObject(@MessageBody('objectIds') objectIds: string[], @ConnectedSocket() socket: Socket) {
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     socket.nsp.emit('unselect_object', { objectIds, userId: userData.userId });
+
+    this.logger.log(
+      `workspaceId: ${socket.nsp.name.substring(11)} / eventName: unselect_object / userId: ${userData.userId}`,
+    );
   }
 
   @SubscribeMessage('move_object')
@@ -184,6 +202,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         top: objectMoveDTO.top,
       },
     });
+
+    this.logger.log(
+      `workspaceId: ${socket.nsp.name.substring(11)} / eventName: move_object / userId: ${userData.userId}`,
+    );
   }
 
   @SubscribeMessage('scale_object')
@@ -210,6 +232,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         scaleY: objectScaleDTO.scaleY,
       },
     });
+
+    this.logger.log(
+      `workspaceId: ${socket.nsp.name.substring(11)} / eventName: scale_object / userId: ${userData.userId}`,
+    );
   }
 
   @SubscribeMessage('create_object')
@@ -226,6 +252,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       // 생성을 시도하고, 성공하면 이를 전달한다.
       await this.objectManagementService.insertObjectIntoWorkspace(userData.workspaceId, objectData);
       socket.nsp.emit('create_object', objectData);
+
+      this.logger.log(
+        `workspaceId: ${socket.nsp.name.substring(11)} / eventName: create_object / userId: ${userData.userId}`,
+      );
     } catch (e) {
       this.logger.error(`Create Error: ${e.message}`, e.stack);
       throw new WsException(e.message);
@@ -245,6 +275,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       // 수정을 시도하고, 성공하면 이를 전달한다.
       await this.objectManagementService.updateObjectInWorkspace(userData.workspaceId, objectData);
       socket.nsp.emit('update_object', { userId: userData.userId, objectData });
+
+      this.logger.log(
+        `workspaceId: ${socket.nsp.name.substring(11)} / eventName: update_object / userId: ${userData.userId}`,
+      );
     } catch (e) {
       this.logger.error(`Update Error: ${e.message}`, e.stack);
       throw new WsException(e.message);
@@ -259,6 +293,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
       const res = await this.objectManagementService.deleteObjectInWorkspace(userData.workspaceId, objectId);
       if (!res) throw new WsException('존재하지 않는 ObjectId');
       socket.nsp.emit('delete_object', { userId: userData.userId, objectId });
+
+      this.logger.log(
+        `workspaceId: ${socket.nsp.name.substring(11)} / eventName: delete_object / userId: ${userData.userId}`,
+      );
     } catch (e) {
       this.logger.error(`Delete Error: ${e.message}`, e.stack);
       throw new WsException(e.message);
@@ -285,5 +323,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (userData !== null) userData.role = role;
 
     socket.nsp.emit('change_role', { userId, role });
+
+    this.logger.log(
+      `workspaceId: ${socket.nsp.name.substring(11)} / eventName: change_role / userId: ${userData.userId}`,
+    );
   }
 }
