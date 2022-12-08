@@ -204,7 +204,9 @@ export const setCursorMode = (canvas: fabric.Canvas, cursor: string, mode: Canva
 	canvas.hoverCursor = cursor;
 	canvas.mode = mode;
 	canvas.selection = selectable;
-	canvas.forEachObject((obj) => (obj.selectable = selectable));
+	canvas.forEachObject((obj) =>
+		obj.type === ObjectType.cursor ? (obj.selectable = false) : (obj.selectable = selectable)
+	);
 };
 
 export const toStringPath = (path: fabric.Path) => {
