@@ -26,9 +26,9 @@ export default () => {
 		} = {};
 		taskQueue.forEach((item) => {
 			if (dataByObject.hasOwnProperty(item.objectId)) {
-				dataByObject[item.objectId] = { ...dataByObject[item.objectId], ...item };
+				Object.assign(dataByObject[item.objectId], item);
 			} else {
-				dataByObject[item.objectId] = { ...item };
+				dataByObject[item.objectId] = item;
 			}
 		});
 		return dataByObject;
