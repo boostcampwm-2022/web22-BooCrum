@@ -246,7 +246,6 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 		}
 
 		editableText.set({
-			...updatedProperty,
 			left,
 			top,
 			width,

@@ -148,6 +148,7 @@ export const setPostItEditEvent = (
 		textBox.set({ visible: false });
 		canvas.add(editableTextBox);
 		canvas.setActiveObject(editableTextBox);
+		console.log(textBox.fontSize, groupObject.getScaledWidth());
 		editableTextBox.set({
 			text: textBox.text,
 			left: (groupObject?.left || 0) + groupObject.getScaledWidth() * 0.05,
