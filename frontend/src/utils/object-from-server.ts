@@ -42,7 +42,12 @@ export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 };
 
 export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
-	const decodedPath = LZString.decompress(newObject.path || '');
+	let decodedPath;
+	if (isUndefined(newObject.path)) return;
+	// 이전에 생성된 path들은 decompress 하지 않는다.
+	if (newObject.path[0] !== 'M') decodedPath = LZString.decompress(newObject.path || '');
+	else decodedPath = newObject.path;
+
 	if (isNull(decodedPath)) return;
 	const drawObject = new fabric.Path(decodedPath, {
 		type: newObject.type,
@@ -176,7 +181,6 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	if (object.length === 0) return;
 
 	if (object[0].type === SocketObjectType.draw) {
-		// const decodedPath = LZString.decompress(updatedObject.path || '');
 		const { ...updateProperty } = updatedObject;
 		object[0].set({
 			...updateProperty,
