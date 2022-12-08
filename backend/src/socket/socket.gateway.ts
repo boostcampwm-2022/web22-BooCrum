@@ -295,7 +295,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     objectData: UpdateObjectDTO,
     @ConnectedSocket() socket: Socket,
   ) {
-    console.log(objectData);
     const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
     socket.nsp.emit('updating_object', { userId: userData.userId, objectData });
 
