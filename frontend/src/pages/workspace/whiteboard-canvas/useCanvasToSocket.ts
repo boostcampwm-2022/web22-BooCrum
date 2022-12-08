@@ -25,9 +25,10 @@ import { useParams } from 'react-router-dom';
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
 	socket: React.MutableRefObject<Socket<ServerToClientEvents, ClientToServerEvents> | null>;
+	cursorWorker: React.MutableRefObject<Worker | undefined>;
 }
 
-function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
+function useCanvasToSocket({ canvas, socket, cursorWorker }: UseCanvasToSocketProps) {
 	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, openMenu, selectedType, menuPosition } =
 		useEditMenu(canvas);
 	const { workspaceId } = useParams();
@@ -203,15 +204,9 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				x,
 				y,
 			};
-			socket.current?.emit('move_pointer', message);
+			cursorWorker.current?.postMessage(message);
+			// socket.current?.emit('move_pointer', message);
 		});
-		return () => {
-			if (socket.current) {
-				console.log('asdasd');
-				console.log(canvas.current);
-				socket.current?.emit('update_object', { objectId: 'asdasdas' });
-			}
-		};
 	}, []);
 
 	return {
