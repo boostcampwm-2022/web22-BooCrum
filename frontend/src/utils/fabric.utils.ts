@@ -1,5 +1,5 @@
 import { colorChips } from '@data/workspace-object-color';
-import { ObjectType, CanvasType } from '@pages/workspace/whiteboard-canvas/types';
+import { ObjectType, CanvasType, SocketObjectType } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
 import { SetterOrUpdater } from 'recoil';
 import { v4 } from 'uuid';
@@ -221,7 +221,8 @@ export const calcCanvasFullWidthAndHeight = (canvas: fabric.Canvas) => {
 		bottom: undefined,
 	};
 	canvas._objects.forEach((object) => {
-		if (object.aCoords) {
+		if (object.type in SocketObjectType && object.aCoords) {
+			console.log(object);
 			const {
 				tl: { x: left, y: top },
 				br: { x: right, y: bottom },
