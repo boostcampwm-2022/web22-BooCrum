@@ -147,14 +147,10 @@ function useCanvasToSocket({ canvas, socket, cursorWorker }: UseCanvasToSocketPr
 		});
 
 		canvas.current.on('font:modified', ({ target: fabricObject }) => {
-			if (!(fabricObject instanceof fabric.Group)) return;
-			if (fabricObject.type !== ObjectType.postit) return;
+			const textObject = fabricObject as fabric.Text;
+			if (isUndefined(textObject)) return;
 
-			const textObjects = fabricObject._objects.filter((obj) => obj.type === ObjectType.text);
-
-			if (textObjects.length < 1) return;
-
-			const message = formatEditFontSizeEventToSocket(fabricObject, textObjects[0] as fabric.Text);
+			const message = formatEditFontSizeEventToSocket(textObject);
 			socket.current?.emit('update_object', message);
 		});
 

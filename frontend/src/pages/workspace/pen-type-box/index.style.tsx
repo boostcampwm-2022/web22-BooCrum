@@ -45,9 +45,12 @@ export const Tool = styled.div<{ selected: boolean }>`
 	}
 `;
 
-export const ColorChip = styled.div<{ color: string }>`
+export const ColorChip = styled.div<{ color: string; selected: boolean }>`
 	background: ${({ color }) => color};
 	border-radius: 30px;
+
+	box-sizing: border-box;
+	border: 2px solid ${({ selected, theme }) => (selected ? theme.blue_3 : 'transparent')};
 
 	width: 24px;
 	height: 24px;

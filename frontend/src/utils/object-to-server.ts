@@ -15,11 +15,11 @@ export const formatEditColorEventToSocket = (objectGroup: fabric.Group) => {
 	return message;
 };
 
-export const formatEditFontSizeEventToSocket = (objectGroup: fabric.Group, textObjects: fabric.Text) => {
+export const formatEditFontSizeEventToSocket = (textObject: fabric.Text) => {
 	const message: ObjectDataToServer = {
-		type: objectGroup.type as SocketObjectType,
-		objectId: objectGroup.objectId,
-		fontSize: textObjects.fontSize,
+		type: SocketObjectType.postit,
+		objectId: textObject.objectId,
+		fontSize: textObject.fontSize,
 	};
 
 	return message;
