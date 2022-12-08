@@ -4,11 +4,13 @@ import useModal from '@hooks/useModal';
 import { useState, useEffect } from 'react';
 import { ModalContent, ExportButton } from './index.style';
 import { calcCanvasFullWidthAndHeight } from '../../../utils/fabric.utils';
+import { useParams } from 'react-router-dom';
 
 function ExportModal({ canvas }: { canvas: React.MutableRefObject<fabric.Canvas | null> }) {
 	const { isOpenModal, modalRef, closeModal, openModal } = useModal();
 	const [isExporting, setIsExporting] = useState(false);
 	const [openToast, setOpenToast] = useState(false);
+	const { workspaceId } = useParams();
 
 	const handleClickExportButton = () => {
 		if (!canvas.current) return;
@@ -16,7 +18,6 @@ function ExportModal({ canvas }: { canvas: React.MutableRefObject<fabric.Canvas 
 		setIsExporting(true);
 		setOpenToast(true);
 		const coords = calcCanvasFullWidthAndHeight(canvas.current);
-		console.log(coords);
 		let dataUrl;
 		if (!coords.left || !coords.right || !coords.top || !coords.bottom) {
 			dataUrl = canvas.current.toDataURL();
@@ -33,7 +34,7 @@ function ExportModal({ canvas }: { canvas: React.MutableRefObject<fabric.Canvas 
 		setOpenToast(false);
 		const link = document.createElement('a');
 		link.href = dataUrl;
-		link.download = 'export';
+		link.download = 'boocrum_' + (workspaceId || 'export');
 		document.body.appendChild(link);
 		link.click();
 		document.body.removeChild(link);
