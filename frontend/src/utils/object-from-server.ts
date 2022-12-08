@@ -84,6 +84,7 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 		isSocketObject: true,
 		scaleX: 1 / scaleX,
 		scaleY: 1 / scaleY,
+		width: width * scaleX * 0.9,
 	});
 	nameLabel.set({
 		isSocketObject: true,
@@ -200,6 +201,7 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 					fontSize: updatedObject.fontSize || textObject.fontSize,
 					scaleX: 1 / (groupObject.scaleX || 1),
 					scaleY: 1 / (groupObject.scaleY || 1),
+					width: groupObject.getScaledWidth() * 0.9,
 				});
 			} else if (object.type === ObjectType.rect && updatedObject.color) {
 				const backgroundRect = object as fabric.Rect;
