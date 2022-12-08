@@ -224,7 +224,6 @@ export const calcCanvasFullWidthAndHeight = (canvas: fabric.Canvas) => {
 	};
 	canvas._objects.forEach((object) => {
 		if (object.type in SocketObjectType && object.aCoords) {
-			console.log(object);
 			const {
 				tl: { x: left, y: top },
 				br: { x: right, y: bottom },

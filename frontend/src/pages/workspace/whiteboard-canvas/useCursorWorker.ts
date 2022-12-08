@@ -12,7 +12,6 @@ function useCursorWorker(
 
 	const initWorker = () => {
 		const code = workerModule.toString();
-		console.log(code);
 		const blob = new Blob([`(${code})()`]);
 		return new Worker(URL.createObjectURL(blob));
 	};
@@ -24,7 +23,6 @@ function useCursorWorker(
 		}: {
 			data: { mouse: MousePointer; queueLength: number };
 		}) => {
-			console.log(queueLength);
 			socket.current?.emit('move_pointer', mouse);
 		};
 
