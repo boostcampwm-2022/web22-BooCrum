@@ -30,4 +30,5 @@ export interface ClientToServerEvents {
 	move_object: (arg: ObjectDataToServer) => void;
 	change_role: (arg: { userId: string; role: Role }) => void;
 	scale_object: (arg: ObjectDataToServer) => void;
+	updating_object: (arg: ObjectDataToServer) => void;
 }
