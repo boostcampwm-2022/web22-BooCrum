@@ -1,4 +1,5 @@
 import { workspaceRole } from '@data/workspace-role';
+import { Workspace } from '@api/workspace';
 import {
 	ObjectDataFromServer,
 	MemberInCanvas,
@@ -26,9 +27,14 @@ import {
 } from './object.utils';
 import { isUndefined } from './type.utils';
 
-export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
+export const createObjectFromServer = (
+	canvas: fabric.Canvas,
+	newObject: ObjectDataFromServer,
+	role: Role,
+	workspaceId: string | undefined
+) => {
 	if (newObject.type === SocketObjectType.postit) {
-		createPostitFromServer(canvas, newObject, role);
+		createPostitFromServer(canvas, newObject, role, workspaceId);
 	}
 
 	if (newObject.type === SocketObjectType.section) {
@@ -60,11 +66,21 @@ export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDat
 	canvas.add(drawObject);
 };
 
-export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
+export const createPostitFromServer = async (
+	canvas: fabric.Canvas,
+	newObject: ObjectDataFromServer,
+	role: Role,
+	workspaceId: string | undefined
+) => {
 	const { objectId, left, top, fontSize, color, text, width, height, creator, scaleX, scaleY } = newObject;
 
 	if (!left || !top || !fontSize || !color || isUndefined(text) || !width || !height || !scaleX || !scaleY) return;
-	const nameLabel = createNameLabel({ objectId, text: creator, left, top });
+	const participants = await Workspace.getWorkspaceParticipant(workspaceId || '');
+	const user = participants.filter((part) => {
+		if (part.user.userId === creator) return true;
+	});
+
+	const nameLabel = createNameLabel({ objectId, text: user.length ? user[0].user.nickname : '', left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
 	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
 	const backgroundRect = createRect({ objectId, left, top, color });
