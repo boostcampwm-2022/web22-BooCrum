@@ -9,6 +9,7 @@ import {
 	Role,
 } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
+import LZString from 'lz-string';
 import { v4 } from 'uuid';
 import {
 	createNameLabel,
@@ -24,7 +25,7 @@ import {
 	setPreventResizeEvent,
 	setSectionEditEvent,
 } from './object.utils';
-import { isUndefined } from './type.utils';
+import { isNull, isUndefined } from './type.utils';
 
 export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
 	if (newObject.type === SocketObjectType.postit) {
@@ -41,7 +42,9 @@ export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 };
 
 export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
-	const drawObject = new fabric.Path(newObject.path, {
+	const decodedPath = LZString.decompress(newObject.path || '');
+	if (isNull(decodedPath)) return;
+	const drawObject = new fabric.Path(decodedPath, {
 		type: newObject.type,
 		objectId: newObject.objectId,
 		isSocketObject: true,
@@ -173,7 +176,8 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	if (object.length === 0) return;
 
 	if (object[0].type === SocketObjectType.draw) {
-		const { path, ...updateProperty } = updatedObject;
+		// const decodedPath = LZString.decompress(updatedObject.path || '');
+		const { ...updateProperty } = updatedObject;
 		object[0].set({
 			...updateProperty,
 		});

@@ -1,6 +1,7 @@
 import { ObjectType, ObjectDataToServer, SocketObjectType } from '@pages/workspace/whiteboard-canvas/types';
 
 import { fabric } from 'fabric';
+import LZString from 'lz-string';
 import { v4 } from 'uuid';
 import { toStringPath } from './fabric.utils';
 
@@ -11,7 +12,6 @@ export const formatEditColorEventToSocket = (objectGroup: fabric.Group) => {
 		objectId: objectGroup.objectId,
 		color: currentObject.fill as string,
 	};
-
 	return message;
 };
 
@@ -39,7 +39,9 @@ export const formatObjectDataToServer = (fabricObject: fabric.Object): ObjectDat
 
 	if (fabricObject instanceof fabric.Path) {
 		message.color = fabricObject.stroke;
-		message.path = toStringPath(fabricObject as fabric.Path);
+		const path = toStringPath(fabricObject as fabric.Path);
+		const encodedPath = LZString.compress(path);
+		message.path = encodedPath;
 	}
 
 	if (fabricObject instanceof fabric.Group) {
