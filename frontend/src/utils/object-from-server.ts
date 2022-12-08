@@ -184,7 +184,6 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	const { type, ...updatedProperty } = updatedObject;
 	object.forEach((obj) => {
 		if (obj.type === ObjectType.editable) {
-			console.log(obj.getScaledHeight(), obj.getScaledWidth());
 			obj.set({
 				...updatedProperty,
 				left: updatedProperty.left ? updatedProperty.left + 10 : obj.left,
@@ -199,6 +198,7 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 			const groupObject = obj as fabric.Group;
 			groupObject._objects.forEach((object) => {
 				if (object.type === ObjectType.text || object.type === ObjectType.title) {
+					console.log(object);
 					const textObject = object as fabric.Text;
 					textObject.set({
 						text: updatedObject.text || textObject.text,

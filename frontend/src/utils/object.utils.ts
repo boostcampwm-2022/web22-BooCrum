@@ -148,14 +148,15 @@ export const setPostItEditEvent = (
 		textBox.set({ visible: false });
 		canvas.add(editableTextBox);
 		canvas.setActiveObject(editableTextBox);
-		editableTextBox.enterEditing();
 		editableTextBox.set({
+			text: textBox.text,
 			left: (groupObject?.left || 0) + groupObject.getScaledWidth() * 0.05,
 			top: (groupObject?.top || 0) + groupObject.getScaledHeight() * 0.05,
 			width: groupObject.getScaledWidth() * 0.9,
 			fontSize: textBox.fontSize,
 			evented: true,
 		});
+		editableTextBox.enterEditing();
 		canvas.mode = CanvasType.edit;
 		editableTextBox.fire('changed');
 	});
