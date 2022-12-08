@@ -180,26 +180,37 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 		});
 		return;
 	}
-	object[0].set({
-		...updatedObject,
-	});
 
-	if (object[0] instanceof fabric.Group) {
-		const groupObject = object[0] as fabric.Group;
-		groupObject._objects.forEach((object) => {
-			if (object.type === ObjectType.text || object.type === ObjectType.title) {
-				const textObject = object as fabric.Text;
-				textObject.set({
-					text: updatedObject.text || textObject.text,
-					fontSize: updatedObject.fontSize || textObject.fontSize,
-				});
-			} else if (object.type === ObjectType.rect && updatedObject.color) {
-				const backgroundRect = object as fabric.Rect;
-				backgroundRect.set({ fill: updatedObject.color });
-			}
-		});
-	}
-	canvas.requestRenderAll();
+	const { type, ...updatedProperty } = updatedObject;
+	object.forEach((obj) => {
+		if (obj.type === ObjectType.editable) {
+			console.log(obj.getScaledHeight(), obj.getScaledWidth());
+			obj.set({
+				...updatedProperty,
+				left: updatedProperty.left ? updatedProperty.left + 10 : obj.left,
+				top: updatedProperty.top ? updatedProperty.top + 10 : obj.top,
+				width: updatedProperty.width ? updatedProperty.width - 20 : obj.width,
+			});
+		} else {
+			obj.set({ ...updatedObject });
+		}
+
+		if (obj instanceof fabric.Group) {
+			const groupObject = obj as fabric.Group;
+			groupObject._objects.forEach((object) => {
+				if (object.type === ObjectType.text || object.type === ObjectType.title) {
+					const textObject = object as fabric.Text;
+					textObject.set({
+						text: updatedObject.text || textObject.text,
+						fontSize: updatedObject.fontSize || textObject.fontSize,
+					});
+				} else if (object.type === ObjectType.rect && updatedObject.color) {
+					const backgroundRect = object as fabric.Rect;
+					backgroundRect.set({ fill: updatedObject.color });
+				}
+			});
+		}
+	});
 };
 
 export const selectObjectFromServer = (canvas: fabric.Canvas, objectIds: string[], color: string) => {
