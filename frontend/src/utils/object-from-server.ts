@@ -10,6 +10,7 @@ import {
 	Role,
 } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
+import LZString from 'lz-string';
 import { v4 } from 'uuid';
 import {
 	createNameLabel,
@@ -25,7 +26,7 @@ import {
 	setPreventResizeEvent,
 	setSectionEditEvent,
 } from './object.utils';
-import { isUndefined } from './type.utils';
+import { isNull, isUndefined } from './type.utils';
 
 export const createObjectFromServer = (
 	canvas: fabric.Canvas,
@@ -47,7 +48,14 @@ export const createObjectFromServer = (
 };
 
 export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
-	const drawObject = new fabric.Path(newObject.path, {
+	let decodedPath;
+	if (isUndefined(newObject.path)) return;
+	// 이전에 생성된 path들은 decompress 하지 않는다.
+	if (newObject.path[0] !== 'M') decodedPath = LZString.decompress(newObject.path || '');
+	else decodedPath = newObject.path;
+
+	if (isNull(decodedPath)) return;
+	const drawObject = new fabric.Path(decodedPath, {
 		type: newObject.type,
 		objectId: newObject.objectId,
 		isSocketObject: true,
@@ -92,6 +100,7 @@ export const createPostitFromServer = async (
 		isSocketObject: true,
 		scaleX: 1 / scaleX,
 		scaleY: 1 / scaleY,
+		width: width * scaleX * 0.9,
 	});
 	nameLabel.set({
 		isSocketObject: true,
@@ -185,7 +194,6 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	const object: fabric.Object[] = canvas.getObjects().filter((object) => {
 		return object.objectId === updatedObject.objectId;
 	});
-
 	if (object.length === 0) return;
 
 	if (object[0].type === SocketObjectType.draw) {
@@ -207,6 +215,9 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 				textObject.set({
 					text: updatedObject.text || textObject.text,
 					fontSize: updatedObject.fontSize || textObject.fontSize,
+					scaleX: 1 / (groupObject.scaleX || 1),
+					scaleY: 1 / (groupObject.scaleY || 1),
+					width: groupObject.getScaledWidth() * 0.9,
 				});
 			} else if (object.type === ObjectType.rect && updatedObject.color) {
 				const backgroundRect = object as fabric.Rect;
