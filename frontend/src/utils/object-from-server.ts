@@ -177,11 +177,10 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	const object: fabric.Object[] = canvas.getObjects().filter((object) => {
 		return object.objectId === updatedObject.objectId;
 	});
-
 	if (object.length === 0) return;
 
 	if (object[0].type === SocketObjectType.draw) {
-		const { ...updateProperty } = updatedObject;
+		const { path, ...updateProperty } = updatedObject;
 		object[0].set({
 			...updateProperty,
 		});
