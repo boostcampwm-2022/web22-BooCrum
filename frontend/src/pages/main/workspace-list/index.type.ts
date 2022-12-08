@@ -6,5 +6,6 @@ export interface WorkspaceCardType {
 		name: string;
 		registerDate: string;
 		updateDate: string;
+		thumbnailUrl: string;
 	};
 }

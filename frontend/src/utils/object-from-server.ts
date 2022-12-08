@@ -70,6 +70,7 @@ export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDat
 		strokeLineCap: 'round',
 		strokeLineJoin: 'round',
 		fill: undefined,
+		lockRotation: true,
 	});
 	canvas.add(drawObject);
 };
@@ -81,8 +82,8 @@ export const createPostitFromServer = async (
 	workspaceId: string | undefined
 ) => {
 	const { objectId, left, top, fontSize, color, text, width, height, creator, scaleX, scaleY } = newObject;
-
 	if (!left || !top || !fontSize || !color || isUndefined(text) || !width || !height || !scaleX || !scaleY) return;
+
 	const participants = await Workspace.getWorkspaceParticipant(workspaceId || '');
 	const user = participants.filter((part) => {
 		if (part.user.userId === creator) return true;
@@ -91,7 +92,7 @@ export const createPostitFromServer = async (
 	const nameLabel = createNameLabel({ objectId, text: user.length ? user[0].user.nickname : '', left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
 	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
-	const backgroundRect = createRect({ objectId, left, top, color });
+	const backgroundRect = createRect(ObjectType.postit, { objectId, left, top, color });
 
 	backgroundRect.set({
 		isSocketObject: true,
@@ -120,6 +121,8 @@ export const createPostitFromServer = async (
 		scaleY,
 	});
 
+	console.log(postit);
+
 	setLimitHeightEvent(canvas, textBox, backgroundRect);
 	setLimitHeightEvent(canvas, editableTextBox, postit);
 	setPostItEditEvent(canvas, postit, editableTextBox, textBox);
@@ -134,7 +137,7 @@ export const createSectionFromServer = (canvas: fabric.Canvas, newObject: Object
 	const editableTitle = createSectionTitle({ objectId, text: text, left, top: top + 25, editable: true });
 	const sectionTitle = createSectionTitle({ objectId, text: text, left, top, editable: false });
 	const sectionBackground = createTitleBackground({ objectId, left, top, color });
-	const backgroundRect = createRect({ objectId, left, top, color });
+	const backgroundRect = createRect(ObjectType.section, { objectId, left, top, color });
 
 	sectionTitle.set({
 		isSocketObject: true,
@@ -190,6 +193,29 @@ export const moveCursorFromServer = (membersInCanvas: MemberInCanvas[], userMous
 	memberInCanvasById[0].cursorObject.bringToFront();
 };
 
+const updateObject = (object: fabric.Object, updatedObject: ObjectDataFromServer) => {
+	object.set({ ...updatedObject });
+
+	if (object instanceof fabric.Group) {
+		const groupObject = object as fabric.Group;
+		groupObject._objects.forEach((obj) => {
+			if (obj.type === ObjectType.text || obj.type === ObjectType.title) {
+				const textObject = obj as fabric.Text;
+				textObject.set({
+					text: updatedObject.text || textObject.text,
+					fontSize: updatedObject.fontSize || textObject.fontSize,
+					scaleX: 1 / (groupObject.scaleX || 1),
+					scaleY: 1 / (groupObject.scaleY || 1),
+					width: groupObject.getScaledWidth() * 0.9,
+				});
+			} else if (obj.type === ObjectType.rect && updatedObject.color) {
+				const backgroundRect = obj as fabric.Rect;
+				backgroundRect.set({ fill: updatedObject.color });
+			}
+		});
+	}
+};
+
 export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: ObjectDataFromServer) => {
 	const object: fabric.Object[] = canvas.getObjects().filter((object) => {
 		return object.objectId === updatedObject.objectId;
@@ -203,29 +229,34 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 		});
 		return;
 	}
-	object[0].set({
-		...updatedObject,
-	});
 
-	if (object[0] instanceof fabric.Group) {
-		const groupObject = object[0] as fabric.Group;
-		groupObject._objects.forEach((object) => {
-			if (object.type === ObjectType.text || object.type === ObjectType.title) {
-				const textObject = object as fabric.Text;
-				textObject.set({
-					text: updatedObject.text || textObject.text,
-					fontSize: updatedObject.fontSize || textObject.fontSize,
-					scaleX: 1 / (groupObject.scaleX || 1),
-					scaleY: 1 / (groupObject.scaleY || 1),
-					width: groupObject.getScaledWidth() * 0.9,
-				});
-			} else if (object.type === ObjectType.rect && updatedObject.color) {
-				const backgroundRect = object as fabric.Rect;
-				backgroundRect.set({ fill: updatedObject.color });
-			}
+	const { type, ...updatedProperty } = updatedObject;
+
+	if (object[0].type === ObjectType.editable) {
+		const [editableText, rectObject] = object;
+		let left = editableText.left,
+			top = editableText.top;
+		const width = rectObject.getScaledWidth() * 0.9;
+
+		if (rectObject.type === ObjectType.postit) {
+			left = updatedProperty.left ? updatedProperty.left + rectObject.getScaledWidth() * 0.05 : left;
+			top = updatedProperty.top ? updatedProperty.top + rectObject.getScaledHeight() * 0.05 : top;
+		} else if (rectObject.type === ObjectType.section) {
+			left = updatedProperty.left ? updatedProperty.left + rectObject.getScaledWidth() * 0.05 : left;
+		}
+
+		editableText.set({
+			left,
+			top,
+			width,
+		});
+
+		rectObject.set({ ...updatedObject });
+	} else {
+		object.forEach((obj) => {
+			updateObject(obj, updatedObject);
 		});
 	}
-	canvas.requestRenderAll();
 };
 
 export const selectObjectFromServer = (canvas: fabric.Canvas, objectIds: string[], color: string) => {

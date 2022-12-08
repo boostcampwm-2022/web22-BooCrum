@@ -20,6 +20,15 @@ export const setEditMenu = (object: fabric.Object) => {
 	return [left, top];
 };
 
+const setShadow = () => {
+	return new fabric.Shadow({
+		color: 'gray',
+		blur: 7,
+		offsetX: 1,
+		offsetY: 1,
+	});
+};
+
 export const createNameLabel = (options: NameLabelOptions) => {
 	const defaultLeft = options.left + 300 * 0.05;
 	const defaultTop = options.top + 275;
@@ -40,7 +49,7 @@ export const createNameLabel = (options: NameLabelOptions) => {
 	return nameLabelText;
 };
 
-export const createRect = (options: RectOptions) => {
+export const createRect = (type: ObjectType, options: RectOptions) => {
 	const defaultWidth = 300;
 	const defaultHeight = 300;
 
@@ -55,6 +64,15 @@ export const createRect = (options: RectOptions) => {
 		objectCaching: false,
 		isSocketObject: false,
 	});
+
+	if (type === ObjectType.postit) rect.set({ shadow: setShadow() });
+	else if (type === ObjectType.section) {
+		rect.set({
+			opacity: 0.8,
+			rx: 5,
+			ry: 5,
+		});
+	}
 
 	return rect;
 };
@@ -94,6 +112,8 @@ export const createPostIt = (options: PostItOptions) => {
 		objectCaching: false,
 		isSocketObject: false,
 		selectable: options.selectable,
+		lockRotation: true,
+		lockScalingFlip: true,
 	});
 
 	postit.set({ left: options.left, top: options.top });
@@ -132,14 +152,16 @@ export const setPostItEditEvent = (
 		textBox.set({ visible: false });
 		canvas.add(editableTextBox);
 		canvas.setActiveObject(editableTextBox);
-		editableTextBox.enterEditing();
+		console.log(textBox.fontSize, groupObject.getScaledWidth());
 		editableTextBox.set({
+			text: textBox.text,
 			left: (groupObject?.left || 0) + groupObject.getScaledWidth() * 0.05,
 			top: (groupObject?.top || 0) + groupObject.getScaledHeight() * 0.05,
 			width: groupObject.getScaledWidth() * 0.9,
 			fontSize: textBox.fontSize,
 			evented: true,
 		});
+		editableTextBox.enterEditing();
 		canvas.mode = CanvasType.edit;
 		editableTextBox.fire('changed');
 	});
@@ -190,7 +212,7 @@ export const addPostIt = (
 	const id = v4();
 	const nameLabel = createNameLabel({ objectId: id, text: creator, left: x, top: y });
 	const textBox = createTextBox({ objectId: id, left: x, top: y, fontSize: fontSize, editable: false });
-	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
+	const backgroundRect = createRect(ObjectType.postit, { objectId: id, left: x, top: y, color: fill });
 	const postit = createPostIt({
 		objectId: id,
 		left: x,
@@ -251,6 +273,8 @@ export const createSection = (options: SectionOption) => {
 		top: options.top,
 		objectCaching: false,
 		selectable: options.selectable,
+		lockRotation: true,
+		lockScalingFlip: true,
 	});
 	return section;
 };
@@ -336,7 +360,7 @@ export const addSection = (canvas: fabric.Canvas, x: number, y: number, fill: st
 	const id = v4();
 	const sectionTitle = createSectionTitle({ objectId: id, text: 'SECTION', left: x, top: y, editable: false });
 	const sectionBackground = createTitleBackground({ objectId: id, left: x, top: y, color: fill });
-	const backgroundRect = createRect({ objectId: id, left: x, top: y, color: fill });
+	const backgroundRect = createRect(ObjectType.section, { objectId: id, left: x, top: y, color: fill });
 	const section = createSection({
 		objectId: id,
 		left: x,

@@ -11,10 +11,13 @@ import {
   ForbiddenException,
   UseGuards,
   Session,
+  ValidationPipe,
 } from '@nestjs/common';
 import { Request } from 'express';
 import { AuthorizationGuard } from 'src/auth/guard/session.guard';
+import { PartialSearchRequestDto } from './dto/partial-search.dto';
 import { UserDto } from './dto/user.dto';
+import { PartSearchTransformPipe } from './pipe/part-search-transform.pipe';
 import { UserService } from './user.service';
 
 @Controller('user')
@@ -53,20 +56,35 @@ export class UserController {
     return await this.userService.getUserData(session.user.userId);
   }
 
-  @Get('/info/:type')
+  @Get('/info/profile')
   @UseGuards(AuthorizationGuard)
-  async getMyPartialData(@Param('type') type: string, @Session() session: Record<string, any>): Promise<any> {
+  async getMyProfileData(@Session() session: Record<string, any>): Promise<any> {
     const userId = session.user.userId;
-    switch (type) {
-      case 'profile':
-        return await this.userService.getUserProfileData(userId);
-      case 'team':
-        return await this.userService.getUserTeamData(userId);
-      case 'workspace':
-        return await this.userService.getUserWorkspaceData(userId);
-      default:
-        throw new BadRequestException(`잘못된 유저 데이터 접근입니다. Param: ${type}`);
-    }
+    return await this.userService.getUserProfileData(userId);
+  }
+
+  @Get('/info/team')
+  @UseGuards(AuthorizationGuard)
+  async getMyTeamData(@Session() session: Record<string, any>): Promise<any> {
+    const userId = session.user.userId;
+    return await this.userService.getUserTeamData(userId);
+  }
+
+  @Get('/info/workspace/:filter/:page')
+  @UseGuards(AuthorizationGuard)
+  async getMyPartialWorkspaceData(
+    @Param(new PartSearchTransformPipe(), new ValidationPipe()) { filter, page }: PartialSearchRequestDto,
+    @Session() session: Record<string, any>,
+  ): Promise<any> {
+    const userId = session.user.userId;
+    return await this.userService.getPartialUserWorkspaceData(userId, filter, (page - 1) * 10, 10);
+  }
+
+  @Get('/info/workspace')
+  @UseGuards(AuthorizationGuard)
+  async getMyAllWorkspaceData(@Session() session: Record<string, any>): Promise<any> {
+    const userId = session.user.userId;
+    return await this.userService.getUserWorkspaceData(userId);
   }
 
   @Patch('/info')
