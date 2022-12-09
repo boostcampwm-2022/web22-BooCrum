@@ -73,6 +73,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 				createObjectFromServer(canvas.current, object, role, workspaceId);
 			});
 
+			canvas.current?.requestRenderAll();
 			setIsEndInit(true);
 		});
 
@@ -141,6 +142,11 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		});
 
 		socket.current.on('scale_object', ({ userId, objectData }) => {
+			if (isNull(canvas.current) || isMessageByMe(userId)) return;
+			updateObjectFromServer(canvas.current, objectData);
+		});
+
+		socket.current.on('updating_object', ({ userId, objectData }) => {
 			if (isNull(canvas.current) || isMessageByMe(userId)) return;
 			updateObjectFromServer(canvas.current, objectData);
 		});

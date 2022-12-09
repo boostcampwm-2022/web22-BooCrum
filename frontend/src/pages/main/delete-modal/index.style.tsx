@@ -4,6 +4,7 @@ export const DeleteModalLayout = styled.div`
 	div {
 		padding: 0.5em;
 		font-size: 16px;
+		margin-left: 0.5em;
 	}
 	button {
 		position: absolute;
@@ -15,5 +16,6 @@ export const DeleteModalLayout = styled.div`
 		font-weight: 600;
 		padding: 1em;
 		border-radius: 30px;
+		cursor: pointer;
 	}
 `;

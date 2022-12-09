@@ -18,15 +18,30 @@ import {
 } from '@utils/object-to-server';
 import { fabric } from 'fabric';
 import { isNull, isUndefined } from '@utils/type.utils';
+import { createThumbnailImage } from '@utils/fabric.utils';
+import { Workspace } from '@api/workspace';
+import { useParams } from 'react-router-dom';
 
 interface UseCanvasToSocketProps {
 	canvas: React.MutableRefObject<fabric.Canvas | null>;
 	socket: React.MutableRefObject<Socket<ServerToClientEvents, ClientToServerEvents> | null>;
+	cursorWorker: React.MutableRefObject<Worker | undefined>;
+	objectWorker: React.MutableRefObject<Worker | undefined>;
 }
 
-function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
+function useCanvasToSocket({ canvas, socket, cursorWorker, objectWorker }: UseCanvasToSocketProps) {
 	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, openMenu, selectedType, menuPosition } =
 		useEditMenu(canvas);
+	const { workspaceId } = useParams();
+
+	const updateThumbnail = () => {
+		if (!canvas.current || !workspaceId) return;
+		const thumbnailImage = createThumbnailImage(canvas.current);
+
+		Workspace.postThumbnail(workspaceId, {
+			file: thumbnailImage,
+		});
+	};
 
 	useEffect(() => {
 		if (isNull(canvas.current)) return;
@@ -41,6 +56,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatObjectDataToServer(fabricObject);
 				socket.current?.emit('create_object', message);
+				updateThumbnail();
 			}
 		});
 
@@ -50,6 +66,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatObjectDataToServer(fabricObject);
 				socket.current?.emit('update_object', message);
+				updateThumbnail();
 				return;
 			}
 
@@ -61,6 +78,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 					socket.current?.emit('update_object', message);
 				}
 			});
+			updateThumbnail();
 		});
 
 		canvas.current.on('object:removed', ({ target: fabricObject }) => {
@@ -71,13 +89,15 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			socket.current?.emit('delete_object', {
 				objectId: fabricObject.objectId,
 			});
+			updateThumbnail();
 		});
 
 		canvas.current.on('object:moving', ({ target: fabricObject }) => {
 			if (isUndefined(fabricObject)) return;
 			if (fabricObject.type in SocketObjectType) {
 				const message = formatMoveObjectEventToSocket(fabricObject as fabric.Group);
-				socket.current?.emit('move_object', message);
+				objectWorker.current?.postMessage(message);
+				// socket.current?.emit('move_object', message);
 				return;
 			}
 
@@ -86,7 +106,8 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			fabricObject._objects.forEach((object) => {
 				if (object.type in SocketObjectType) {
 					const message = formatMoveObjectEventToSocketForGroup(fabricObject, object as fabric.Group);
-					socket.current?.emit('move_object', message);
+					objectWorker.current?.postMessage(message);
+					// socket.current?.emit('move_object', message);
 				}
 			});
 		});
@@ -96,7 +117,8 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 
 			if (fabricObject.type in ObjectType) {
 				const message = formatScaleObjectEventToSocket(fabricObject as fabric.Group);
-				socket.current?.emit('scale_object', message);
+				objectWorker.current?.postMessage(message);
+				// socket.current?.emit('scale_object', message);
 				return;
 			}
 
@@ -105,7 +127,8 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 			fabricObject._objects.forEach((object) => {
 				if (object.type in SocketObjectType) {
 					const message = formatScaleObjectEventToSocketForGroup(fabricObject, object as fabric.Group);
-					socket.current?.emit('scale_object', message);
+					objectWorker.current?.postMessage(message);
+					// socket.current?.emit('scale_object', message);
 				}
 			});
 		});
@@ -129,20 +152,18 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 		});
 
 		canvas.current.on('font:modified', ({ target: fabricObject }) => {
-			if (!(fabricObject instanceof fabric.Group)) return;
-			if (fabricObject.type !== ObjectType.postit) return;
+			const textObject = fabricObject as fabric.Text;
+			if (isUndefined(textObject)) return;
 
-			const textObjects = fabricObject._objects.filter((obj) => obj.type === ObjectType.text);
-
-			if (textObjects.length < 1) return;
-
-			const message = formatEditFontSizeEventToSocket(fabricObject, textObjects[0] as fabric.Text);
+			const message = formatEditFontSizeEventToSocket(textObject);
 			socket.current?.emit('update_object', message);
 		});
 
 		canvas.current.on('text:changed', ({ target: fabricObject }) => {
+			console.log(fabricObject);
 			if (isUndefined(fabricObject) || fabricObject.type !== ObjectType.editable) return;
 			const message = formatEditTextEventToSocket(fabricObject as fabric.Text);
+			console.log(message);
 			socket.current?.emit('update_object', message);
 		});
 
@@ -186,7 +207,7 @@ function useCanvasToSocket({ canvas, socket }: UseCanvasToSocketProps) {
 				x,
 				y,
 			};
-			socket.current?.emit('move_pointer', message);
+			cursorWorker.current?.postMessage(message);
 		});
 	}, []);
 

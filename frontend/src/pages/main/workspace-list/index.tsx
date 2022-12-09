@@ -53,7 +53,7 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 						role={item.role}
 						title={item.workspace.name}
 						timestamp={setTimestamp(item.workspace.updateDate)}
-						imgSrc={''}
+						imgSrc={item.workspace.thumbnailUrl}
 						setWorkspaceList={setWorkspaceList}
 					/>
 				))}

@@ -28,6 +28,8 @@ export const UserDetail = styled.div`
 	display: none;
 
 	box-shadow: 1px 1px 3px rgba(0, 0, 0, 0.25);
+
+	white-space: nowrap;
 `;
 
 export const UserInfo = styled.div<{ color: string }>`
@@ -43,6 +45,8 @@ export const UserInfo = styled.div<{ color: string }>`
 	overflow: hidden;
 
 	cursor: pointer;
+
+	font-weight: 700;
 
 	& + & {
 		margin-left: 8px;
