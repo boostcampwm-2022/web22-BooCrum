@@ -31,7 +31,12 @@ function PenTypeBox() {
 			</Tool>
 			{isSelectedCursor(cursor.type, toolItems.PEN) &&
 				colorChips.map((color) => (
-					<ColorChip key={color} color={color} onClick={() => handleCursorColor(color)}></ColorChip>
+					<ColorChip
+						key={color}
+						color={color}
+						selected={color === cursor.color}
+						onClick={() => handleCursorColor(color)}
+					></ColorChip>
 				))}
 		</Container>
 	);

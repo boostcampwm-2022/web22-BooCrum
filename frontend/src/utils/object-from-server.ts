@@ -1,4 +1,5 @@
 import { workspaceRole } from '@data/workspace-role';
+import { Workspace } from '@api/workspace';
 import {
 	ObjectDataFromServer,
 	MemberInCanvas,
@@ -9,6 +10,7 @@ import {
 	Role,
 } from '@pages/workspace/whiteboard-canvas/types';
 import { fabric } from 'fabric';
+import LZString from 'lz-string';
 import { v4 } from 'uuid';
 import {
 	createNameLabel,
@@ -21,13 +23,20 @@ import {
 	setLimitChar,
 	setLimitHeightEvent,
 	setPostItEditEvent,
+	setPreventRemainCursor,
 	setPreventResizeEvent,
 	setSectionEditEvent,
 } from './object.utils';
+import { isNull, isUndefined } from './type.utils';
 
-export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
+export const createObjectFromServer = (
+	canvas: fabric.Canvas,
+	newObject: ObjectDataFromServer,
+	role: Role,
+	workspaceId: string | undefined
+) => {
 	if (newObject.type === SocketObjectType.postit) {
-		createPostitFromServer(canvas, newObject, role);
+		createPostitFromServer(canvas, newObject, role, workspaceId);
 	}
 
 	if (newObject.type === SocketObjectType.section) {
@@ -40,7 +49,14 @@ export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 };
 
 export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer) => {
-	const drawObject = new fabric.Path(newObject.path, {
+	let decodedPath;
+	if (isUndefined(newObject.path)) return;
+	// 이전에 생성된 path들은 decompress 하지 않는다.
+	if (newObject.path[0] !== 'M') decodedPath = LZString.decompress(newObject.path || '');
+	else decodedPath = newObject.path;
+
+	if (isNull(decodedPath)) return;
+	const drawObject = new fabric.Path(decodedPath, {
 		type: newObject.type,
 		objectId: newObject.objectId,
 		isSocketObject: true,
@@ -52,18 +68,32 @@ export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDat
 		scaleY: newObject.scaleY,
 		stroke: newObject.color,
 		strokeWidth: canvas.freeDrawingBrush.width,
+		strokeLineCap: 'round',
+		strokeLineJoin: 'round',
 		fill: undefined,
+		lockRotation: true,
 	});
 	canvas.add(drawObject);
 };
 
-export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
+export const createPostitFromServer = async (
+	canvas: fabric.Canvas,
+	newObject: ObjectDataFromServer,
+	role: Role,
+	workspaceId: string | undefined
+) => {
 	const { objectId, left, top, fontSize, color, text, width, height, creator, scaleX, scaleY } = newObject;
-	if (!left || !top || !fontSize || !color || !text || !width || !height || !scaleX || !scaleY) return;
-	const nameLabel = createNameLabel({ objectId, text: creator, left, top });
+	if (!left || !top || !fontSize || !color || isUndefined(text) || !width || !height || !scaleX || !scaleY) return;
+
+	const participants = await Workspace.getWorkspaceParticipant(workspaceId || '');
+	const user = participants.filter((part) => {
+		if (part.user.userId === creator) return true;
+	});
+
+	const nameLabel = createNameLabel({ objectId, text: user.length ? user[0].user.nickname : '', left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
 	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
-	const backgroundRect = createRect({ objectId, left, top, color });
+	const backgroundRect = createRect(ObjectType.postit, { objectId, left, top, color });
 
 	backgroundRect.set({
 		isSocketObject: true,
@@ -72,6 +102,7 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 		isSocketObject: true,
 		scaleX: 1 / scaleX,
 		scaleY: 1 / scaleY,
+		width: width * scaleX * 0.9,
 	});
 	nameLabel.set({
 		isSocketObject: true,
@@ -95,17 +126,18 @@ export const createPostitFromServer = (canvas: fabric.Canvas, newObject: ObjectD
 	setLimitHeightEvent(canvas, editableTextBox, postit);
 	setPostItEditEvent(canvas, postit, editableTextBox, textBox);
 	setPreventResizeEvent(objectId, canvas, textBox, postit);
+	setPreventRemainCursor(canvas, editableTextBox);
 	canvas.add(postit);
 };
 
 export const createSectionFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
 	const { objectId, left, top, fontSize, color, scaleX, scaleY, text } = newObject;
-	if (!left || !top || !fontSize || !color || !scaleX || !scaleY || !text) return;
+	if (!left || !top || !fontSize || !color || !scaleX || !scaleY || isUndefined(text)) return;
 
 	const editableTitle = createSectionTitle({ objectId, text: text, left, top: top + 25, editable: true });
 	const sectionTitle = createSectionTitle({ objectId, text: text, left, top, editable: false });
 	const sectionBackground = createTitleBackground({ objectId, left, top, color });
-	const backgroundRect = createRect({ objectId, left, top, color });
+	const backgroundRect = createRect(ObjectType.section, { objectId, left, top, color });
 
 	sectionTitle.set({
 		isSocketObject: true,
@@ -142,6 +174,7 @@ export const createSectionFromServer = (canvas: fabric.Canvas, newObject: Object
 	setLimitChar(canvas, section, sectionTitle, sectionBackground);
 	setLimitChar(canvas, section, editableTitle, sectionBackground);
 	setSectionEditEvent(canvas, section, editableTitle, sectionTitle);
+	setPreventRemainCursor(canvas, editableTitle);
 
 	canvas.add(section);
 	sectionTitle.fire('changed');
@@ -161,11 +194,39 @@ export const moveCursorFromServer = (membersInCanvas: MemberInCanvas[], userMous
 	memberInCanvasById[0].cursorObject.bringToFront();
 };
 
+const updateObject = (object: fabric.Object, updatedObject: ObjectDataFromServer) => {
+	object.set({ ...updatedObject });
+
+	if (object instanceof fabric.Group) {
+		const groupObject = object as fabric.Group;
+		groupObject._objects.forEach((obj) => {
+			if (obj.type === ObjectType.text) {
+				const textObject = obj as fabric.Text;
+				textObject.set({
+					text: updatedObject.text === undefined ? textObject.text : updatedObject.text,
+					fontSize: updatedObject.fontSize || textObject.fontSize,
+					scaleX: 1 / (groupObject.scaleX || 1),
+					scaleY: 1 / (groupObject.scaleY || 1),
+					width: groupObject.getScaledWidth() * 0.9,
+				});
+			} else if (obj.type === ObjectType.title) {
+				const textObject = obj as fabric.Text;
+				textObject.set({
+					text: updatedObject.text === undefined ? textObject.text : updatedObject.text,
+					fontSize: updatedObject.fontSize || textObject.fontSize,
+				});
+			} else if (obj.type === ObjectType.rect && updatedObject.color) {
+				const backgroundRect = obj as fabric.Rect;
+				backgroundRect.set({ fill: updatedObject.color });
+			}
+		});
+	}
+};
+
 export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: ObjectDataFromServer) => {
 	const object: fabric.Object[] = canvas.getObjects().filter((object) => {
 		return object.objectId === updatedObject.objectId;
 	});
-
 	if (object.length === 0) return;
 
 	if (object[0].type === SocketObjectType.draw) {
@@ -176,23 +237,32 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 		return;
 	}
 
-	object[0].set({
-		...updatedObject,
-	});
+	const { type, ...updatedProperty } = updatedObject;
 
-	if (object[0] instanceof fabric.Group) {
-		const groupObject = object[0] as fabric.Group;
-		groupObject._objects.forEach((object) => {
-			if (object.type === ObjectType.text || object.type === ObjectType.title) {
-				const textObject = object as fabric.Text;
-				textObject.set({
-					text: updatedObject.text || textObject.text,
-					fontSize: updatedObject.fontSize || textObject.fontSize,
-				});
-			} else if (object.type === ObjectType.rect && updatedObject.color) {
-				const backgroundRect = object as fabric.Rect;
-				backgroundRect.set({ fill: updatedObject.color });
-			}
+	if (object[0].type === ObjectType.editable) {
+		const [editableText, rectObject] = object;
+		let left = editableText.left,
+			top = editableText.top;
+		const width = rectObject.getScaledWidth() * 0.9;
+
+		if (rectObject.type === ObjectType.postit) {
+			left = updatedProperty.left ? updatedProperty.left + rectObject.getScaledWidth() * 0.05 : left;
+			top = updatedProperty.top ? updatedProperty.top + rectObject.getScaledHeight() * 0.05 : top;
+		} else if (rectObject.type === ObjectType.section) {
+			left = updatedProperty.left ? updatedProperty.left + rectObject.getScaledWidth() * 0.05 : left;
+		}
+
+		editableText.set({
+			left,
+			top,
+			width,
+		});
+
+		rectObject.set({ ...updatedObject });
+	} else {
+		console.log(object);
+		object.forEach((obj) => {
+			updateObject(obj, updatedObject);
 		});
 	}
 };

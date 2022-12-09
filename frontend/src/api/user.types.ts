@@ -25,6 +25,7 @@ interface WorkspaceInfo {
 	name: 'string';
 	registerDate: 'string';
 	updateDate: 'string';
+	thumbnailUrl: string;
 }
 
 export interface WorkspaceData {

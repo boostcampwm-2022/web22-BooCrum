@@ -23,10 +23,10 @@ function ExportModal({ canvas }: { canvas: React.MutableRefObject<fabric.Canvas 
 			dataUrl = canvas.current.toDataURL();
 		} else {
 			dataUrl = canvas.current.toDataURL({
-				left: coords.left - 20,
-				top: coords.top - 20,
-				width: coords.right - coords.left + 40,
-				height: coords.bottom - coords.top + 40,
+				left: coords.left - 60,
+				top: coords.top - 60,
+				width: coords.right - coords.left + 120,
+				height: coords.bottom - coords.top + 120,
 			});
 		}
 		closeModal();

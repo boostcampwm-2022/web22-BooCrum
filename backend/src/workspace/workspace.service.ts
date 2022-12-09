@@ -54,7 +54,6 @@ export class WorkspaceService {
       const templateBucket = await this.templateBucketModel.findOne({ templateId }, { objects: 1 }, { lean: true });
       if (templateBucket) newBucket.objects = templateBucket.objects;
     }
-    console.log(templateId, newBucket);
     await newBucket.save();
     return true;
   }

@@ -16,6 +16,12 @@ function UserList() {
 					<UserDetail>{member.nickname}</UserDetail>
 				</UserInfo>
 			))}
+			{members.length > 5 && (
+				<UserInfo color="#d8d8d8">
+					...
+					<UserDetail>+{members.length - 5}명의 사용자</UserDetail>
+				</UserInfo>
+			)}
 		</Container>
 	);
 }

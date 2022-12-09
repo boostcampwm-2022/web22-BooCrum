@@ -99,28 +99,36 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 
 		const currentGroup = currentCanvas.getActiveObject() as fabric.Group;
 
+		let selectedRect = currentGroup;
+
+		if (currentGroup.type === ObjectType.editable) {
+			const currentRect = currentCanvas._objects.filter((obj) => obj.objectId === currentGroup.objectId);
+			if (currentRect.length < 2) return;
+			selectedRect = (currentGroup.groupType === ObjectType.section ? currentRect[0] : currentRect[1]) as fabric.Group;
+		}
+
 		setColor(color);
 
-		if (currentGroup.type === ObjectType.section || currentGroup.type === ObjectType.postit) {
-			const [backgroundRect, ...currentObjects] = currentGroup._objects;
+		if (selectedRect.type === ObjectType.section || selectedRect.type === ObjectType.postit) {
+			const [backgroundRect, ...currentObjects] = selectedRect._objects;
 			if (!backgroundRect || currentObjects.length < 2) return;
 
 			if (backgroundRect) backgroundRect.fill = color;
-			if (currentGroup.type === ObjectType.section) currentObjects[0].fill = color;
+			if (selectedRect.type === ObjectType.section) currentObjects[0].fill = color;
 		}
 
-		currentGroup._objects.forEach((object) => {
-			const currentGroup = object as fabric.Group;
-			if (currentGroup.type === ObjectType.section || currentGroup.type === ObjectType.postit) {
-				const [backgroundRect, ...currentObjects] = currentGroup._objects;
+		selectedRect._objects.forEach((object) => {
+			const selectedGroup = object as fabric.Group;
+			if (selectedGroup.type === ObjectType.section || selectedGroup.type === ObjectType.postit) {
+				const [backgroundRect, ...currentObjects] = selectedGroup._objects;
 				if (!backgroundRect || currentObjects.length < 2) return;
 
 				if (backgroundRect) backgroundRect.fill = color;
-				if (currentGroup.type === ObjectType.section) currentObjects[0].fill = color;
+				if (selectedGroup.type === ObjectType.section) currentObjects[0].fill = color;
 			}
 		});
 
-		currentCanvas.fire('color:modified', { target: currentGroup });
+		currentCanvas.fire('color:modified', { target: selectedRect });
 		currentCanvas.requestRenderAll();
 	};
 
@@ -147,18 +155,23 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	};
 
 	const setPostItFontSize = (e: KeyboardEvent) => {
-		if (e.key !== 'Enter') return;
+		if (e.key !== 'Enter' || !isOpen) return;
 
 		const currentCanvas = canvas.current as fabric.Canvas;
 		if (!currentCanvas) return;
 
-		const currentGroup = currentCanvas.getActiveObject() as fabric.Group;
-		const textObject = currentGroup._objects[1] as fabric.Text;
-		if (!textObject) return;
+		const currentGroup = currentCanvas.getActiveObject();
+
+		let textObject;
+		if (currentGroup.type === ObjectType.editable) {
+			textObject = currentGroup as fabric.Text;
+		} else {
+			textObject = (currentGroup as fabric.Group)._objects[1] as fabric.Text;
+		}
 
 		textObject.fontSize = fontSizeRef.current;
 
-		currentCanvas.fire('font:modified', { target: currentGroup });
+		currentCanvas.fire('font:modified', { target: textObject });
 		currentCanvas.requestRenderAll();
 	};
 

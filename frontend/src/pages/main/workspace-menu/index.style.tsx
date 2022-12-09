@@ -4,7 +4,7 @@ export const WorkspaceMenuList = styled.ul`
 	margin: 0;
 	padding: 0;
 	list-style: none;
-
+	cursor: pointer;
 	width: 100px;
 	background: ${({ theme }) => theme.white};
 
@@ -17,5 +17,8 @@ export const WorkspaceMenuItem = styled.li`
 	padding: 5px;
 	:last-child {
 		border: none;
+	}
+	:hover {
+		color: ${({ theme }) => theme.blue_2};
 	}
 `;

@@ -175,4 +175,40 @@ export class UserService {
     if (!userData) throw new BadRequestException('유효하지 않은 사용자 ID입니다.');
     return userData.workspaceMember;
   }
+
+  /**
+   * 특정 필터를 기반으로 특정 유저가 접촉한 Workspace 목록의 페이지네이션을 시도합니다.
+   * @param userId 워크스페이스 목록을 조회할 유저의 ID
+   * @param filter 워크스페이스 정렬에 쓰일 필터
+   * @param offset 어디서부터 가져올 것인지 지정
+   * @param limit 가져올 최대 워크스페이스 개수
+   * @returns Workspace 목록을 가져옵니다.
+   */
+  async getPartialUserWorkspaceData(userId: string, filter: WORKSPACE_FILTERS, offset: number, limit: number) {
+    if (isNaN(+offset) || isNaN(+limit))
+      throw new BadRequestException('offset과 limit는 number로 지정해주시기 바랍니다.');
+
+    let queryBuilder = this.dataSource
+      .createQueryBuilder(WorkspaceMember, 'wm')
+      .where('wm.user_id = :id', { id: userId })
+      .leftJoinAndSelect('wm.workspace', 'ws')
+      .offset(offset)
+      .limit(limit)
+      .select(['wm.role', 'ws']);
+
+    switch (filter) {
+      case 'last-created':
+        queryBuilder = queryBuilder.orderBy('ws.register_date', 'DESC');
+        break;
+      case 'last-updated':
+        queryBuilder = queryBuilder.orderBy('ws.update_date', 'DESC');
+        break;
+      case 'alphabetically':
+        queryBuilder = queryBuilder.orderBy('ws.name', 'ASC');
+        break;
+      default:
+        throw new BadRequestException('잘못된 Filter 정보입니다.');
+    }
+    return await queryBuilder.getMany();
+  }
 }
