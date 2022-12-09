@@ -91,7 +91,7 @@ export class UserManagementService {
     let userData = await this.findUserDataInWorkspaceByUserId(userId, workspaceId);
     if (userData) {
       userData.count++;
-      this.socketUserDataMap.set(client.id, userData);
+      await this.socketUserDataMap.set(client.id, JSON.stringify(userData));
       return userData;
     }
 
@@ -100,7 +100,7 @@ export class UserManagementService {
     if (!userData) throw new Error('유저 정보 초기화 실패');
     userData.count++;
 
-    this.socketUserDataMap.set(client.id, userData);
+    await this.socketUserDataMap.set(client.id, JSON.stringify(userData));
     if (!this.workspaceUserDataMap.has(workspaceId)) this.workspaceUserDataMap.set(workspaceId, [userData]);
     else this.workspaceUserDataMap.get(workspaceId).push(userData);
     return userData;
@@ -113,12 +113,12 @@ export class UserManagementService {
    * @param client 유저 정보와의 연결을 제거할 소켓
    * @param workspaceId 유저 정보를 담고 있는 워크스페이스의 ID
    */
-  deleteUserData(client: Socket): UserMapVO {
+  async deleteUserData(client: Socket): Promise<UserMapVO> {
     const socketId = client.id;
-    const userData = this.socketUserDataMap.get(socketId);
+    const userData: UserMapVO = JSON.parse(await this.socketUserDataMap.get(socketId));
     if (!userData) return null;
     userData.count--;
-    this.socketUserDataMap.delete(socketId);
+    await this.socketUserDataMap.del(socketId);
 
     // 만약 해당 유저가 더이상 워크스페이스를 보지 않을 경우, Workspace 유저 목록에서 제외한다.
     // 만약 워크스페이스를 아무도 보지 않을 경우, 워크스페이스를 관리 목록에서 제거한다.

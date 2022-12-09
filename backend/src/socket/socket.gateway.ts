@@ -130,7 +130,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const clientId = client.id;
     this.logger.log(`Client disconnected: ${clientId}`);
     try {
-      const userData = this.dataManagementService.deleteUserData(client);
+      const userData = await this.dataManagementService.deleteUserData(client);
       if (userData) client.nsp.emit('leave_user', { userId: userData.userId });
       if (userData && !userData.isGuest) {
         const res = await this.dbAccessService.renewUpdateDateOfMember(userData.userId, userData.workspaceId);
