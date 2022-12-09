@@ -8,8 +8,6 @@ import Redis from 'ioredis';
 
 @Injectable()
 export class UserManagementService {
-  // private socketUserDataMap = new Map<string, UserMapVO>(); // socketId -> userMapVO
-  // private workspaceUserDataMap = new Map<string, UserMapVO[]>(); // workspaceId -> userMapVO[]
   private logger: Logger = new Logger('UserDataService');
 
   constructor(
@@ -74,9 +72,12 @@ export class UserManagementService {
    * @param workspaceId 탐색하길 원하는 워크스페이스의 ID
    * @returns 해당 워크스페이스에 접속 중인 유저들의 정보, 없을 경우 null
    */
-  findUserDataListInWorkspace(workspaceId: string): UserMapVO[] {
-    if (!workspaceId || !this.workspaceUserDataMap.has(workspaceId)) return null;
-    return this.workspaceUserDataMap.get(workspaceId);
+  async findUserDataListInWorkspace(workspaceId: string): Promise<UserMapVO[]> {
+    if (!workspaceId || !(await this.workspaceUserDataMap.exists(workspaceId))) return null;
+    const res: UserMapVO[] = (await this.workspaceUserDataMap.lrange(workspaceId, 0, -1)).map((value) =>
+      JSON.parse(value),
+    );
+    return res;
   }
 
   /**
@@ -101,8 +102,9 @@ export class UserManagementService {
     userData.count++;
 
     await this.socketUserDataMap.set(client.id, JSON.stringify(userData));
-    if (!this.workspaceUserDataMap.has(workspaceId)) this.workspaceUserDataMap.set(workspaceId, [userData]);
-    else this.workspaceUserDataMap.get(workspaceId).push(userData);
+    // if (!(await this.workspaceUserDataMap.exists(workspaceId)))
+    await this.workspaceUserDataMap.rpush(workspaceId, JSON.stringify(userData));
+    // else this.workspaceUserDataMap.get(workspaceId).push(userData);
     return userData;
   }
 
@@ -123,13 +125,17 @@ export class UserManagementService {
     // 만약 해당 유저가 더이상 워크스페이스를 보지 않을 경우, Workspace 유저 목록에서 제외한다.
     // 만약 워크스페이스를 아무도 보지 않을 경우, 워크스페이스를 관리 목록에서 제거한다.
     if (userData.count < 1) {
-      let workspaceUserList = this.findUserDataListInWorkspace(userData.workspaceId);
+      let workspaceUserList = await this.findUserDataListInWorkspace(userData.workspaceId);
       workspaceUserList = workspaceUserList.filter((vo) => vo !== userData);
 
       // 해당 워크스페이스에 더이상 온라인 사용자가 없을 경우 workspace 자체를 관리 목록에서 제거한다.
       // 아닐 경우 유저 VO만 제거한다.
-      if (workspaceUserList.length === 0) this.workspaceUserDataMap.delete(userData.workspaceId);
-      else this.workspaceUserDataMap.set(userData.workspaceId, workspaceUserList);
+      await this.workspaceUserDataMap.del(userData.workspaceId);
+
+      if (workspaceUserList.length !== 0)
+        workspaceUserList.forEach(async (element) => {
+          await this.workspaceUserDataMap.rpush(userData.workspaceId, JSON.stringify(element));
+        });
     }
     return userData;
   }
