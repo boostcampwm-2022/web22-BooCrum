@@ -4,15 +4,12 @@ import {
   MessageBody,
   OnGatewayConnection,
   OnGatewayDisconnect,
-  OnGatewayInit,
   SubscribeMessage,
   WebSocketGateway,
   WebSocketServer,
   WsException,
 } from '@nestjs/websockets';
 import { Server, Socket } from 'socket.io';
-import { createSessionMiddleware } from '../middlewares/session.middleware';
-import { Request, Response, NextFunction } from 'express';
 import { UserManagementService } from './user-management.service';
 import { DbAccessService } from './db-access.service';
 import { UserMapVO } from './dto/user-map.vo';
@@ -38,7 +35,7 @@ const errorMsgFormatter = (errors: ValidationError[]) =>
 //============================================================================================//
 
 @WebSocketGateway(8080, { cors: '*', namespace: /workspace\/.+/ })
-export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
+export class SocketGateway implements OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('SocketGateway');
 
@@ -47,20 +44,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     private dataManagementService: UserManagementService,
     private objectManagementService: ObjectManagementService,
   ) {}
-
-  /**
-   * 소켓 서버 초기화 직후 실행할 처리를 정의한다.
-   *
-   * 처리 과정:
-   * 1. Express-session을 Socket 서버와 연결한다.
-   */
-  async afterInit() {
-    // REST API 서버에서 사용하는 세션 정보를 express-session을 이용하여 가져옴.
-    const sessionMiddleware = createSessionMiddleware();
-    this.server.use((socket, next) =>
-      sessionMiddleware(socket.request as Request, {} as Response, next as NextFunction),
-    );
-  }
 
   /**
    * 소켓 연결 직후 처리를 정의한다.
