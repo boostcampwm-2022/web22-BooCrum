@@ -33,9 +33,29 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 			});
 		}
 		return workspaceList.sort((a, b) => {
-			if (orderType === 0) return compareStringByMillisecond(a.workspace.updateDate, b.workspace.updateDate);
-			else if (orderType === 1) return compareStringByMillisecond(a.workspace.registerDate, b.workspace.registerDate);
-			else return a.workspace.name < b.workspace.name ? -1 : 1;
+			if (orderType === 0) {
+				if (a.workspace.updateDate === b.workspace.updateDate) {
+					const compare = compareStringByMillisecond(a.workspace.registerDate, b.workspace.registerDate);
+					return compare === 0 ? -1 : compare;
+				}
+				const compare = compareStringByMillisecond(a.workspace.updateDate, b.workspace.updateDate);
+				return compare === 0 ? -1 : compare;
+			} else if (orderType === 1) {
+				if (a.workspace.registerDate === b.workspace.registerDate) {
+					const compare = compareStringByMillisecond(a.workspace.updateDate, b.workspace.updateDate);
+					return compare === 0 ? -1 : compare;
+				}
+				const compare = compareStringByMillisecond(a.workspace.registerDate, b.workspace.registerDate);
+				return compare === 0 ? -1 : compare;
+			} else {
+				const AWorkspaceName = a.workspace.name.toLowerCase();
+				const BWorkspaceName = b.workspace.name.toLowerCase();
+				if (AWorkspaceName === BWorkspaceName) {
+					const compare = compareStringByMillisecond(a.workspace.updateDate, b.workspace.updateDate);
+					return compare === 0 ? -1 : compare;
+				}
+				return AWorkspaceName < BWorkspaceName ? -1 : 1;
+			}
 		});
 	}
 
