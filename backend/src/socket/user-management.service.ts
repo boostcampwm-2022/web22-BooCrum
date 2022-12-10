@@ -92,7 +92,11 @@ export class UserManagementService {
     let userData = await this.findUserDataInWorkspaceByUserId(userId, workspaceId);
     if (userData) {
       userData.count++;
-      await this.socketUserDataMap.set(client.id, JSON.stringify(userData));
+      await this.socketUserDataMap
+        .pipeline()
+        .set(client.id, JSON.stringify(userData))
+        .expire(client.id, process.env.REDIS_EXPIRE)
+        .exec();
       return userData;
     }
 
@@ -101,9 +105,18 @@ export class UserManagementService {
     if (!userData) throw new Error('유저 정보 초기화 실패');
     userData.count++;
 
-    await this.socketUserDataMap.set(client.id, JSON.stringify(userData));
-    await this.workspaceUserDataMap.rpush(workspaceId, JSON.stringify(userData));
-    console.log(await this.findUserDataListInWorkspace(workspaceId));
+    await this.socketUserDataMap
+      .pipeline()
+      .set(client.id, JSON.stringify(userData))
+      .expire(client.id, process.env.REDIS_EXPIRE)
+      .exec();
+    await this.workspaceUserDataMap
+      .pipeline()
+      .rpush(workspaceId, JSON.stringify(userData))
+      .expire(workspaceId, process.env.REDIS_EXPIRE)
+      .exec();
+    console.log(await this.socketUserDataMap.get(client.id));
+    console.log(await this.workspaceUserDataMap.lrange(workspaceId, 0, -1));
     return userData;
   }
 
@@ -135,6 +148,7 @@ export class UserManagementService {
         workspaceUserList.forEach(async (element) => {
           await this.workspaceUserDataMap.rpush(userData.workspaceId, JSON.stringify(element));
         });
+      await this.workspaceUserDataMap.expire(userData.workspaceId, process.env.REDIS_EXPIRE);
     }
     return userData;
   }
