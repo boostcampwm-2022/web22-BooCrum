@@ -115,8 +115,6 @@ export class UserManagementService {
       .rpush(workspaceId, JSON.stringify(userData))
       .expire(workspaceId, process.env.REDIS_EXPIRE)
       .exec();
-    console.log(await this.socketUserDataMap.get(client.id));
-    console.log(await this.workspaceUserDataMap.lrange(workspaceId, 0, -1));
     return userData;
   }
 
