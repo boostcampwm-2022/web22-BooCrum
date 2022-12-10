@@ -102,9 +102,8 @@ export class UserManagementService {
     userData.count++;
 
     await this.socketUserDataMap.set(client.id, JSON.stringify(userData));
-    // if (!(await this.workspaceUserDataMap.exists(workspaceId)))
     await this.workspaceUserDataMap.rpush(workspaceId, JSON.stringify(userData));
-    // else this.workspaceUserDataMap.get(workspaceId).push(userData);
+    console.log(await this.findUserDataListInWorkspace(workspaceId));
     return userData;
   }
 
@@ -125,13 +124,13 @@ export class UserManagementService {
     // 만약 해당 유저가 더이상 워크스페이스를 보지 않을 경우, Workspace 유저 목록에서 제외한다.
     // 만약 워크스페이스를 아무도 보지 않을 경우, 워크스페이스를 관리 목록에서 제거한다.
     if (userData.count < 1) {
-      let workspaceUserList = await this.findUserDataListInWorkspace(userData.workspaceId);
-      workspaceUserList = workspaceUserList.filter((vo) => vo !== userData);
+      const workspaceUserList = (await this.findUserDataListInWorkspace(userData.workspaceId)).filter(
+        (vo) => vo.userId !== userData.userId,
+      );
+      await this.workspaceUserDataMap.del(userData.workspaceId);
 
       // 해당 워크스페이스에 더이상 온라인 사용자가 없을 경우 workspace 자체를 관리 목록에서 제거한다.
       // 아닐 경우 유저 VO만 제거한다.
-      await this.workspaceUserDataMap.del(userData.workspaceId);
-
       if (workspaceUserList.length !== 0)
         workspaceUserList.forEach(async (element) => {
           await this.workspaceUserDataMap.rpush(userData.workspaceId, JSON.stringify(element));
