@@ -98,9 +98,9 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     if (!userMapVO.isGuest) client.join(userMapVO.userId);
 
     // 4. Init 목적 데이터 가공
-    const members: UserDAO[] = this.dataManagementService
-      .findUserDataListInWorkspace(workspaceId)
-      .map((vo) => new UserDAO(vo.userId, vo.nickname, vo.color, vo.role));
+    const members: UserDAO[] = (await this.dataManagementService.findUserDataListInWorkspace(workspaceId)).map(
+      (vo) => new UserDAO(vo.userId, vo.nickname, vo.color, vo.role),
+    );
     const objects: ObjectMapVO[] = await this.objectManagementService.findAllObjectsInWorkspace(workspaceId);
     const userData = new UserDAO(userMapVO.userId, userMapVO.nickname, userMapVO.color, userMapVO.role);
 
@@ -133,7 +133,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const clientId = client.id;
     this.logger.log(`Client disconnected: ${clientId}`);
     try {
-      const userData = this.dataManagementService.deleteUserData(client);
+      const userData = await this.dataManagementService.deleteUserData(client);
       if (userData) client.nsp.emit('leave_user', { userId: userData.userId });
       if (userData && !userData.isGuest) {
         const res = await this.dbAccessService.renewUpdateDateOfMember(userData.userId, userData.workspaceId);
@@ -154,7 +154,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
   @SubscribeMessage('move_pointer')
   async moveMousePointer(@MessageBody() { x, y }, @ConnectedSocket() socket: Socket) {
-    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    const userData = await this.dataManagementService.findUserDataBySocketId(socket.id);
     socket.nsp.emit('move_pointer', { x, y, userId: userData.userId });
 
     this.logger.log(
@@ -165,7 +165,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('select_object')
   @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
   async selectObject(@MessageBody('objectIds') objectIds: string[], @ConnectedSocket() socket: Socket) {
-    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    const userData = await this.dataManagementService.findUserDataBySocketId(socket.id);
     socket.nsp.emit('select_object', { objectIds, userId: userData.userId });
 
     this.logger.log(
@@ -176,7 +176,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @SubscribeMessage('unselect_object')
   @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
   async unselectObject(@MessageBody('objectIds') objectIds: string[], @ConnectedSocket() socket: Socket) {
-    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    const userData = await this.dataManagementService.findUserDataBySocketId(socket.id);
     socket.nsp.emit('unselect_object', { objectIds, userId: userData.userId });
 
     this.logger.log(
@@ -188,7 +188,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
   async moveObject(@MessageBody() objectMoveDTO: ObjectMoveDTO, @ConnectedSocket() socket: Socket) {
     // User 권한 체크
-    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    const userData = await this.dataManagementService.findUserDataBySocketId(socket.id);
 
     // 객체 존재 여부 체크 및 조회
     const objectData: ObjectMapVO = await this.objectManagementService.findOneObjectInWorkspace(
@@ -216,7 +216,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
   async scaleObject(@MessageBody() objectScaleDTO: ObjectScaleDTO, @ConnectedSocket() socket: Socket) {
     // User 권한 체크
-    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    const userData = await this.dataManagementService.findUserDataBySocketId(socket.id);
 
     // 객체 존재 여부 체크 및 조회
     const objectData: ObjectMapVO = await this.objectManagementService.findOneObjectInWorkspace(
@@ -249,7 +249,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     objectData: CreateObjectDTO,
     @ConnectedSocket() socket: Socket,
   ) {
-    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    const userData = await this.dataManagementService.findUserDataBySocketId(socket.id);
     try {
       objectData.creator = userData.userId;
 
@@ -274,7 +274,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     @ConnectedSocket() socket: Socket,
   ) {
     try {
-      const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+      const userData = await this.dataManagementService.findUserDataBySocketId(socket.id);
 
       // 수정을 시도하고, 성공하면 이를 전달한다.
       await this.objectManagementService.updateObjectInWorkspace(userData.workspaceId, objectData);
@@ -293,7 +293,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
   @UseGuards(UserRoleGuard(WORKSPACE_ROLE.EDITOR))
   async deleteObject(@MessageBody('objectId') objectId: string, @ConnectedSocket() socket: Socket) {
     try {
-      const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+      const userData = await this.dataManagementService.findUserDataBySocketId(socket.id);
       const res = await this.objectManagementService.deleteObjectInWorkspace(userData.workspaceId, objectId);
       if (!res) throw new WsException('존재하지 않는 ObjectId');
       socket.nsp.emit('delete_object', { userId: userData.userId, objectId });
@@ -313,8 +313,8 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     @MessageBody(new ValidationPipe({ exceptionFactory: errorMsgFormatter })) { userId, role }: ChangeUserRoleDTO,
     @ConnectedSocket() socket: Socket,
   ) {
-    const { workspaceId } = this.dataManagementService.findUserDataBySocketId(socket.id);
-    const userData = this.dataManagementService.findUserDataInWorkspaceByUserId(userId, workspaceId);
+    const { workspaceId } = await this.dataManagementService.findUserDataBySocketId(socket.id);
+    const userData = await this.dataManagementService.findUserDataInWorkspaceByUserId(userId, workspaceId);
 
     // User의 경우 DB에 기록된 Role을 수정한다. Workspace Member로 비등록된 경우 오류를 반환한다.
     // Guest는 DB에 저장하지 않으므로, Guest는 이 처리를 수행하지 않는다.
@@ -340,7 +340,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     objectData: UpdateObjectDTO,
     @ConnectedSocket() socket: Socket,
   ) {
-    const userData = this.dataManagementService.findUserDataBySocketId(socket.id);
+    const userData = await this.dataManagementService.findUserDataBySocketId(socket.id);
     socket.nsp.emit('updating_object', { userId: userData.userId, objectData });
 
     this.logger.log(
