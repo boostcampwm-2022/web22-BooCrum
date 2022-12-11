@@ -15,6 +15,6 @@ async function bootstrap() {
   app.use(createSessionMiddleware());
 
   app.setGlobalPrefix('api');
-  await app.listen(3000);
+  await app.listen(process.env.API_PORT);
 }
 bootstrap();

@@ -19,6 +19,7 @@ export class RedisIoAdapter extends IoAdapter {
   }
 
   createIOServer(port: number, options?: ServerOptions): any {
+    port = parseInt(process.env.WS_PORT);
     const server = super.createIOServer(port, options);
     server.adapter(this.adapterConstructor);
     return server;

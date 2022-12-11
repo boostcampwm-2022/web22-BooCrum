@@ -37,7 +37,7 @@ const errorMsgFormatter = (errors: ValidationError[]) =>
 //==================================== Socket.io 서버 정의 ====================================//
 //============================================================================================//
 
-@WebSocketGateway(8080, { cors: '*', namespace: /workspace\/.+/ })
+@WebSocketGateway({ cors: '*', namespace: /workspace\/.+/ })
 export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('SocketGateway');
