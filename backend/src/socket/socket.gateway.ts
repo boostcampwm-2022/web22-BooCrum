@@ -85,7 +85,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     // 2. 데이터 가공 수행
     const userMapVO: UserMapVO = await this.dataManagementService.findOrAddUserData(client, workspaceId);
-    client.data = userMapVO;
 
     if (!userMapVO) {
       client.emit('exception', { status: 'error', message: 'User Data 초기화 중 Role 획득 실패' });
@@ -129,7 +128,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
    * @param client 연결을 끊기 직전인(disconnect 이벤트를 발생시킨) 소켓
    */
   async handleDisconnect(client: Socket) {
-    console.log(client.data);
     const clientId = client.id;
     this.logger.log(`Client disconnected: ${clientId}`);
     try {
