@@ -10,7 +10,11 @@ export const UserRoleGuard = (minimumRole: WORKSPACE_ROLE) => {
     constructor(@Inject(UserManagementService) readonly userManagementService: UserManagementService) {}
     canActivate(context: ExecutionContext): boolean | Promise<boolean> | Observable<boolean> {
       const client = context.switchToWs().getClient<Socket>();
-      const userData = this.userManagementService.findUserDataBySocketId(client.id);
+      return this.validate(client.id);
+    }
+
+    async validate(clientId: string): Promise<boolean> {
+      const userData = await this.userManagementService.findUserDataBySocketId(clientId);
       if (userData.role < minimumRole) throw new WsException('유효하지 않은 권한입니다.');
       return userData.role >= minimumRole;
     }
