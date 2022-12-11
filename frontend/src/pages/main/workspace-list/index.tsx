@@ -20,7 +20,7 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 
 	async function initWorkspaceList() {
 		page.current = 1;
-		const result = await User.getFilteredWorkspace(orderItemString[hasOrder ? orderType : 1], page.current);
+		const result = await User.getFilteredWorkspace(orderItemString[hasOrder ? orderType : 0], page.current);
 		setWorkspaces(result);
 
 		page.current += 1;
@@ -29,7 +29,7 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 	}
 
 	async function setWorkspaceList() {
-		const result = await User.getFilteredWorkspace(orderItemString[hasOrder ? orderType : 1], page.current);
+		const result = await User.getFilteredWorkspace(orderItemString[hasOrder ? orderType : 0], page.current);
 		setWorkspaces((prevWorkspace) => [...prevWorkspace, ...result]);
 
 		page.current += 1;
@@ -40,6 +40,7 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 		if (!observerTargetRef.current || loading) return;
 
 		const io = new IntersectionObserver((entries) => {
+			if (observerTargetRef.current && !hasNextPage.current) io.unobserve(observerTargetRef.current);
 			if (entries[0].isIntersecting && hasNextPage.current) {
 				setWorkspaceList();
 			}
