@@ -20,6 +20,8 @@ export const User = {
 	getProfile: (): Promise<ProfileData> => userRequests.get<ProfileData>('/info/profile'),
 	getTeam: (): Promise<TeamData[]> => userRequests.get<TeamData[]>('/info/team'),
 	getWorkspace: (): Promise<WorkspaceData[]> => userRequests.get<TeamData[]>('/info/workspace'),
+	getFilteredWorkspace: (filter: string, page: number): Promise<WorkspaceData[]> =>
+		userRequests.get<WorkspaceData[]>(`/info/workspace/${filter}/${page}`),
 	getAll: (): Promise<UserData> => userRequests.get<UserData>('/info'),
 	patchProfile: (body: PatchProfileBody): Promise<ProfileData> =>
 		userRequests.patch<ProfileData, PatchProfileBody>('/info', body),
