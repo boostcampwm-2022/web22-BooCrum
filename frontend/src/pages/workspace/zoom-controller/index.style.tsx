@@ -11,6 +11,8 @@ export const Container = styled.div`
 	justify-content: space-between;
 	align-items: center;
 
+	user-select: none;
+
 	.zoom {
 		width: 36px;
 		height: 100%;
