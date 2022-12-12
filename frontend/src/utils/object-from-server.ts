@@ -52,7 +52,8 @@ export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDat
 	let decodedPath;
 	if (isUndefined(newObject.path)) return;
 	// 이전에 생성된 path들은 decompress 하지 않는다.
-	if (newObject.path[0] !== 'M') decodedPath = LZString.decompress(newObject.path || '');
+	const lzstring = decodeURI(newObject.path);
+	if (newObject.path[0] !== 'M') decodedPath = LZString.decompressFromUTF16(lzstring);
 	else decodedPath = newObject.path;
 
 	if (isNull(decodedPath)) return;
@@ -127,6 +128,7 @@ export const createPostitFromServer = async (
 	setPostItEditEvent(canvas, postit, editableTextBox, textBox);
 	setPreventResizeEvent(objectId, canvas, textBox, postit);
 	setPreventRemainCursor(canvas, editableTextBox);
+
 	canvas.add(postit);
 };
 
