@@ -40,7 +40,8 @@ export const formatObjectDataToServer = (fabricObject: fabric.Object): ObjectDat
 	if (fabricObject instanceof fabric.Path) {
 		message.color = fabricObject.stroke;
 		const path = toStringPath(fabricObject as fabric.Path);
-		const encodedPath = LZString.compress(path);
+		const lzstring = LZString.compressToUTF16(path);
+		const encodedPath = encodeURI(lzstring);
 		message.path = encodedPath;
 	}
 
