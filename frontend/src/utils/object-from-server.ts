@@ -1,5 +1,4 @@
 import { workspaceRole } from '@data/workspace-role';
-import { Workspace } from '@api/workspace';
 import {
 	ObjectDataFromServer,
 	MemberInCanvas,

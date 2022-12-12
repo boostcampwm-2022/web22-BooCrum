@@ -28,8 +28,10 @@ function useCanvas() {
 	const userProfile = useRecoilValue(userProfileState);
 
 	useEffect(() => {
-		if (canvas.current && zoom.event === 'control')
+		if (canvas.current && zoom.event === 'control') {
 			canvas.current.zoomToPoint({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, zoom.percent / 100);
+			canvas.current.requestRenderAll();
+		}
 	}, [zoom]);
 
 	useEffect(() => {
@@ -95,6 +97,7 @@ function useCanvas() {
 			height: canvasHeight,
 			width: canvasWidth,
 			backgroundColor: '#f1f1f1',
+			renderOnAddRemove: false,
 		});
 
 		initGrid(fabricCanvas, pattern, grid);

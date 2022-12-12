@@ -66,6 +66,7 @@ export const initZoom = (
 		canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
 		opt.e.preventDefault();
 		opt.e.stopPropagation();
+		canvas.requestRenderAll();
 	});
 };
 
@@ -129,6 +130,7 @@ export const initDrawing = (canvas: fabric.Canvas) => {
 			if (canvas.mode !== CanvasType.erase || path.type !== ObjectType.draw) return;
 			path.isSocketObject = false;
 			canvas.remove(path);
+			canvas.requestRenderAll();
 		});
 	});
 };
@@ -179,6 +181,7 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 				canvas.remove(obj);
 			});
 			canvas.discardActiveObject();
+			canvas.requestRenderAll();
 			document.removeEventListener('keydown', objectDeleteHandler);
 		}
 	};
