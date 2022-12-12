@@ -261,7 +261,6 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 
 		rectObject.set({ ...updatedObject });
 	} else {
-		console.log(object);
 		object.forEach((obj) => {
 			updateObject(obj, updatedObject);
 		});
@@ -277,6 +276,7 @@ export const selectObjectFromServer = (canvas: fabric.Canvas, objectIds: string[
 
 	objects.forEach((object) => {
 		if (object instanceof fabric.Group) {
+			object.objectCaching = false;
 			object._objects.forEach((_object) => {
 				if (_object.type === ObjectType.rect) {
 					_object.set({
@@ -306,6 +306,7 @@ export const unselectObjectFromServer = (canvas: fabric.Canvas, objectIds: strin
 					});
 				}
 			});
+			object.objectCaching = true;
 		}
 	});
 };
