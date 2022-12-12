@@ -28,15 +28,16 @@ import {
 	setSectionEditEvent,
 } from './object.utils';
 import { isNull, isUndefined } from './type.utils';
+import { ParticipantInfo } from '@api/workspace.type';
 
 export const createObjectFromServer = (
 	canvas: fabric.Canvas,
 	newObject: ObjectDataFromServer,
 	role: Role,
-	workspaceId: string | undefined
+	participants: ParticipantInfo[]
 ) => {
 	if (newObject.type === SocketObjectType.postit) {
-		createPostitFromServer(canvas, newObject, role, workspaceId);
+		createPostitFromServer(canvas, newObject, role, participants);
 	}
 
 	if (newObject.type === SocketObjectType.section) {
@@ -81,12 +82,11 @@ export const createPostitFromServer = async (
 	canvas: fabric.Canvas,
 	newObject: ObjectDataFromServer,
 	role: Role,
-	workspaceId: string | undefined
+	participants: ParticipantInfo[]
 ) => {
 	const { objectId, left, top, fontSize, color, text, width, height, creator, scaleX, scaleY } = newObject;
 	if (!left || !top || !fontSize || !color || isUndefined(text) || !width || !height || !scaleX || !scaleY) return;
 
-	const participants = await Workspace.getWorkspaceParticipant(workspaceId || '');
 	const user = participants.filter((part) => {
 		if (part.user.userId === creator) return true;
 	});
