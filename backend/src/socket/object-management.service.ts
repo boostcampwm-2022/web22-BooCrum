@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ObjectMapVO } from './dto/object-map.vo';
 import { MongooseObjectHandlerService } from '../object-database/mongoose-object-handler.service';
 import { UpdateObjectDTO } from 'src/object-database/dto/update-object.dto';
@@ -50,7 +50,7 @@ export class ObjectManagementService {
    * @param objectDto 갱신할 Object에 관한 데이터
    */
   async updateObjectInWorkspace(workspaceId: string, objectDto: UpdateObjectDTO): Promise<void> {
-    await this.updateObjectInWorkspace(workspaceId, objectDto);
+    await this.objectHandlerService.updateObject(workspaceId, objectDto);
   }
 
   /**
