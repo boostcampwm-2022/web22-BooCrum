@@ -23,22 +23,24 @@ function MemberRole({ participant, handleRole }: MemberRoleProps) {
 				<img alt="participant profile" src={userProfile} className="profile" />
 				<p className="name">{participant.user.nickname}</p>
 			</div>
-			<div className="role-setting">
-				<p className="role-selected">{convertRole(participant.role)}</p>
-				{myInfoInWorkspace.role === workspaceRole.OWNER && (
-					<img alt="role dropdown" src={dropdownIcon} className="dropdown" onClick={toggleOpenModal} />
+			<div ref={modalRef}>
+				<div className="role-setting">
+					<p className="role-selected">{convertRole(participant.role)}</p>
+					{myInfoInWorkspace.role === workspaceRole.OWNER && (
+						<img alt="role dropdown" src={dropdownIcon} className="dropdown" onClick={toggleOpenModal} />
+					)}
+				</div>
+
+				{isOpenModal && (
+					<RoleEditMenu>
+						{workspaceRoleArr.map((role) => (
+							<p key={role.id} className="role" onClick={() => handleMemberRole(role.roleIndex)}>
+								{role.roleText}
+							</p>
+						))}
+					</RoleEditMenu>
 				)}
 			</div>
-
-			{isOpenModal && (
-				<RoleEditMenu ref={modalRef}>
-					{workspaceRoleArr.map((role) => (
-						<p key={role.id} className="role" onClick={() => handleMemberRole(role.roleIndex)}>
-							{role.roleText}
-						</p>
-					))}
-				</RoleEditMenu>
-			)}
 		</Container>
 	);
 }

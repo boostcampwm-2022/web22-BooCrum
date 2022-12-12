@@ -8,3 +8,5 @@ export const orderItems: WorkspaceOrderType[] = [
 	{ id: 1, description: 'Last created' },
 	{ id: 2, description: 'Alphabetically' },
 ];
+
+export const orderItemString: string[] = ['last-updated', 'last-created', 'alphabetically'];

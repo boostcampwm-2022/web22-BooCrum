@@ -1,7 +1,3 @@
-export function compareStringByMillisecond(a: string, b: string) {
-	return new Date(b).getTime() - new Date(a).getTime();
-}
-
 export function setTimestamp(time: string): string {
 	const updateDate = new Date(time).getTime();
 	const currentDate = new Date().getTime();
