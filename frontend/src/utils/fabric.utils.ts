@@ -143,7 +143,6 @@ export const addObject = (
 		color: string;
 	}>
 ) => {
-	//todo 색 정보 받아와야함
 	canvas.on('mouse:down', function (opt) {
 		const evt = opt.e;
 		const vpt = canvas.viewportTransform;
@@ -161,6 +160,13 @@ export const addObject = (
 				return { ...prev, type: toolItems.SELECT };
 			});
 		}
+	});
+};
+
+export const setObejctProps = (canvas: fabric.Canvas) => {
+	canvas.on('object:added', (e) => {
+		if (!e.target) return;
+		if (e.target.controls.mtr) e.target.controls.mtr.visible = false;
 	});
 };
 
@@ -186,11 +192,9 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 export const setObjectIndexLeveling = (canvas: fabric.Canvas) => {
 	canvas.on('object:added', (e) => {
 		const postits = canvas._objects.filter((obj) => obj.type === ObjectType.postit);
-
 		postits.forEach((obj) => {
 			obj.bringToFront();
 		});
-
 		const drawings = canvas._objects.filter((obj) => obj.type === ObjectType.draw);
 		drawings.forEach((obj) => {
 			obj.bringToFront();

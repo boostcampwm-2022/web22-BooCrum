@@ -11,6 +11,7 @@ import {
 	setCursorMode,
 	initDrawing,
 	canvasResize,
+	setObejctProps,
 } from '@utils/fabric.utils';
 import { toolItems } from '@data/workspace-tool';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -103,6 +104,7 @@ function useCanvas() {
 		initWheelPanning(fabricCanvas);
 		addObject(fabricCanvas, userProfile.nickname, setCursor);
 		deleteObject(fabricCanvas);
+		setObejctProps(fabricCanvas);
 		setObjectIndexLeveling(fabricCanvas);
 
 		return fabricCanvas;
