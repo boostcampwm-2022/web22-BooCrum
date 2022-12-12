@@ -59,6 +59,6 @@ export class ObjectManagementService {
    * @param objectId 제거할 Object의 ID
    */
   async deleteObjectInWorkspace(workspaceId: string, objectId: string): Promise<boolean> {
-    return await this.deleteObjectInWorkspace(workspaceId, objectId);
+    return await this.objectHandlerService.deleteObject(workspaceId, objectId);
   }
 }
