@@ -14,12 +14,14 @@ import ObjectWorker from 'worker/object.worker';
 import CursorWorker from 'worker/cursor.worker';
 import useCursorWorker from './useCursorWorker';
 import useObjectWorker from './useObjectWorker';
+import useOffscreencanvas from './useOffscreencanvas';
 
 function WhiteboardCanvas() {
 	const { canvas } = useCanvas();
 	const { socket, isEndInit } = useSocket(canvas);
 	const { worker: cursorWorker } = useCursorWorker(CursorWorker, socket);
 	const { worker: objectWorker } = useObjectWorker(ObjectWorker, socket);
+	useOffscreencanvas();
 
 	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, selectedType, menuPosition } =
 		useCanvasToSocket({ canvas, socket, cursorWorker, objectWorker });

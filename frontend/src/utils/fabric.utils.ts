@@ -15,7 +15,7 @@ export const initGrid = (canvas: fabric.Canvas, patternSize: number, gridSize: n
 		mode: canvas.mode,
 		height: patternSize,
 		width: patternSize,
-		backgroundColor: '#f1f1f1',
+		// backgroundColor: '#f1f1f1',
 	});
 
 	for (let i = 0; i <= patternSize / gridSize; i++) {
