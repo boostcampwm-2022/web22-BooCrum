@@ -50,7 +50,7 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 		return () => {
 			io.disconnect();
 		};
-	}, [loading, orderType]);
+	}, [loading, workspaces]);
 	useEffect(() => {
 		initWorkspaceList();
 	}, [orderType]);
@@ -73,7 +73,7 @@ function WorkspaceList({ title, hasOrder }: { title: string; hasOrder: boolean }
 							title={item.workspace.name}
 							timestamp={setTimestamp(item.workspace.updateDate)}
 							imgSrc={item.workspace.thumbnailUrl}
-							setWorkspaceList={setWorkspaceList}
+							setWorkspaceList={initWorkspaceList}
 						/>
 					))}
 					<div ref={observerTargetRef} />
