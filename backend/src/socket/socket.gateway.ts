@@ -37,7 +37,7 @@ const errorMsgFormatter = (errors: ValidationError[]) =>
 //==================================== Socket.io 서버 정의 ====================================//
 //============================================================================================//
 
-@WebSocketGateway(8080, { cors: '*', namespace: /workspace\/.+/ })
+@WebSocketGateway({ cors: '*', namespace: /workspace\/.+/ })
 export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGatewayDisconnect {
   @WebSocketServer() server: Server;
   private logger: Logger = new Logger('SocketGateway');
@@ -85,6 +85,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
     // 2. 데이터 가공 수행
     const userMapVO: UserMapVO = await this.dataManagementService.findOrAddUserData(client, workspaceId);
+
     if (!userMapVO) {
       client.emit('exception', { status: 'error', message: 'User Data 초기화 중 Role 획득 실패' });
       return client.disconnect();
