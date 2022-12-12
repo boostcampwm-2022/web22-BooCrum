@@ -30,7 +30,7 @@ export const workspaceIdState = atom<string>({
 	default: '',
 });
 
-export const WPState = selector({
+export const workspaceParticipantsSelector = selector({
 	key: 'WPState',
 	get: async ({ get }): Promise<ParticipantInfo[]> => {
 		const wid = get(workspaceIdState);

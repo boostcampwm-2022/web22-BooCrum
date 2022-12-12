@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, Member, MemberInCanvas, Role, ServerToClientEvents } from './types';
-import { useRecoilState, useRecoilValue, useSetRecoilState } from 'recoil';
-import { membersState, workspaceIdState, WPState } from '@context/workspace';
+import { useRecoilValue, useSetRecoilState } from 'recoil';
+import { membersState, workspaceParticipantsSelector } from '@context/workspace';
 import { fabric } from 'fabric';
 import {
 	createCursorObject,
@@ -19,7 +19,7 @@ import { isNull } from '@utils/type.utils';
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const { workspaceId } = useParams();
 	const setMyInfoInWorkspace = useSetRecoilState(myInfoInWorkspaceState);
-	const WP = useRecoilValue(WPState);
+	const participants = useRecoilValue(workspaceParticipantsSelector);
 	const myInfoInWorkspaceRef = useRef<Member>();
 	const setMembers = useSetRecoilState(membersState);
 
@@ -70,7 +70,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			objects.forEach((object) => {
 				if (!canvas.current) return;
 				const role = myInfoInWorkspaceRef.current?.role as Role;
-				createObjectFromServer(canvas.current, object, role, WP);
+				createObjectFromServer(canvas.current, object, role, participants);
 			});
 
 			canvas.current?.requestRenderAll();
@@ -120,7 +120,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('create_object', (arg) => {
 			if (isNull(canvas.current) || isMessageByMe(arg.creator)) return;
 			const role = myInfoInWorkspaceRef.current?.role as Role;
-			createObjectFromServer(canvas.current, arg, role, WP);
+			createObjectFromServer(canvas.current, arg, role, participants);
 		});
 
 		socket.current.on('delete_object', ({ objectId }) => {
