@@ -29,7 +29,23 @@ describe('AuthController', () => {
     controller = module.get<AuthController>(AuthController);
   });
 
-  test('AuthController defined test', async () => {
-    expect(AuthController).toBeDefined();
+  test('AuthController - Defined', async () => {
+    expect(controller).toBeDefined();
+  });
+
+  test('AuthController - startGithubOAuthProcess', () => {
+    expect(controller.startGithubOAuthProcess).toBeDefined();
+  });
+
+  test('AuthController - handleGithubData', () => {
+    expect(controller.handleGithubData).toBeDefined();
+  });
+
+  test('AuthController - destroySession', () => {
+    expect(controller.destroySession).toBeDefined();
+  });
+
+  test('AuthController - checkLoginStatus', () => {
+    expect(controller.checkLoginStatus).toBeDefined();
   });
 });
