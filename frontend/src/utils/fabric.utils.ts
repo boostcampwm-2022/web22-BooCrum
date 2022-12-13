@@ -202,6 +202,7 @@ export const setObjectIndexLeveling = (canvas: fabric.Canvas) => {
 		drawings.forEach((obj) => {
 			obj.bringToFront();
 		});
+		e.target?.bringToFront();
 	});
 };
 
