@@ -10,6 +10,7 @@ import { UserService } from '../user/user.service';
 import { AuthController } from './auth.controller';
 import { GithubStrategy } from './strategy/github.strategy';
 import { config } from '../ormconfig';
+import { ConfigModule } from '@nestjs/config';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -17,6 +18,7 @@ describe('AuthController', () => {
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
+        ConfigModule.forRoot(),
         UserModule,
         TeamModule,
         TypeOrmModule.forRoot(config),
