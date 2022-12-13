@@ -19,7 +19,7 @@ export class MongooseObjectHandlerService implements AbstractObjectHandlerServic
   ) {}
 
   private async createOrFindDocument(workspaceId: string) {
-    const workspace = await this.objectBucketModel.findOne({ workspaceId }).exec();
+    const workspace = await this.objectBucketModel.findOne({ workspaceId }, {}, { lean: true }).exec();
     if (workspace) return workspace;
     const newBucket = new this.objectBucketModel({ workspaceId });
     return newBucket;
