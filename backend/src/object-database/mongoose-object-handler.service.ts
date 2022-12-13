@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
-import { Model } from 'mongoose';
+import { Model, QueryOptions } from 'mongoose';
 import { ObjectBucket, ObjectBucketDocument } from './schema/object-bucket.schema';
 
 import { AbstractObjectHandlerService } from './abstract/object-handler.abstract';
@@ -18,8 +18,8 @@ export class MongooseObjectHandlerService implements AbstractObjectHandlerServic
     private objectBucketModel: Model<ObjectBucketDocument>,
   ) {}
 
-  private async createOrFindDocument(workspaceId: string) {
-    const workspace = await this.objectBucketModel.findOne({ workspaceId }, {}, { lean: true }).exec();
+  private async createOrFindDocument(workspaceId: string, options?: QueryOptions) {
+    const workspace = await this.objectBucketModel.findOne({ workspaceId }, {}, options).exec();
     if (workspace) return workspace;
     const newBucket = new this.objectBucketModel({ workspaceId });
     return newBucket;
@@ -33,7 +33,7 @@ export class MongooseObjectHandlerService implements AbstractObjectHandlerServic
   }
 
   async selectAllObjects(workspaceId: string): Promise<WorkspaceObjectInterface[]> {
-    const { objects } = await this.createOrFindDocument(workspaceId);
+    const { objects } = await this.createOrFindDocument(workspaceId, { lean: true });
     return objects;
   }
 
