@@ -1,0 +1,39 @@
+name: Check PR Test
+on:
+  pull_request:
+    branches:
+      - dev
+jobs:
+  try-backend-test:
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3.5.1
+        with:
+          node-version: "16.18.0"
+      - name : backend - change directory
+        run : cd ./backend
+      - name : backend - npm install
+        run : npm install
+      - name : backend - jest test
+        run : npm test
+      - name: if fail
+        uses: actions/github-script@0.2.0
+        with:
+          github-token: ${{github.token}}
+          script: |
+            const ref = "${{github.ref}}"
+            const pull_number = Number(ref.split("/")[2])
+            await github.pulls.createReview({
+              ...context.repo,
+              pull_number,
+              body: "Back-End 테스트 코드를 다시 작성해주세요.",
+              event: "REQUEST_CHANGES"
+            })
+            await github.pulls.update({
+              ...context.repo,
+              pull_number,
+              state: "closed"
+            })
+        if: failure()
+      
