@@ -5,6 +5,7 @@ import { Workspace } from '../workspace/entity/workspace.entity';
 import { WorkspaceMember } from '../workspace/entity/workspace-member.entity';
 import { User } from '../user/entity/user.entity';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
+import { ObjectMapVO } from './dto/object-map.vo';
 
 @Injectable()
 export class DbAccessService {
@@ -169,5 +170,20 @@ export class DbAccessService {
     );
     await queryRunner.release();
     return ret.affected > 0;
+  }
+
+  async replaceCreatorIdToNickname(workspaceId: string, objects: ObjectMapVO[]) {
+    const queryBuilder = this.dataSoruce.createQueryBuilder(WorkspaceMember, 'wm');
+
+    const memberArray = await queryBuilder
+      .where('wm.workspace_id = :wid', { wid: workspaceId })
+      .leftJoinAndSelect('wm.user', 'user')
+      .getMany();
+    const memberMap = memberArray.reduce((prev, { user }) => {
+      prev.set(user.userId, user.nickname);
+      return prev;
+    }, new Map<string, string>());
+
+    objects.forEach((object) => (object.creator = memberMap.get(object.creator) ?? object.creator));
   }
 }

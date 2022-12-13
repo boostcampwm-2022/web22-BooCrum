@@ -116,6 +116,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
         );
     }
 
+    this.dbAccessService.replaceCreatorIdToNickname(workspaceId, objects);
     this.logger.log(`workspaceId: ${workspaceId} / eventName: handleConnection / userId: ${userMapVO.userId}`);
   }
 
@@ -253,6 +254,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       // 생성을 시도하고, 성공하면 이를 전달한다.
       await this.objectManagementService.insertObjectIntoWorkspace(userData.workspaceId, objectData);
+      objectData.creator = userData.nickname;
       socket.nsp.emit('create_object', objectData);
 
       this.logger.log(
