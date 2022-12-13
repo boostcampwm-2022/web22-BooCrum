@@ -64,6 +64,10 @@ export const initZoom = (
 		if (zoom < 0.5) zoom = 0.5;
 		setZoom({ percent: Math.round(zoom * 100), event: 'wheel' });
 		canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+		if (!canvas.viewportTransform) return;
+		const vpt = canvas.viewportTransform;
+		console.log(vpt[4]);
+		canvas.fire('canvas:zoom', { zoom, x: vpt[4], y: vpt[5] });
 		opt.e.preventDefault();
 		opt.e.stopPropagation();
 		canvas.requestRenderAll();

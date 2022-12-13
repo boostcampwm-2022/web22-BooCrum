@@ -32,6 +32,11 @@ function useOffscreencanvas(canvas: React.MutableRefObject<fabric.Canvas | null>
 			const coords = e as unknown as { x: number; y: number };
 			worker.current?.postMessage({ type: 'move', coords: coords });
 		});
+
+		canvas.current?.on('canvas:zoom', function (e) {
+			const zoom = e as unknown as { zoom: number; x: number; y: number };
+			worker.current?.postMessage({ type: 'zoom', ...zoom });
+		});
 	}, []);
 }
 
