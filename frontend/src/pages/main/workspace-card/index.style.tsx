@@ -25,7 +25,7 @@ export const CardLayout = styled.div`
 	}
 	.card-timestamp {
 		font-size: 12px;
-		color: #808080;
+		color: #515151;
 	}
 	:hover {
 		box-shadow: 7px 7px 4px rgba(0, 0, 0, 0.25);

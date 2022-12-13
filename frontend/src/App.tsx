@@ -1,25 +1,30 @@
 import { Routes, Route } from 'react-router-dom';
-import Main from '@pages/main';
-import Error from '@pages/error';
-import Workspace from '@pages/workspace';
-import Login from '@pages/login';
 import ProtectedRoute from '@components/protected-route';
+import { lazy, Suspense } from 'react';
+import Loading from '@components/loading';
+
+const Main = lazy(() => import('@pages/main'));
+const Login = lazy(() => import('@pages/login'));
+const Workspace = lazy(() => import('@pages/workspace'));
+const Error = lazy(() => import('@pages/error'));
 
 function App() {
 	return (
-		<Routes>
-			<Route
-				path="/"
-				element={
-					<ProtectedRoute>
-						<Main />
-					</ProtectedRoute>
-				}
-			/>
-			<Route path="/login" element={<Login />} />
-			<Route path="/workspace/:workspaceId" element={<Workspace />} />
-			<Route path="/*" element={<Error />} />
-		</Routes>
+		<Suspense fallback={<Loading />}>
+			<Routes>
+				<Route
+					path="/"
+					element={
+						<ProtectedRoute>
+							<Main />
+						</ProtectedRoute>
+					}
+				/>
+				<Route path="/login" element={<Login />} />
+				<Route path="/workspace/:workspaceId" element={<Workspace />} />
+				<Route path="/*" element={<Error />} />
+			</Routes>
+		</Suspense>
 	);
 }
 

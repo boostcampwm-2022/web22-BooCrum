@@ -18,6 +18,7 @@ export const Container = styled.div`
 		height: 100%;
 		display: flex;
 		justify-content: center;
+		align-items: center;
 
 		cursor: pointer;
 
@@ -32,6 +33,7 @@ export const Container = styled.div`
 
 	.zoom-icon {
 		width: 12px;
+		height: 12px;
 	}
 
 	.zoom-percent {

@@ -1,4 +1,4 @@
-import React from 'react';
+import { memo } from 'react';
 import { useRecoilState } from 'recoil';
 import { Container, CursorBackground, Tool } from './index.style';
 import { ReactComponent as SelectCursor } from '@assets/icon/toolkit-select-cursor.svg';
@@ -61,4 +61,4 @@ function Toolkit() {
 	);
 }
 
-export default React.memo(Toolkit);
+export default memo(Toolkit);

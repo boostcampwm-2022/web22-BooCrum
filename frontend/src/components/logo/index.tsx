@@ -1,8 +1,8 @@
-import React from 'react';
+import { memo } from 'react';
 import { Wrapper } from './index.style';
 
 function Logo() {
 	return <Wrapper>BooCrum</Wrapper>;
 }
 
-export default React.memo(Logo);
+export default memo(Logo);

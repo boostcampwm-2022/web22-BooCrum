@@ -11,7 +11,7 @@ function setDateDiff(minuteDiff: number): string {
 	if (Math.floor(minuteDiff / 60) < 1) {
 		return `Edited ${minuteDiff} minutes ago`;
 	} else if (Math.floor(minuteDiff / (60 * 24)) < 1) {
-		return `Edited ${Math.floor(minuteDiff / 60)} hours age`;
+		return `Edited ${Math.floor(minuteDiff / 60)} hours ago`;
 	} else {
 		return `Edited ${Math.floor(minuteDiff / (60 * 24))} days ago`;
 	}
