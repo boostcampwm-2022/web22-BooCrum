@@ -204,6 +204,7 @@ const updateObject = (object: fabric.Object, updatedObject: ObjectDataFromServer
 					text: updatedObject.text === undefined ? textObject.text : updatedObject.text,
 					fontSize: updatedObject.fontSize || textObject.fontSize,
 				});
+				textObject.fire('changed');
 			} else if (obj.type === ObjectType.rect && updatedObject.color) {
 				const backgroundRect = obj as fabric.Rect;
 				backgroundRect.set({ fill: updatedObject.color });
@@ -227,7 +228,6 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	}
 
 	const { type, ...updatedProperty } = updatedObject;
-
 	if (object[0].type === ObjectType.editable) {
 		const [editableText, rectObject] = object;
 		let left = editableText.left,

@@ -160,7 +160,6 @@ function useCanvasToSocket({ canvas, socket, cursorWorker, objectWorker }: UseCa
 		});
 
 		canvas.current.on('text:changed', ({ target: fabricObject }) => {
-			console.log(fabricObject);
 			if (isUndefined(fabricObject) || fabricObject.type !== ObjectType.editable) return;
 			const message = formatEditTextEventToSocket(fabricObject as fabric.Text);
 			socket.current?.emit('update_object', message);
