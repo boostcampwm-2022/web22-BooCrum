@@ -113,8 +113,8 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			const [backgroundRect, ...currentObjects] = selectedRect._objects;
 			if (!backgroundRect || currentObjects.length < 2) return;
 
-			if (backgroundRect) backgroundRect.fill = color;
-			if (selectedRect.type === ObjectType.section) currentObjects[0].fill = color;
+			if (backgroundRect) backgroundRect.set({ fill: color });
+			if (selectedRect.type === ObjectType.section) currentObjects[0].set({ fill: color });
 		}
 
 		selectedRect._objects.forEach((object) => {
@@ -123,13 +123,12 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 				const [backgroundRect, ...currentObjects] = selectedGroup._objects;
 				if (!backgroundRect || currentObjects.length < 2) return;
 
-				if (backgroundRect) backgroundRect.fill = color;
-				if (selectedGroup.type === ObjectType.section) currentObjects[0].fill = color;
+				if (backgroundRect) backgroundRect.set({ fill: color });
+				if (selectedGroup.type === ObjectType.section) currentObjects[0].set({ fill: color });
 			}
 		});
-
-		currentCanvas.fire('color:modified', { target: selectedRect });
 		currentCanvas.requestRenderAll();
+		currentCanvas.fire('color:modified', { target: selectedRect });
 	};
 
 	const setFontEditMode = () => {

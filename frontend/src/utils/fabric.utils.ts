@@ -66,6 +66,7 @@ export const initZoom = (
 		canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
 		opt.e.preventDefault();
 		opt.e.stopPropagation();
+		canvas.requestRenderAll();
 	});
 };
 
@@ -129,6 +130,7 @@ export const initDrawing = (canvas: fabric.Canvas) => {
 			if (canvas.mode !== CanvasType.erase || path.type !== ObjectType.draw) return;
 			path.isSocketObject = false;
 			canvas.remove(path);
+			canvas.requestRenderAll();
 		});
 	});
 };
@@ -143,7 +145,6 @@ export const addObject = (
 		color: string;
 	}>
 ) => {
-	//todo 색 정보 받아와야함
 	canvas.on('mouse:down', function (opt) {
 		const evt = opt.e;
 		const vpt = canvas.viewportTransform;
@@ -164,6 +165,13 @@ export const addObject = (
 	});
 };
 
+export const setObejctProps = (canvas: fabric.Canvas) => {
+	canvas.on('object:added', (e) => {
+		if (!e.target) return;
+		if (e.target.controls.mtr) e.target.controls.mtr.visible = false;
+	});
+};
+
 export const deleteObject = (canvas: fabric.Canvas) => {
 	const objectDeleteHandler = (e: KeyboardEvent) => {
 		if (e.key === 'Backspace') {
@@ -173,6 +181,7 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 				canvas.remove(obj);
 			});
 			canvas.discardActiveObject();
+			canvas.requestRenderAll();
 			document.removeEventListener('keydown', objectDeleteHandler);
 		}
 	};
@@ -186,11 +195,9 @@ export const deleteObject = (canvas: fabric.Canvas) => {
 export const setObjectIndexLeveling = (canvas: fabric.Canvas) => {
 	canvas.on('object:added', (e) => {
 		const postits = canvas._objects.filter((obj) => obj.type === ObjectType.postit);
-
 		postits.forEach((obj) => {
 			obj.bringToFront();
 		});
-
 		const drawings = canvas._objects.filter((obj) => obj.type === ObjectType.draw);
 		drawings.forEach((obj) => {
 			obj.bringToFront();

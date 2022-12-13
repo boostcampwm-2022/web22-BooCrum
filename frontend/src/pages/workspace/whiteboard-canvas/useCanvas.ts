@@ -11,6 +11,7 @@ import {
 	setCursorMode,
 	initDrawing,
 	canvasResize,
+	setObejctProps,
 } from '@utils/fabric.utils';
 import { toolItems } from '@data/workspace-tool';
 import { useRecoilState, useRecoilValue } from 'recoil';
@@ -27,8 +28,10 @@ function useCanvas() {
 	const userProfile = useRecoilValue(userProfileState);
 
 	useEffect(() => {
-		if (canvas.current && zoom.event === 'control')
+		if (canvas.current && zoom.event === 'control') {
 			canvas.current.zoomToPoint({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, zoom.percent / 100);
+			canvas.current.requestRenderAll();
+		}
 	}, [zoom]);
 
 	useEffect(() => {
@@ -54,19 +57,25 @@ function useCanvas() {
 		} else {
 			if (cursor.type === toolItems.SECTION) {
 				setCursorMode(fabricCanvas, 'context-menu', CanvasType.section, false);
+				canvas.current.skipTargetFind = true;
 			} else if (cursor.type === toolItems.POST_IT) {
 				setCursorMode(fabricCanvas, 'context-menu', CanvasType.postit, false);
+				canvas.current.skipTargetFind = true;
 			} else if (cursor.type === toolItems.MOVE) {
 				setCursorMode(fabricCanvas, 'grab', CanvasType.move, false);
+				canvas.current.skipTargetFind = true;
 			} else if (cursor.type === toolItems.SELECT) {
 				setCursorMode(fabricCanvas, 'default', CanvasType.select, true);
+				canvas.current.skipTargetFind = false;
 			} else if (cursor.type === toolItems.PEN) {
 				setCursorMode(fabricCanvas, 'default', CanvasType.draw, true);
 				fabricCanvas.isDrawingMode = true;
 				fabricCanvas.freeDrawingBrush.color = cursor.color;
+				canvas.current.skipTargetFind = true;
 			} else if (cursor.type === toolItems.ERASER) {
 				// todo canvas.mode에 erase 추가해줘야함
 				setCursorMode(fabricCanvas, 'default', CanvasType.erase, false);
+				canvas.current.skipTargetFind = false;
 			}
 			canvas.current.discardActiveObject();
 			canvas.current.requestRenderAll();
@@ -94,6 +103,7 @@ function useCanvas() {
 			height: canvasHeight,
 			width: canvasWidth,
 			backgroundColor: '#f1f1f1',
+			renderOnAddRemove: false,
 		});
 
 		initGrid(fabricCanvas, pattern, grid);
@@ -103,6 +113,7 @@ function useCanvas() {
 		initWheelPanning(fabricCanvas);
 		addObject(fabricCanvas, userProfile.nickname, setCursor);
 		deleteObject(fabricCanvas);
+		setObejctProps(fabricCanvas);
 		setObjectIndexLeveling(fabricCanvas);
 
 		return fabricCanvas;

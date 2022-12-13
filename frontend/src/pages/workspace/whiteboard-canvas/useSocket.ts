@@ -17,6 +17,7 @@ import { myInfoInWorkspaceState } from '@context/user';
 import { isNull } from '@utils/type.utils';
 
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
+	const { workspaceId } = useParams();
 	const setMyInfoInWorkspace = useSetRecoilState(myInfoInWorkspaceState);
 	const myInfoInWorkspaceRef = useRef<Member>();
 	const setMembers = useSetRecoilState(membersState);
@@ -26,10 +27,8 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [isConnected, setIsConnected] = useState(false);
 	const [isEndInit, setIsEndInit] = useState(false);
 
-	const { workspaceId } = useParams();
-
 	const isMessageByMe = (userId: string) => {
-		return myInfoInWorkspaceRef.current?.userId === userId;
+		return myInfoInWorkspaceRef.current?.userId === userId || myInfoInWorkspaceRef.current?.nickname === userId;
 	};
 
 	const createMemberInCanvas = (member: Member) => {
@@ -45,7 +44,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	};
 
 	useEffect(() => {
-		socket.current = io(`/workspace/${workspaceId}`);
+		socket.current = io(`wss://boocrum.run/workspace/${workspaceId}`, { transports: ['websocket'] });
 
 		socket.current.on('connect', () => {
 			setIsConnected(true);
@@ -66,11 +65,10 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 					createMemberInCanvas(member);
 				}
 			});
-
 			objects.forEach((object) => {
 				if (!canvas.current) return;
 				const role = myInfoInWorkspaceRef.current?.role as Role;
-				createObjectFromServer(canvas.current, object, role, workspaceId);
+				createObjectFromServer(canvas.current, object, role);
 			});
 
 			canvas.current?.requestRenderAll();
@@ -89,6 +87,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			membersInCanvas.current = membersInCanvas.current.filter((memberInCanvas) => {
 				if (memberInCanvas.userId === userId) {
 					canvas.current?.remove(memberInCanvas.cursorObject);
+					canvas.current?.requestRenderAll();
 					return false;
 				}
 				return true;
@@ -102,6 +101,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('move_pointer', (userMousePointer) => {
 			if (isNull(canvas.current) || isMessageByMe(userMousePointer.userId)) return;
 			moveCursorFromServer(membersInCanvas.current, userMousePointer);
+			canvas.current.requestRenderAll();
 		});
 
 		socket.current.on('select_object', ({ userId, objectIds }) => {
@@ -115,12 +115,14 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('unselect_object', ({ userId, objectIds }) => {
 			if (isNull(canvas.current) || isMessageByMe(userId)) return;
 			unselectObjectFromServer(canvas.current, objectIds);
+			canvas.current.requestRenderAll();
 		});
 
 		socket.current.on('create_object', (arg) => {
 			if (isNull(canvas.current) || isMessageByMe(arg.creator)) return;
 			const role = myInfoInWorkspaceRef.current?.role as Role;
-			createObjectFromServer(canvas.current, arg, role, workspaceId);
+			createObjectFromServer(canvas.current, arg, role);
+			canvas.current.requestRenderAll();
 		});
 
 		socket.current.on('delete_object', ({ objectId }) => {
@@ -134,26 +136,31 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 			});
 			if (objects.length === 0) return;
 			canvas.current.remove(...objects);
+			canvas.current.requestRenderAll();
 		});
 
 		socket.current.on('move_object', ({ userId, objectData }) => {
 			if (isNull(canvas.current) || isMessageByMe(userId)) return;
 			updateObjectFromServer(canvas.current, objectData);
+			canvas.current.requestRenderAll();
 		});
 
 		socket.current.on('scale_object', ({ userId, objectData }) => {
 			if (isNull(canvas.current) || isMessageByMe(userId)) return;
 			updateObjectFromServer(canvas.current, objectData);
+			canvas.current.requestRenderAll();
 		});
 
 		socket.current.on('updating_object', ({ userId, objectData }) => {
 			if (isNull(canvas.current) || isMessageByMe(userId)) return;
 			updateObjectFromServer(canvas.current, objectData);
+			canvas.current.requestRenderAll();
 		});
 
 		socket.current.on('update_object', ({ userId, objectData }) => {
 			if (isNull(canvas.current) || isMessageByMe(userId)) return;
 			updateObjectFromServer(canvas.current, objectData);
+			canvas.current.requestRenderAll();
 		});
 
 		return () => {

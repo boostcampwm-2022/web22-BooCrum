@@ -1,5 +1,4 @@
 import { workspaceRole } from '@data/workspace-role';
-import { Workspace } from '@api/workspace';
 import {
 	ObjectDataFromServer,
 	MemberInCanvas,
@@ -29,14 +28,9 @@ import {
 } from './object.utils';
 import { isNull, isUndefined } from './type.utils';
 
-export const createObjectFromServer = (
-	canvas: fabric.Canvas,
-	newObject: ObjectDataFromServer,
-	role: Role,
-	workspaceId: string | undefined
-) => {
+export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
 	if (newObject.type === SocketObjectType.postit) {
-		createPostitFromServer(canvas, newObject, role, workspaceId);
+		createPostitFromServer(canvas, newObject, role);
 	}
 
 	if (newObject.type === SocketObjectType.section) {
@@ -76,22 +70,15 @@ export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDat
 	});
 	canvas.add(drawObject);
 };
+const isGeust = (name: string) => {
+	return name.includes('(');
+};
 
-export const createPostitFromServer = async (
-	canvas: fabric.Canvas,
-	newObject: ObjectDataFromServer,
-	role: Role,
-	workspaceId: string | undefined
-) => {
+export const createPostitFromServer = async (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
 	const { objectId, left, top, fontSize, color, text, width, height, creator, scaleX, scaleY } = newObject;
 	if (!left || !top || !fontSize || !color || isUndefined(text) || !width || !height || !scaleX || !scaleY) return;
 
-	const participants = await Workspace.getWorkspaceParticipant(workspaceId || '');
-	const user = participants.filter((part) => {
-		if (part.user.userId === creator) return true;
-	});
-
-	const nameLabel = createNameLabel({ objectId, text: user.length ? user[0].user.nickname : '', left, top });
+	const nameLabel = createNameLabel({ objectId, text: isGeust(creator) ? '' : creator, left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
 	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
 	const backgroundRect = createRect(ObjectType.postit, { objectId, left, top, color });
@@ -217,6 +204,7 @@ const updateObject = (object: fabric.Object, updatedObject: ObjectDataFromServer
 					text: updatedObject.text === undefined ? textObject.text : updatedObject.text,
 					fontSize: updatedObject.fontSize || textObject.fontSize,
 				});
+				textObject.fire('changed');
 			} else if (obj.type === ObjectType.rect && updatedObject.color) {
 				const backgroundRect = obj as fabric.Rect;
 				backgroundRect.set({ fill: updatedObject.color });
@@ -240,7 +228,6 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	}
 
 	const { type, ...updatedProperty } = updatedObject;
-
 	if (object[0].type === ObjectType.editable) {
 		const [editableObject, rectObject] = object;
 		let left = editableObject.left,
@@ -281,6 +268,7 @@ export const selectObjectFromServer = (canvas: fabric.Canvas, objectIds: string[
 
 	objects.forEach((object) => {
 		if (object instanceof fabric.Group) {
+			object.objectCaching = false;
 			object._objects.forEach((_object) => {
 				if (_object.type === ObjectType.rect) {
 					_object.set({
@@ -310,6 +298,7 @@ export const unselectObjectFromServer = (canvas: fabric.Canvas, objectIds: strin
 					});
 				}
 			});
+			object.objectCaching = true;
 		}
 	});
 };
