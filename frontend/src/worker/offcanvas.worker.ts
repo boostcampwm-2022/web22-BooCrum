@@ -30,6 +30,14 @@ export default () => {
 			lastZoom = data.zoom;
 			drawGrid(gridSize * data.zoom, { x: data.x, y: data.y });
 		}
+
+		if (data.type === 'resize') {
+			if (!ctx) return;
+			ctx.clearRect(0, 0, canvas.width, canvas.height);
+			canvas.width = data.width;
+			canvas.height = data.height;
+			drawGrid(gridSize * lastZoom, lastPosition);
+		}
 	};
 
 	const drawGrid = (gridSize: number, coords: { x: number; y: number }) => {

@@ -8,6 +8,10 @@ import { toolItems } from '@data/workspace-tool';
 
 export const canvasResize = (canvas: fabric.Canvas) => {
 	canvas.setDimensions({ width: window.innerWidth, height: window.innerHeight });
+	canvas.fire('canvas:resize', {
+		width: window.innerWidth,
+		height: window.innerHeight,
+	});
 };
 
 export const initGrid = (canvas: fabric.Canvas, patternSize: number, gridSize: number) => {

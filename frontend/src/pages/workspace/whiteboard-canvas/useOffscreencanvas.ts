@@ -37,6 +37,11 @@ function useOffscreencanvas(canvas: React.MutableRefObject<fabric.Canvas | null>
 			const zoom = e as unknown as { zoom: number; x: number; y: number };
 			worker.current?.postMessage({ type: 'zoom', ...zoom });
 		});
+
+		canvas.current?.on('canvas:resize', function (e) {
+			const size = e as unknown as { width: number; height: number };
+			worker.current?.postMessage({ type: 'resize', ...size });
+		});
 	}, []);
 }
 
