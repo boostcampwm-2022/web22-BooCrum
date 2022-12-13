@@ -9,8 +9,8 @@ import { UserModule } from '../user/user.module';
 import { UserService } from '../user/user.service';
 import { AuthController } from './auth.controller';
 import { GithubStrategy } from './strategy/github.strategy';
-import { config } from '../ormconfig';
 import { ConfigModule } from '@nestjs/config';
+import { join } from 'path';
 
 describe('AuthController', () => {
   let controller: AuthController;
@@ -19,10 +19,23 @@ describe('AuthController', () => {
     const module: TestingModule = await Test.createTestingModule({
       imports: [
         ConfigModule.forRoot(),
+        TypeOrmModule.forRoot({
+          type: 'mysql',
+          host: process.env.MYSQL_HOST,
+          port: parseInt(process.env.MYSQL_PORT),
+          username: process.env.MYSQL_USERNAME,
+          password: process.env.MYSQL_PASSWORD,
+          database: process.env.MYSQL_DATABASE,
+          entities: [join(__dirname, '/**/*.entity{.ts,.js}')],
+          migrations: [
+            process.env.NODE_ENV !== 'develop' && process.env.NODE_ENV !== 'production'
+              ? 'src/migrations/**/*.ts'
+              : 'dist/migrations/**/*.js',
+          ],
+        }),
+        TypeOrmModule.forFeature([User, Team, TeamMember]),
         UserModule,
         TeamModule,
-        TypeOrmModule.forRoot(config),
-        TypeOrmModule.forFeature([User, Team, TeamMember]),
       ],
       controllers: [AuthController],
       providers: [GithubStrategy, UserService, TeamService],
