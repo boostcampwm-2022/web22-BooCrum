@@ -100,7 +100,10 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
     const members: UserDAO[] = (await this.dataManagementService.findUserDataListInWorkspace(workspaceId)).map(
       (vo) => new UserDAO(vo.userId, vo.nickname, vo.color, vo.role),
     );
-    const objects: ObjectMapVO[] = await this.objectManagementService.findAllObjectsInWorkspace(workspaceId);
+    const objects: ObjectMapVO[] = await this.dbAccessService.replaceCreatorIdToNickname(
+      workspaceId,
+      await this.objectManagementService.findAllObjectsInWorkspace(workspaceId),
+    );
     const userData = new UserDAO(userMapVO.userId, userMapVO.nickname, userMapVO.color, userMapVO.role);
 
     // 5. Socket 이벤트 Emit
@@ -115,7 +118,6 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
           `멤버 최종 updateDate 갱신 실패 (워크스페이스 ID: ${userMapVO.workspaceId}, 유저 ID: ${userMapVO.userId})`,
         );
     }
-
     this.logger.log(`workspaceId: ${workspaceId} / eventName: handleConnection / userId: ${userMapVO.userId}`);
   }
 
@@ -253,6 +255,7 @@ export class SocketGateway implements OnGatewayInit, OnGatewayConnection, OnGate
 
       // 생성을 시도하고, 성공하면 이를 전달한다.
       await this.objectManagementService.insertObjectIntoWorkspace(userData.workspaceId, objectData);
+      objectData.creator = userData.nickname;
       socket.nsp.emit('create_object', objectData);
 
       this.logger.log(

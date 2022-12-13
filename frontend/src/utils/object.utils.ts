@@ -331,13 +331,14 @@ export const setSectionEditEvent = (
 		sectionTitle.set({ visible: false });
 		canvas.add(editableTitle);
 		canvas.setActiveObject(editableTitle);
-		editableTitle.enterEditing();
 		editableTitle.set({
 			scaleX: groupObject.scaleX,
 			scaleY: groupObject.scaleY,
 			left: (groupObject?.left || 0) + 10 * (groupObject?.scaleX || 1),
 			top: groupObject.top,
+			text: sectionTitle.text,
 		});
+		editableTitle.enterEditing();
 
 		canvas.mode = CanvasType.edit;
 	});
