@@ -83,11 +83,16 @@ export const initDragPanning = (canvas: fabric.Canvas) => {
 	canvas.on('mouse:move', function (opt) {
 		if (canvas.viewportTransform && canvas.isDragging) {
 			const e = opt.e;
+			// console.log(e);
 			const vpt = canvas.viewportTransform;
 
 			if (canvas.lastPosX && canvas.lastPosY) {
 				vpt[4] += e.clientX - canvas.lastPosX;
 				vpt[5] += e.clientY - canvas.lastPosY;
+				canvas.fire('canvas:move', {
+					x: vpt[4],
+					y: vpt[5],
+				});
 			}
 			canvas.requestRenderAll();
 			canvas.lastPosX = e.clientX;
@@ -114,6 +119,10 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 			const vpt = canvas.viewportTransform;
 			vpt[4] += -deltaX / canvas.getZoom();
 			vpt[5] += -deltaY / canvas.getZoom();
+			canvas.fire('canvas:move', {
+				x: vpt[4],
+				y: vpt[5],
+			});
 		}
 		canvas.requestRenderAll();
 		if (canvas.viewportTransform) canvas.setViewportTransform(canvas.viewportTransform);

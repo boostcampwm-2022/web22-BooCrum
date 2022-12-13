@@ -18,10 +18,10 @@ import useOffscreencanvas from './useOffscreencanvas';
 
 function WhiteboardCanvas() {
 	const { canvas } = useCanvas();
+	useOffscreencanvas(canvas);
 	const { socket, isEndInit } = useSocket(canvas);
 	const { worker: cursorWorker } = useCursorWorker(CursorWorker, socket);
 	const { worker: objectWorker } = useObjectWorker(ObjectWorker, socket);
-	useOffscreencanvas();
 
 	const { isOpen, menuRef, color, setObjectColor, fontSize, handleFontSize, selectedType, menuPosition } =
 		useCanvasToSocket({ canvas, socket, cursorWorker, objectWorker });
