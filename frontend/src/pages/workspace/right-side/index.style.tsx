@@ -5,11 +5,15 @@ export const Container = styled.div`
 
 	display: flex;
 	justify-content: flex-end;
+	align-items: center;
 
 	margin-right: 20px;
 
 	.share {
 		margin-right: 20px;
+
+		width: 26px;
+		height: 26px;
 
 		cursor: pointer;
 	}

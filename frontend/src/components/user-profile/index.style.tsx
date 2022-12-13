@@ -1,6 +1,11 @@
 import styled from 'styled-components';
 
-export const Wrapper = styled.div``;
+export const Wrapper = styled.div`
+	.user-profile {
+		width: 32px;
+		height: 32px;
+	}
+`;
 
 export const ProfileContainer = styled.div<{ isShow: boolean }>`
 	position: absolute;
