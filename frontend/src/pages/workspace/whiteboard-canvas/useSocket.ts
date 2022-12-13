@@ -44,7 +44,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	};
 
 	useEffect(() => {
-		socket.current = io(`/workspace/${workspaceId}`);
+		socket.current = io(`wss://boocrum.run/workspace/${workspaceId}`, { transports: ['websocket'] });
 
 		socket.current.on('connect', () => {
 			setIsConnected(true);
