@@ -4,16 +4,12 @@ import { useEffect } from 'react';
 import Loading from '@components/loading';
 import useAuth from '@hooks/useAuth';
 import Layout from './layout';
-import { useRecoilState } from 'recoil';
-import { workspaceIdState } from '@context/workspace';
 
 function Workspace() {
 	const { isLoading, authenticate } = useAuth();
 	const { workspaceId } = useParams();
-	const [wid, setSid] = useRecoilState(workspaceIdState);
 
 	useEffect(() => {
-		setSid(workspaceId || '');
 		authenticate();
 	}, []);
 

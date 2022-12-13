@@ -27,16 +27,10 @@ import {
 	setSectionEditEvent,
 } from './object.utils';
 import { isNull, isUndefined } from './type.utils';
-import { ParticipantInfo } from '@api/workspace.type';
 
-export const createObjectFromServer = (
-	canvas: fabric.Canvas,
-	newObject: ObjectDataFromServer,
-	role: Role,
-	participants: ParticipantInfo[]
-) => {
+export const createObjectFromServer = (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
 	if (newObject.type === SocketObjectType.postit) {
-		createPostitFromServer(canvas, newObject, role, participants);
+		createPostitFromServer(canvas, newObject, role);
 	}
 
 	if (newObject.type === SocketObjectType.section) {
@@ -76,21 +70,15 @@ export const createDrawFromServer = (canvas: fabric.Canvas, newObject: ObjectDat
 	});
 	canvas.add(drawObject);
 };
+const isGeust = (name: string) => {
+	return name.includes('(');
+};
 
-export const createPostitFromServer = async (
-	canvas: fabric.Canvas,
-	newObject: ObjectDataFromServer,
-	role: Role,
-	participants: ParticipantInfo[]
-) => {
+export const createPostitFromServer = async (canvas: fabric.Canvas, newObject: ObjectDataFromServer, role: Role) => {
 	const { objectId, left, top, fontSize, color, text, width, height, creator, scaleX, scaleY } = newObject;
 	if (!left || !top || !fontSize || !color || isUndefined(text) || !width || !height || !scaleX || !scaleY) return;
 
-	const user = participants.filter((part) => {
-		if (part.user.userId === creator) return true;
-	});
-
-	const nameLabel = createNameLabel({ objectId, text: user.length ? user[0].user.nickname : '', left, top });
+	const nameLabel = createNameLabel({ objectId, text: isGeust(creator) ? '' : creator, left, top });
 	const textBox = createTextBox({ objectId, left, top, fontSize, text, editable: false });
 	const editableTextBox = createTextBox({ objectId, left, top, fontSize, text, editable: true });
 	const backgroundRect = createRect(ObjectType.postit, { objectId, left, top, color });

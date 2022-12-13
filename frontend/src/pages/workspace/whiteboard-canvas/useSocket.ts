@@ -2,8 +2,8 @@ import { useState, useEffect, useRef } from 'react';
 import { useParams } from 'react-router-dom';
 import { io, Socket } from 'socket.io-client';
 import { ClientToServerEvents, Member, MemberInCanvas, Role, ServerToClientEvents } from './types';
-import { useRecoilValue, useSetRecoilState } from 'recoil';
-import { membersState, workspaceParticipantsSelector } from '@context/workspace';
+import { useSetRecoilState } from 'recoil';
+import { membersState } from '@context/workspace';
 import { fabric } from 'fabric';
 import {
 	createCursorObject,
@@ -19,7 +19,6 @@ import { isNull } from '@utils/type.utils';
 function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const { workspaceId } = useParams();
 	const setMyInfoInWorkspace = useSetRecoilState(myInfoInWorkspaceState);
-	const participants = useRecoilValue(workspaceParticipantsSelector);
 	const myInfoInWorkspaceRef = useRef<Member>();
 	const setMembers = useSetRecoilState(membersState);
 
@@ -29,7 +28,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const [isEndInit, setIsEndInit] = useState(false);
 
 	const isMessageByMe = (userId: string) => {
-		return myInfoInWorkspaceRef.current?.userId === userId;
+		return myInfoInWorkspaceRef.current?.userId === userId || myInfoInWorkspaceRef.current?.nickname === userId;
 	};
 
 	const createMemberInCanvas = (member: Member) => {
@@ -66,11 +65,10 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 					createMemberInCanvas(member);
 				}
 			});
-
 			objects.forEach((object) => {
 				if (!canvas.current) return;
 				const role = myInfoInWorkspaceRef.current?.role as Role;
-				createObjectFromServer(canvas.current, object, role, participants);
+				createObjectFromServer(canvas.current, object, role);
 			});
 
 			canvas.current?.requestRenderAll();
@@ -123,7 +121,7 @@ function useSocket(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		socket.current.on('create_object', (arg) => {
 			if (isNull(canvas.current) || isMessageByMe(arg.creator)) return;
 			const role = myInfoInWorkspaceRef.current?.role as Role;
-			createObjectFromServer(canvas.current, arg, role, participants);
+			createObjectFromServer(canvas.current, arg, role);
 			canvas.current.requestRenderAll();
 		});
 
