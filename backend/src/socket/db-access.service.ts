@@ -184,6 +184,10 @@ export class DbAccessService {
       return prev;
     }, new Map<string, string>());
 
-    objects.forEach((object) => (object.creator = memberMap.get(object.creator) ?? object.creator));
+    return objects.map((object) => {
+      const nickname = memberMap.get(object.creator) ?? object.creator;
+      object.creator = nickname;
+      return object;
+    });
   }
 }
