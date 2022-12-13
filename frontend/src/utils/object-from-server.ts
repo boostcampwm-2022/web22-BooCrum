@@ -242,9 +242,9 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 	const { type, ...updatedProperty } = updatedObject;
 
 	if (object[0].type === ObjectType.editable) {
-		const [editableText, rectObject] = object;
-		let left = editableText.left,
-			top = editableText.top;
+		const [editableObject, rectObject] = object;
+		let left = editableObject.left,
+			top = editableObject.top;
 		const width = rectObject.getScaledWidth() * 0.9;
 
 		if (rectObject.type === ObjectType.postit) {
@@ -254,19 +254,22 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 			left = updatedProperty.left ? updatedProperty.left + rectObject.getScaledWidth() * 0.05 : left;
 		}
 
+		const editableText = editableObject as fabric.Textbox;
 		editableText.set({
 			left,
 			top,
 			width,
+			text: (updatedProperty.text || editableText.text) as string,
 		});
+		(editableText.hiddenTextarea as HTMLTextAreaElement).value = (updatedProperty.text || editableText.text) as string;
+		editableText.fire('changed');
 
 		rectObject.set({ ...updatedObject });
-	} else {
-		console.log(object);
-		object.forEach((obj) => {
-			updateObject(obj, updatedObject);
-		});
 	}
+
+	object.forEach((obj) => {
+		updateObject(obj, updatedObject);
+	});
 };
 
 export const selectObjectFromServer = (canvas: fabric.Canvas, objectIds: string[], color: string) => {
