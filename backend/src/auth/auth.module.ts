@@ -1,5 +1,4 @@
 import { Module } from '@nestjs/common';
-import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { GithubStrategy } from './strategy/github.strategy';
 import { UserModule } from '../user/user.module';
@@ -14,6 +13,6 @@ import { TeamMember } from '../team/entity/team-member.entity';
 @Module({
   imports: [UserModule, TeamModule, TypeOrmModule.forFeature([User, Team, TeamMember])],
   controllers: [AuthController],
-  providers: [AuthService, GithubStrategy, UserService, TeamService],
+  providers: [GithubStrategy, UserService, TeamService],
 })
 export class AuthModule {}

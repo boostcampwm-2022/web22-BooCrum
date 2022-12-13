@@ -6,8 +6,8 @@ import { TeamMember } from './entity/team-member.entity';
 import { IsTeam } from './enum/is-team.enum';
 import { TeamDTO } from './dto/team.dto';
 import { User } from '../user/entity/user.entity';
-import { UserService } from 'src/user/user.service';
-import { TEAM_ROLE } from 'src/util/constant/role.constant';
+import { UserService } from '../user/user.service';
+import { TEAM_ROLE } from '../util/constant/role.constant';
 
 @Injectable()
 export class TeamService {

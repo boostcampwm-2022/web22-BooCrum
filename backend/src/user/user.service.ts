@@ -3,12 +3,12 @@ import { Injectable, BadRequestException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { TeamMember } from '../team/entity/team-member.entity';
 import { Team } from '../team/entity/team.entity';
-import { IsTeam } from 'src/team/enum/is-team.enum';
+import { IsTeam } from '../team/enum/is-team.enum';
 import { WorkspaceMember } from '../workspace/entity/workspace-member.entity';
 import { Repository, DataSource } from 'typeorm';
 import { UserDto } from './dto/user.dto';
 import { User } from './entity/user.entity';
-import { TEAM_ROLE } from 'src/util/constant/role.constant';
+import { TEAM_ROLE } from '../util/constant/role.constant';
 
 @Injectable()
 export class UserService {
