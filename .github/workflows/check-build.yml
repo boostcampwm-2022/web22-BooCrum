@@ -27,13 +27,14 @@ jobs:
       - uses: actions/setup-node@v3.5.1
         with:
           node-version: "16.18.0"
+      - name: change backend directory
+        run: cd ./backend
+      - name: install backend packages
+        run: npm install
       - name: try build backend
-        run: |
-          cd ./backend
-          npm install
-          npm run build
-      - name : backend - jest test
-        run : npm test
+        run: npm run build
+      - name : backend jest test
+        run: npm test
       - name: if fail
         uses: actions/github-script@0.2.0
         with:
