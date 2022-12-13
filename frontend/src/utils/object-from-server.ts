@@ -263,11 +263,11 @@ export const updateObjectFromServer = (canvas: fabric.Canvas, updatedObject: Obj
 		editableText.fire('changed');
 
 		rectObject.set({ ...updatedObject });
-	} else {
-		object.forEach((obj) => {
-			updateObject(obj, updatedObject);
-		});
 	}
+
+	object.forEach((obj) => {
+		updateObject(obj, updatedObject);
+	});
 };
 
 export const selectObjectFromServer = (canvas: fabric.Canvas, objectIds: string[], color: string) => {
