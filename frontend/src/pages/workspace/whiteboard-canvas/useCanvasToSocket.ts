@@ -135,7 +135,6 @@ function useCanvasToSocket({ canvas, socket, cursorWorker, objectWorker }: UseCa
 
 		canvas.current.on('color:modified', ({ target: fabricObject }) => {
 			if (!(fabricObject instanceof fabric.Group)) return;
-
 			if (fabricObject.type === ObjectType.section || fabricObject.type === ObjectType.postit) {
 				const message = formatEditColorEventToSocket(fabricObject);
 				socket.current?.emit('update_object', message);
