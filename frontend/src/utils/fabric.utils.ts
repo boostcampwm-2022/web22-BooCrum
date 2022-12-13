@@ -8,6 +8,10 @@ import { toolItems } from '@data/workspace-tool';
 
 export const canvasResize = (canvas: fabric.Canvas) => {
 	canvas.setDimensions({ width: window.innerWidth, height: window.innerHeight });
+	canvas.fire('canvas:resize', {
+		width: window.innerWidth,
+		height: window.innerHeight,
+	});
 };
 
 export const initGrid = (canvas: fabric.Canvas, patternSize: number, gridSize: number) => {
@@ -15,7 +19,7 @@ export const initGrid = (canvas: fabric.Canvas, patternSize: number, gridSize: n
 		mode: canvas.mode,
 		height: patternSize,
 		width: patternSize,
-		backgroundColor: '#f1f1f1',
+		// backgroundColor: '#f1f1f1',
 	});
 
 	for (let i = 0; i <= patternSize / gridSize; i++) {
@@ -64,6 +68,9 @@ export const initZoom = (
 		if (zoom < 0.5) zoom = 0.5;
 		setZoom({ percent: Math.round(zoom * 100), event: 'wheel' });
 		canvas.zoomToPoint({ x: opt.e.offsetX, y: opt.e.offsetY }, zoom);
+		if (!canvas.viewportTransform) return;
+		const vpt = canvas.viewportTransform;
+		canvas.fire('canvas:zoom', { zoom, x: vpt[4], y: vpt[5] });
 		opt.e.preventDefault();
 		opt.e.stopPropagation();
 		canvas.requestRenderAll();
@@ -83,11 +90,16 @@ export const initDragPanning = (canvas: fabric.Canvas) => {
 	canvas.on('mouse:move', function (opt) {
 		if (canvas.viewportTransform && canvas.isDragging) {
 			const e = opt.e;
+			// console.log(e);
 			const vpt = canvas.viewportTransform;
 
 			if (canvas.lastPosX && canvas.lastPosY) {
 				vpt[4] += e.clientX - canvas.lastPosX;
 				vpt[5] += e.clientY - canvas.lastPosY;
+				canvas.fire('canvas:move', {
+					x: vpt[4],
+					y: vpt[5],
+				});
 			}
 			canvas.requestRenderAll();
 			canvas.lastPosX = e.clientX;
@@ -114,6 +126,10 @@ export const initWheelPanning = (canvas: fabric.Canvas) => {
 			const vpt = canvas.viewportTransform;
 			vpt[4] += -deltaX / canvas.getZoom();
 			vpt[5] += -deltaY / canvas.getZoom();
+			canvas.fire('canvas:move', {
+				x: vpt[4],
+				y: vpt[5],
+			});
 		}
 		canvas.requestRenderAll();
 		if (canvas.viewportTransform) canvas.setViewportTransform(canvas.viewportTransform);

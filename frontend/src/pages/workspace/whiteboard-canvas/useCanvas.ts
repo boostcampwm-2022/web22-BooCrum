@@ -102,11 +102,10 @@ function useCanvas() {
 			mode: CanvasType.select,
 			height: canvasHeight,
 			width: canvasWidth,
-			backgroundColor: '#f1f1f1',
 			renderOnAddRemove: false,
 		});
 
-		initGrid(fabricCanvas, pattern, grid);
+		// initGrid(fabricCanvas, pattern, grid);
 		initDrawing(fabricCanvas);
 		initZoom(fabricCanvas, setZoom);
 		initDragPanning(fabricCanvas);
