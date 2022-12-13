@@ -1,49 +1,75 @@
+import { Position, CanvasSize } from '@pages/workspace/whiteboard-canvas/types/offscreencanvas.types';
+
+interface OffcanvasWorkerMessageData {
+	type: string;
+}
+
+interface OffcanvasWorkerInitData extends OffcanvasWorkerMessageData {
+	canvas: OffscreenCanvas;
+}
+interface OffcanvasWorkerZoomData extends OffcanvasWorkerMessageData {
+	zoom: number;
+	position: Position;
+}
+interface OffcanvasWorkerMoveData extends OffcanvasWorkerMessageData {
+	position: Position;
+}
+interface OffcanvasWorkerResizeData extends OffcanvasWorkerMessageData {
+	size: CanvasSize;
+}
+
 export default () => {
 	let canvas: OffscreenCanvas;
 	let ctx: OffscreenCanvasRenderingContext2D | null;
 	const gridSize = 50;
-	let lastPosition: { x: number; y: number } = { x: 0, y: 0 };
+	let lastPosition: Position = { x: 0, y: 0 };
 	let lastZoom = 1;
 
-	self.onmessage = ({ data }) => {
+	self.onmessage = ({
+		data,
+	}: {
+		data: OffcanvasWorkerInitData | OffcanvasWorkerMoveData | OffcanvasWorkerZoomData | OffcanvasWorkerResizeData;
+	}) => {
 		if (data.type === 'init') {
-			canvas = data.canvas as OffscreenCanvas;
-
+			data = data as OffcanvasWorkerInitData;
+			canvas = data.canvas;
 			ctx = canvas.getContext('2d');
-			const backgroundColor = '#f1f1f1';
-			if (!ctx) return;
-			ctx.fillStyle = backgroundColor;
-			ctx.fillRect(0, 0, canvas.width, canvas.height);
-			const defaultCoords = { x: 0, y: 0 };
-			drawGrid(gridSize * lastZoom, defaultCoords);
+
+			initCanvas();
+			drawGrid(gridSize * lastZoom, lastPosition);
+			return;
 		}
 
 		if (data.type === 'move') {
+			data = data as OffcanvasWorkerMoveData;
 			if (!ctx) return;
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			drawGrid(gridSize * lastZoom, data.coords);
+			clearCanvas();
+			drawGrid(gridSize * lastZoom, data.position);
+			return;
 		}
 
 		if (data.type === 'zoom') {
 			if (!ctx) return;
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			lastZoom = data.zoom;
-			drawGrid(gridSize * data.zoom, { x: data.x, y: data.y });
+			clearCanvas();
+			lastZoom = (data as OffcanvasWorkerZoomData).zoom;
+			drawGrid(gridSize * (data as OffcanvasWorkerZoomData).zoom, (data as OffcanvasWorkerZoomData).position);
+			return;
 		}
 
 		if (data.type === 'resize') {
 			if (!ctx) return;
-			ctx.clearRect(0, 0, canvas.width, canvas.height);
-			canvas.width = data.width;
-			canvas.height = data.height;
+			data = data as OffcanvasWorkerResizeData;
+			clearCanvas();
+			resizeCanvas(data.size);
 			drawGrid(gridSize * lastZoom, lastPosition);
+			return;
 		}
 	};
 
-	const drawGrid = (gridSize: number, coords: { x: number; y: number }) => {
-		lastPosition = coords;
-		const offsetX = -1 * (coords.x % gridSize);
-		const offsetY = -1 * (coords.y % gridSize);
+	const drawGrid = (gridSize: number, position: Position) => {
+		lastPosition = position;
+		const offsetX = -1 * (position.x % gridSize);
+		const offsetY = -1 * (position.y % gridSize);
 
 		if (!ctx) return;
 		ctx.beginPath();
@@ -63,5 +89,22 @@ export default () => {
 		ctx.closePath();
 		ctx.strokeStyle = '#ccc';
 		ctx.stroke();
+	};
+
+	const initCanvas = () => {
+		if (!ctx) return;
+		const backgroundColor = '#f1f1f1';
+		ctx.fillStyle = backgroundColor;
+		ctx.fillRect(0, 0, canvas.width, canvas.height);
+	};
+
+	const clearCanvas = () => {
+		if (!ctx) return;
+		ctx.clearRect(0, 0, canvas.width, canvas.height);
+	};
+
+	const resizeCanvas = (size: CanvasSize) => {
+		canvas.width = size.width;
+		canvas.height = size.height;
 	};
 };

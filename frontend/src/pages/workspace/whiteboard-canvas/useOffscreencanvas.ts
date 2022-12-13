@@ -1,6 +1,6 @@
-import { IEvent } from 'fabric/fabric-impl';
 import { useRef, useEffect } from 'react';
 import offcanvasWorker from 'worker/offcanvas.worker';
+import { Position, ZoomPosition, CanvasSize } from './types/offscreencanvas.types';
 
 function useOffscreencanvas(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 	const worker = useRef<Worker>();
@@ -29,18 +29,25 @@ function useOffscreencanvas(canvas: React.MutableRefObject<fabric.Canvas | null>
 		worker.current.postMessage({ type: 'init', canvas: offscreen }, [offscreen]);
 
 		canvas.current?.on('canvas:move', function (e) {
-			const coords = e as unknown as { x: number; y: number };
-			worker.current?.postMessage({ type: 'move', coords: coords });
+			const position = e as unknown as Position;
+			worker.current?.postMessage({ type: 'move', position });
 		});
 
 		canvas.current?.on('canvas:zoom', function (e) {
-			const zoom = e as unknown as { zoom: number; x: number; y: number };
-			worker.current?.postMessage({ type: 'zoom', ...zoom });
+			const zoomPosition = e as unknown as ZoomPosition;
+			worker.current?.postMessage({
+				type: 'zoom',
+				zoom: zoomPosition.zoom,
+				position: {
+					x: zoomPosition.x,
+					y: zoomPosition.y,
+				},
+			});
 		});
 
 		canvas.current?.on('canvas:resize', function (e) {
-			const size = e as unknown as { width: number; height: number };
-			worker.current?.postMessage({ type: 'resize', ...size });
+			const size = e as unknown as CanvasSize;
+			worker.current?.postMessage({ type: 'resize', size: size });
 		});
 	}, []);
 }
