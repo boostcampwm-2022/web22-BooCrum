@@ -11,8 +11,8 @@ import {
   UseGuards,
   ValidationPipe,
 } from '@nestjs/common';
-import { AuthorizationGuard } from 'src/auth/guard/session.guard';
-import { TEAM_ROLE } from 'src/util/constant/role.constant';
+import { AuthorizationGuard } from '../auth/guard/session.guard';
+import { TEAM_ROLE } from '../util/constant/role.constant';
 import { TeamDTO } from './dto/team.dto';
 import { TeamMember } from './entity/team-member.entity';
 import { Team } from './entity/team.entity';

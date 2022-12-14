@@ -1,14 +1,13 @@
 /* eslint-disable @typescript-eslint/no-empty-function */
 import { Controller, UseGuards, UseFilters, Get, Put, Req, Res, Session, UnauthorizedException } from '@nestjs/common';
 import { Request, Response } from 'express';
-import { AuthService } from './auth.service';
 import { UnAuthRedirectionFilter } from './filter/unauth-redirect.filter';
 import { GithubOAuthGuard } from './guard/github.guard';
 import { AuthorizationGuard, UnAuthorizationGuard } from './guard/session.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor() {}
 
   @UseGuards(GithubOAuthGuard)
   @UseGuards(UnAuthorizationGuard)
