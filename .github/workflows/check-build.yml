@@ -35,6 +35,7 @@ jobs:
           node-version: "16.18.0"
       - name: try build backend
         run: |
+          echo $MYSQL_HOST
           cd ./backend
           npm install
           npm run build
