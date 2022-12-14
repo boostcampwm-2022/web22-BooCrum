@@ -141,6 +141,10 @@ export const initControls = () => {
 	fabric.Object.prototype.borderScaleFactor = 3;
 };
 
+export const initObjectCaching = () => {
+	fabric.Object.prototype.objectCaching = false;
+};
+
 export const addObject = (
 	canvas: fabric.Canvas,
 	creator: string,
