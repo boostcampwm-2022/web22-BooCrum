@@ -32,3 +32,10 @@ jobs:
           cd ./backend
           npm install
           npm run build
+          npm test
+        env:
+          MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+          MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
+          MYSQL_USERNAME: ${{ secrets.MYSQL_USERNAME }}
+          MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+          MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
