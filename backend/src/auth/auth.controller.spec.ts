@@ -1,16 +1,16 @@
+import { ConfigModule } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { TeamMember } from '../team/entity/team-member.entity';
 import { Team } from '../team/entity/team.entity';
-import { TeamModule } from '../team/team.module';
-import { TeamService } from '../team/team.service';
 import { User } from '../user/entity/user.entity';
-import { UserModule } from '../user/user.module';
-import { UserService } from '../user/user.service';
 import { AuthController } from './auth.controller';
-import { GithubStrategy } from './strategy/github.strategy';
-import { ConfigModule } from '@nestjs/config';
+import { UserModule } from '../user/user.module';
+import { TeamModule } from '../team/team.module';
+import { UserService } from '../user/user.service';
+import { TeamService } from '../team/team.service';
 import { join } from 'path';
+import { GithubStrategy } from './strategy/github.strategy';
 
 describe('AuthController', () => {
   let controller: AuthController;
