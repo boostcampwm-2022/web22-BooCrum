@@ -118,6 +118,7 @@ export const initDragPanning = (canvas: fabric.Canvas) => {
 
 export const initWheelPanning = (canvas: fabric.Canvas) => {
 	canvas.on('mouse:wheel', (opt) => {
+		opt.e.preventDefault();
 		const evt = opt.e;
 		if (evt.ctrlKey === true) return;
 		const deltaX = evt.deltaX;
