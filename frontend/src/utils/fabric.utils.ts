@@ -151,6 +151,12 @@ export const initDrawing = (canvas: fabric.Canvas) => {
 	});
 };
 
+export const initControls = () => {
+	fabric.Object.prototype.borderColor = '#5794FF';
+	fabric.Object.prototype.cornerColor = '#5794FF';
+	fabric.Object.prototype.borderScaleFactor = 3;
+};
+
 export const addObject = (
 	canvas: fabric.Canvas,
 	creator: string,
