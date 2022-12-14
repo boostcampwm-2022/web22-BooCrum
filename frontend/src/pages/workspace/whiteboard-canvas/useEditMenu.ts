@@ -102,9 +102,11 @@ function useEditMenu(canvas: React.MutableRefObject<fabric.Canvas | null>) {
 		let selectedRect = currentGroup;
 
 		if (currentGroup.type === ObjectType.editable) {
-			const currentRect = currentCanvas._objects.filter((obj) => obj.objectId === currentGroup.objectId);
-			if (currentRect.length < 2) return;
-			selectedRect = (currentGroup.groupType === ObjectType.section ? currentRect[0] : currentRect[1]) as fabric.Group;
+			const currentRect = currentCanvas._objects.filter(
+				(obj) => obj.objectId === currentGroup.objectId && obj instanceof fabric.Group
+			);
+			if (currentRect.length === 0) return;
+			selectedRect = currentRect[0] as fabric.Group;
 		}
 
 		setColor(color);
