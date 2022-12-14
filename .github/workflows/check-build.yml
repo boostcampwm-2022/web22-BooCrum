@@ -32,7 +32,7 @@ jobs:
           cd ./backend
           npm install
           npm run build
-          npm test
+          npm test --detectOpenHandles --forceExit
         env:
           MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
           MYSQL_PORT: ${{ secrets.MYSQL_PORT }}
