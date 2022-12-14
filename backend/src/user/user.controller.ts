@@ -14,7 +14,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common';
 import { Request } from 'express';
-import { AuthorizationGuard } from 'src/auth/guard/session.guard';
+import { AuthorizationGuard } from '../auth/guard/session.guard';
 import { PartialSearchRequestDto } from './dto/partial-search.dto';
 import { UserDto } from './dto/user.dto';
 import { PartSearchTransformPipe } from './pipe/part-search-transform.pipe';
