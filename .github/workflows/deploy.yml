@@ -1,0 +1,30 @@
+name: Try Deploy
+on:
+  push:
+    branches:
+      - dev
+  workflow_dispatch:
+concurrency:
+  # 그룹을 pr의 head_ref로 정의
+  group: 'try-deploy'
+  # 해당 pr에서 새로운 워크플로우가 실행될 경우, 이전에 워크플로우가 있다면 이전 워크플로우를 취소하도록 한다.
+  cancel-in-progress: true
+
+jobs:
+  try-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: deploy
+        uses: appleboy/ssh-action@v0.1.5
+        with:
+          host: ${{ secrets.SERVER_HOST }}
+          port: ${{ secrets.SERVER_SSH_PORT }}
+          username: ${{ secrets.SERVER_USERNAME }}
+          password: ${{ secrets.SERVER_PASSWORD }}
+          script: |
+            export GIT_PROJECT_PATH=https://github.com/boostcampwm-2022/web22-BooCrum.git
+            export PROJECT_DIR_NAME=BooCrum
+            export BRANCH_NAME=dev
+            export FRONTEND_WORKING_DIR=frontend
+            export BACKEND_WORKING_DIR=backend
+            sh ~/scripts/deploy.sh

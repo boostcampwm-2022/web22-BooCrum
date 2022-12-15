@@ -1,10 +1,33 @@
-import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { MongooseModule } from '@nestjs/mongoose';
+import { LoggerMiddleware } from './middlewares/logger.middleware';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
+import { TeamModule } from './team/team.module';
+import { WorkspaceModule } from './workspace/workspace.module';
+import { ObjectDatabaseModule } from './object-database/object-database.module';
+import { config } from './ormconfig';
+import { SocketModule } from './socket/socket.module';
 
 @Module({
-  imports: [],
-  controllers: [AppController],
-  providers: [AppService],
+  imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
+    TypeOrmModule.forRoot(config),
+    MongooseModule.forRoot(process.env.MONGODB_URL),
+    UserModule,
+    TeamModule,
+    WorkspaceModule,
+    AuthModule,
+    ObjectDatabaseModule,
+    SocketModule,
+  ],
+  controllers: [],
+  providers: [],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(LoggerMiddleware).forRoutes('*');
+  }
+}
