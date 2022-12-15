@@ -32,6 +32,9 @@ function useCanvas() {
 	useEffect(() => {
 		if (canvas.current && zoom.event === 'control') {
 			canvas.current.zoomToPoint({ x: window.innerWidth / 2, y: window.innerHeight / 2 }, zoom.percent / 100);
+			if (!canvas.current.viewportTransform) return;
+			const vpt = canvas.current.viewportTransform;
+			canvas.current.fire('canvas:zoom', { zoom: zoom.percent / 100, x: vpt[4], y: vpt[5] });
 			canvas.current.requestRenderAll();
 		}
 	}, [zoom]);
