@@ -3,8 +3,9 @@ import { UserMapVO } from './dto/user-map.vo';
 import { Socket } from 'socket.io';
 import { DbAccessService } from './db-access.service';
 import { WORKSPACE_ROLE } from 'src/util/constant/role.constant';
-import { InjectRedis } from '@liaoliaots/nestjs-redis';
+import { InjectRedis, RedisModule } from '@liaoliaots/nestjs-redis';
 import Redis from 'ioredis';
+import { Semaphore } from 'redis-semaphore';
 
 @Injectable()
 export class UserManagementService {
@@ -135,18 +136,24 @@ export class UserManagementService {
     // 만약 해당 유저가 더이상 워크스페이스를 보지 않을 경우, Workspace 유저 목록에서 제외한다.
     // 만약 워크스페이스를 아무도 보지 않을 경우, 워크스페이스를 관리 목록에서 제거한다.
     if (userData.count < 1) {
-      const workspaceUserList = (await this.findUserDataListInWorkspace(userData.workspaceId)).filter(
-        (vo) => vo.userId !== userData.userId,
-      );
-      await this.workspaceUserDataMap.del(userData.workspaceId);
+      const semaphore = new Semaphore(this.workspaceUserDataMap, userData.workspaceId, 1);
+      await semaphore.acquire();
+      try {
+        const workspaceUserList = (await this.findUserDataListInWorkspace(userData.workspaceId)).filter(
+          (vo) => vo.userId !== userData.userId,
+        );
+        await this.workspaceUserDataMap.del(userData.workspaceId);
 
-      // 해당 워크스페이스에 더이상 온라인 사용자가 없을 경우 workspace 자체를 관리 목록에서 제거한다.
-      // 아닐 경우 유저 VO만 제거한다.
-      if (workspaceUserList.length !== 0)
-        workspaceUserList.forEach(async (element) => {
-          await this.workspaceUserDataMap.rpush(userData.workspaceId, JSON.stringify(element));
-        });
-      await this.workspaceUserDataMap.expire(userData.workspaceId, process.env.REDIS_EXPIRE);
+        // 해당 워크스페이스에 더이상 온라인 사용자가 없을 경우 workspace 자체를 관리 목록에서 제거한다.
+        // 아닐 경우 유저 VO만 제거한다.
+        if (workspaceUserList.length !== 0)
+          workspaceUserList.forEach(async (element) => {
+            await this.workspaceUserDataMap.rpush(userData.workspaceId, JSON.stringify(element));
+          });
+        await this.workspaceUserDataMap.expire(userData.workspaceId, process.env.REDIS_EXPIRE);
+      } finally {
+        await semaphore.release();
+      }
     }
     return userData;
   }
