@@ -11,14 +11,14 @@ Boost + Scrum = **BooCrum**
 
 <div align="center">
 
-[기술 블로그](https://candy-yam-479.notion.site/9f4c2464b2854807838d3cbcd277d460?v=7fc5ec96bd134901baa036d40872d0d3) | [배포 링크](https://boocrum.run/) | [팀 노션](https://candy-yam-479.notion.site/Naver-Boost-Camp-Web22-Boo-crum-fc6b0653f25d4e5f9b6db4f8cb882598)
+[기술 블로그](https://jinlee1703.notion.site/9f4c2464b2854807838d3cbcd277d460?v=7fc5ec96bd134901baa036d40872d0d3&pvs=4) | [팀 노션](https://jinlee1703.notion.site/Naver-Boost-Camp-Web22-Boo-crum-fc6b0653f25d4e5f9b6db4f8cb882598?pvs=4)
 
 </div>
  
 ## 팀원 소개
-|J045 김영호|J112 양성훈|J159 이진우|J196 주효정|J201 최명성|
+J112 양성훈(팀장)|J045 김영호|J159 이진우|J196 주효정|J201 최명성|
 |:----:|:----:|:----:|:----:|:----:|
-|<img src="https://user-images.githubusercontent.com/52180188/201269039-65ff5a63-26e9-441a-a11f-ce83389fa7c3.png" width="150px" height="150px"/>|<img src="https://user-images.githubusercontent.com/52180188/203566771-eefe89b4-4757-4bd3-bf1d-c17ebbd80356.png" width="150px" height="150px"/>|<img src="https://user-images.githubusercontent.com/52180188/201269128-6a496c3a-fbb8-4488-a99c-39490c5a20f9.png" width="150px" height="150px"/>|<img src="https://user-images.githubusercontent.com/52180188/201269182-4b0cbb2d-714e-4307-8259-90d9c770f0b2.png" width="150px" height="150px"/>|<img src="https://user-images.githubusercontent.com/52180188/201269221-06d09c56-cccb-494a-9c58-fdef6f899f54.png" width="150px" height="150px"/>|
+|<img src="https://user-images.githubusercontent.com/52180188/203566771-eefe89b4-4757-4bd3-bf1d-c17ebbd80356.png" width="150px" height="150px"/>|<img src="https://user-images.githubusercontent.com/52180188/201269039-65ff5a63-26e9-441a-a11f-ce83389fa7c3.png" width="150px" height="150px"/>|<img src="https://user-images.githubusercontent.com/52180188/201269128-6a496c3a-fbb8-4488-a99c-39490c5a20f9.png" width="150px" height="150px"/>|<img src="https://user-images.githubusercontent.com/52180188/201269182-4b0cbb2d-714e-4307-8259-90d9c770f0b2.png" width="150px" height="150px"/>|<img src="https://user-images.githubusercontent.com/52180188/201269221-06d09c56-cccb-494a-9c58-fdef6f899f54.png" width="150px" height="150px"/>|
 
 ## BooCrum의 주요 기능
 ### 📝 화이트 보드
